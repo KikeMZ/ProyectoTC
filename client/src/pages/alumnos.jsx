@@ -3,19 +3,43 @@ import { NavContext } from "../layouts/layoutProfesor";
 import * as XLSX from 'xlsx';
 import Table from "../components/table";
 import { Button } from "@nextui-org/react";
-import Toast from "../components/toast";
+import toast from "react-hot-toast";
+import { obtenerListaAlumnos, crearListaInscripcion } from "../services/inscripcion.api"
+import { getAllAlumnos, createAlumno } from "../services/alumnos.api";
+import { claseContext } from "../layouts/layoutProfesor";
 
 
 
 export default function Alumnos() {
+
+    const { dataClase } = useContext(claseContext)
+    const nrc = dataClase.nrc
+    console.log("NRC: "+nrc)
     //Estados
     const [mostrarTablas, setMostrarTablas] = useState(false);
-    const [datosExportados, setDatosExportados] = useState([]);
-
     const { showNav } = useContext(NavContext);
+    const [datosImportados, setDatosImportados] = useState([]); 
+    const [matriculas, setMatriculas] = useState([]); 
+
+    
     useEffect(() => {
+        async function cargaralumnos() {
+            try {
+                const data = await obtenerListaAlumnos(nrc); // Espera a que se resuelva la promesa y obtén los datos
+                setDatosImportados(data); // Asigna los datos al estado
+            } catch (error) {
+                console.error('Error al cargar los alumnos:', error);
+            }
+        }
+        cargaralumnos();
         showNav();
     }, [])
+
+
+    const detallesAlumnos = datosImportados.map(item => {
+        const { matricula, nombre, apellidos, correo } = item.alumno_detail;
+        return { matricula, nombre, apellidos, correo };
+    });
 
     //Modulo de importación
     const [archivoExcel, setArchivoExcel] = useState(null);
@@ -67,6 +91,7 @@ export default function Alumnos() {
             }
             else {
                 setResultadoExtraccion(3);
+                toast(mensajesImportacionExcel[resultadoExtraccion])
             }
 
         }
@@ -113,7 +138,7 @@ export default function Alumnos() {
                 "apellidos": apellidos,
                 "correo": listaCorreos[indice],
             };
-            return registroAlumno; //Se agrega el objeto generado al arreglado llamado "listaAlumnos";
+            return registroAlumno; //Se agrega el objeto generado al arreglo llamado "listaAlumnos";
         });
         return listaAlumnos; //Se retorna el arreglo con los datos de los alumnos.
     }
@@ -145,7 +170,6 @@ export default function Alumnos() {
 
         esValido = existeNombre && existeMatricula && existeCorreo; //Se verifica si existen los 3 campos necesarios para poder leer el Excel
         return esValido;
-
     }
 
 
@@ -163,7 +187,7 @@ export default function Alumnos() {
             const excelValido = validarEstructuraExcel(XLSX.utils.sheet_to_txt(worksheet)); //Se verifica si la estructura del Excel es valida.
             if (!excelValido) { //Si el Excel no tiene una estructura valida, entonces se asigna un valor igual 2 al estado llamado "resultadoExtraccion".
                 setResultadoExtraccion(2);
-
+                toast.error(mensajesImportacionExcel[resultadoExtraccion])
             }
             else {//Si el Excel tiene una estructura valida, entonces comienza el proceso de extraccion.
                 let datosAlumnos = await XLSX.utils.sheet_to_json(worksheet); // Se obtiene un arreglo con cada una de las filas de la segundo hoja del archivo Excel
@@ -174,17 +198,46 @@ export default function Alumnos() {
                 console.log(listaAlumnos);
                 setAlumnos(listaAlumnos); //Se guarda el arreglo obtenido en el estado "listaAlumnos";
                 setResultadoExtraccion(0); //Se indica que el proceso de extraccion se realizo correctamente.
+                toast.success("¡Se han importado los datos del Excel exitosamente!")
                 setMostrarTablas(true)
             }
         }
         else { //Si el usuario aun no ha seleccionado algun archivo, se asignara un valor igual a 4 al estado "resultadoExtraccion".
             setResultadoExtraccion(4);
+            toast.error(mensajesImportacionExcel[resultadoExtraccion])
         }
 
     }
 
+    const registrarAlumnos = () => {
+        alumnos.forEach(alumno => {
+            createAlumno(alumno).then(response => {
+                console.log('Alumno registrado:', response.data);
+            }).catch(error => {
+                console.error('Error al registrar alumno:', error);
+            });
+        });
+    }
 
-
+    const registrarInscripcion = async () => {
+        try {
+            registrarAlumnos();
+            console.log(alumnos)
+            let listaMatriculas = alumnos.map( (alumno) => (alumno.matricula));
+            setMatriculas(listaMatriculas);
+            console.log(matriculas);
+            console.log("Creacion de las inscripciones");
+            const responses = await crearListaInscripcion(listaMatriculas, nrc);
+            responses.forEach(response => {
+                console.log('Inscripción registrada:', response.data);
+            });
+            console.log("Finaliza la creacion de inscripciones");
+        } catch (error) {
+            console.error('Error al registrar la inscripción:', error);
+        }
+    };
+    
+    
 
     const columns = [
         { header: 'Matricula', accessorKey: 'matricula' },
@@ -194,9 +247,10 @@ export default function Alumnos() {
     ]
 
 
+
     return (
-        <div className="flex flex-col items-center justify-center min-h-full">
-            {!mostrarTablas && (
+        <div className="flex flex-col items-center justify-start min-h-full">
+            {(!mostrarTablas && datosImportados.length === 0) &&  (
                 <div className="flex flex-col items-center justify-center">
                     <h1 className="text-center text-3xl font-bold mb-8">Parece que aun no ha importado a los alumnos de esta clase</h1>
                     <form className="mb-4">
@@ -213,8 +267,22 @@ export default function Alumnos() {
                     </Button>
                 </div>
             )}
-            {mostrarTablas && (
-                <Table data={alumnos} columns={columns}></Table>
+            {(mostrarTablas && datosImportados.length === 0) && (
+                <div className="w-full">
+                    <Table data={alumnos} columns={columns}></Table>
+                    <Button
+                        radius="large"
+                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white mt-20"
+                        onClick={registrarInscripcion}
+                    >
+                        Registrar alumnos
+                    </Button>
+                </div>
+            )}
+            {datosImportados.length !== 0 &&(
+                <div className="w-full">
+                    <Table data={detallesAlumnos} columns={columns}></Table>
+                </div>
             )}
         </div>
     )

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useContext } from 'react';
 import MateriaCard from "../components/card"
 import { getAllClases } from '../services/clases.api.js';
@@ -15,7 +14,6 @@ export default function HomeProfesor() {
   const { dontshowNav } = useContext(NavContext); 
   const {limpiarDatos} = useContext(claseContext);
   const {dataProfesor} = useContext(profesorContext);
-  console.log("datos profesor"+dataProfesor)
   const profesor = dataProfesor
 
 
@@ -27,7 +25,6 @@ export default function HomeProfesor() {
         const profesorMatches = res.data.filter(item => item.nombreProfesor === profesor); // Filtrar la lista directamente
         console.log(profesorMatches);
         setLista(profesorMatches); // Establecer la lista filtrada en el estado
-        console.log(profesor)
       } catch (error) {
         console.error('Error al cargar las clases:', error);
       }

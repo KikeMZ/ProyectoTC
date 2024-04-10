@@ -39,7 +39,6 @@ export default function LayoutProfesor() {
     }
 
 
-
     return (
         <profesorContext.Provider value={{dataProfesor, limpiarProfesor}}>
             <claseContext.Provider value={{ dataClase, limpiarDatos, asignarDatos }}>

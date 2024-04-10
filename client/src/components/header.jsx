@@ -10,7 +10,6 @@ const profesor = new URLSearchParams(location.search).get('email');
 
 export default function Header() {
   const {dataClase} = useContext(claseContext)
-  console.log("datos de la clase"+dataClase)
 
     return (
         <header className="h-14 border-b border-gray-600 p-4 bg-transparent flex justify-between items-center">
