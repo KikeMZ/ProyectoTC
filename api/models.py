@@ -10,10 +10,13 @@ class Programmer(models.Model):
 
 
 class Alumno(models.Model):
-    matricula=models.PositiveBigIntegerField()
+    matricula=models.PositiveBigIntegerField(primary_key=True)
     nombre=models.CharField(max_length=100)
     apellidos=models.CharField(max_length=100)
     correo=models.CharField(max_length=100)
+
+    def __str__(self):
+        return str(self.matricula )
 
 class Materia(models.Model):
     clave=models.CharField(max_length=20)
@@ -21,7 +24,6 @@ class Materia(models.Model):
 
 class Clase(models.Model):
     seccion=models.CharField(max_length=100)
-
 
 
 class Profesor(models.Model):
@@ -36,20 +38,31 @@ class Calificacion(models.Model):
     nota=models.FloatField()
 
 
-class Entrega(models.Model):
-    id_entrega=models.BigIntegerField
-    nombre=models.CharField(max_length=100)
-    tipo=models.CharField(max_length=20)
-
-
-class Criterio(models.Model):
-    nombre=models.CharField(max_length=100)
-    ponderacion=models.IntegerField()
-
 
 class Clase2(models.Model):
-    nrc=models.BigIntegerField()
+    nrc=models.BigIntegerField(primary_key=True)
     clave=models.CharField(max_length=10)
     seccion=models.CharField(max_length=4)
     nombreMateria=models.CharField(max_length=250)
     nombreProfesor=models.CharField(max_length=250)
+
+    def __str__(self):
+        return str(self.nrc)
+
+class Inscripcion(models.Model):
+    clase = models.ForeignKey(Clase2, on_delete=models.SET_NULL, null=True)
+    alumno = models.ForeignKey(Alumno, on_delete=models.SET_NULL, null=True)
+
+class Criterio(models.Model):
+    id_criterio = models.AutoField(primary_key=True, default=0)
+    nombre = models.CharField(max_length=250)
+    ponderacion = models.FloatField()
+    nrc = models.ForeignKey(Clase2, on_delete=models.DO_NOTHING, default=1)  # Aquí estableces el valor predeterminado
+
+class Entrega(models.Model):
+    id_entrega = models.AutoField(primary_key=True,default=1)
+    nombre = models.CharField(max_length=250)
+    nrc = models.ForeignKey(Clase2, on_delete=models.DO_NOTHING, default=1)  # Aquí estableces el valor predeterminado
+    criterio = models.ForeignKey(Criterio, on_delete=models.CASCADE,null=True)
+
+

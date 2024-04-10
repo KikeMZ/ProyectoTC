@@ -9,6 +9,10 @@ router.register(r'programmmers',views.ProgrammerViewSet)
 router.register(r'Alumno',views.AlumnoViewSet)
 router.register(r'Clase2',views.Clase2ViewSet)
 router.register(r'Profesor',views.ProfesorViewSet,'Profesor')
+router.register(r'Inscripcion',views.InscripcionViewSet,'Inscripcion')
+router.register(r'Criterio',views.CriterioViewSet,'Criterio')
+router.register(r'Entrega',views.EntregaViewSet,'Entrega')
+
 
 
 urlpatterns =[

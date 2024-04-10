@@ -1,7 +1,11 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .serializer import ProgrammerSerializer,AlumnoSerializer,Clase2Serializer, ProfesorSerializer
-from .models import Programmer,Alumno,Clase2, Profesor
+from .serializer import ProgrammerSerializer,AlumnoSerializer,Clase2Serializer, ProfesorSerializer, InscripcionSerializer,EntregaSerializer,CriterioSerializer
+from .models import Programmer,Alumno,Clase2, Profesor, Inscripcion,Entrega,Criterio
+from rest_framework import filters, status
+from rest_framework.response import Response
+from rest_framework.decorators import action
+
 
 # Create your views here.
 
@@ -21,4 +25,31 @@ class Clase2ViewSet(viewsets.ModelViewSet):
 class ProfesorViewSet(viewsets.ModelViewSet):
     queryset = Profesor.objects.all()
     serializer_class=ProfesorSerializer
+
+class InscripcionViewSet(viewsets.ModelViewSet):
+    queryset = Inscripcion.objects.all()
+    serializer_class=InscripcionSerializer
+    filter_backends=[filters.SearchFilter] #Se indica que se permitira la filtracion de los datos basado en el dato que se pase mediante el metodo GET    
+    search_fields=['clase__nrc','alumno__matricula'] #Se indicaran los campos en los cuales se buscara el valor indicado como parametro al momento de llamar al metodo GET
+
+    @action(detail=False, methods=['get'])
+    def prueba(self, request, pk=None):
+        lista_alumnos = []
+        inscripciones = Inscripcion.objects.all()
+        for inscripcion in inscripciones:
+            lista_alumnos.append(inscripcion.alumno.__dict__)
+        print(lista_alumnos)
+        return Response(lista_alumnos,status=status.HTTP_200_OK)
+    
+class CriterioViewSet(viewsets.ModelViewSet):
+    queryset = Criterio.objects.all()
+    serializer_class=CriterioSerializer
+    filter_backends=[filters.SearchFilter]
+    
+
+class EntregaViewSet(viewsets.ModelViewSet):
+    queryset = Entrega.objects.all()  # Utiliza el queryset de Entrega en lugar de Clase2
+    serializer_class = EntregaSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['nombre']  # Asegúrate de que 'nombre' esté definido en tu modelo Entrega
 
