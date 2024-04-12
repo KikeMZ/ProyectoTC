@@ -37,8 +37,6 @@ class Calificacion(models.Model):
     id_entrega=models.PositiveBigIntegerField()
     nota=models.FloatField()
 
-
-
 class Clase2(models.Model):
     nrc=models.BigIntegerField(primary_key=True)
     clave=models.CharField(max_length=10)
@@ -54,15 +52,17 @@ class Inscripcion(models.Model):
     alumno = models.ForeignKey(Alumno, on_delete=models.SET_NULL, null=True)
 
 class Criterio(models.Model):
-    id_criterio = models.AutoField(primary_key=True, default=0)
+    id_criterio = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=250)
+
+class ClaseCriterio(models.Model):
+    id_clase = models.ForeignKey(Clase2, on_delete=models.DO_NOTHING, default=0)
+    id_criterio = models.ForeignKey(Criterio, on_delete=models.DO_NOTHING, default=0)
     ponderacion = models.FloatField()
-    nrc = models.ForeignKey(Clase2, on_delete=models.DO_NOTHING, default=1)  # Aquí estableces el valor predeterminado
 
 class Entrega(models.Model):
     id_entrega = models.AutoField(primary_key=True,default=1)
     nombre = models.CharField(max_length=250)
-    nrc = models.ForeignKey(Clase2, on_delete=models.DO_NOTHING, default=1)  # Aquí estableces el valor predeterminado
-    criterio = models.ForeignKey(Criterio, on_delete=models.CASCADE,null=True)
+    tipo = models.ForeignKey(ClaseCriterio, on_delete=models.DO_NOTHING, default=1)  # Aquí estableces el valor predeterminado
 
 

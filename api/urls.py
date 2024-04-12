@@ -11,6 +11,7 @@ router.register(r'Clase2',views.Clase2ViewSet)
 router.register(r'Profesor',views.ProfesorViewSet,'Profesor')
 router.register(r'Inscripcion',views.InscripcionViewSet,'Inscripcion')
 router.register(r'Criterio',views.CriterioViewSet,'Criterio')
+router.register(r'ClaseCriterio',views.ClaseCriterioViewSet,'ClaseCriterio')
 router.register(r'Entrega',views.EntregaViewSet,'Entrega')
 
 

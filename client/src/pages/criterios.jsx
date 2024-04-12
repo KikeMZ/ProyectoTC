@@ -1,9 +1,13 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useRef, useEffect } from "react";
 import { NavContext } from "../layouts/layoutProfesor";
+import { claseContext } from "../layouts/layoutProfesor";
 import CriterioModal from "../components/modalCriterios"
-import { Card, CardBody, Button, useDisclosure } from "@nextui-org/react";
+import { Input, Card, CardBody, Button, useDisclosure } from "@nextui-org/react";
+import { getAllCriterios, crearCriterio } from '../services/criterios.api';
+import { getAllClaseCriterio, createClaseCriterio, getCriteriosByNRC, updateClaseCriterio, deleteClaseCriterio } from '../services/claseCriterio.api';
 import toast from 'react-hot-toast';
 import 'primeicons/primeicons.css';
+import { MdDelete } from 'react-icons/md';
 
 const Crit = [
   {"nombre": "Tareas", "ponderacion": 20},
@@ -21,23 +25,76 @@ const Crit = [
 const Criterios = () => {
 
   const { showNav, shownav } = useContext(NavContext);
+  const { dataClase } = useContext(claseContext)
   const controlModal = useDisclosure();
 
   const [ criterios, setCriterios ] = useState([]);
+  const criteriosModificados = useRef([]);
+  const [ criteriosEliminados, setCriteriosEliminados ] = useState([])
+  const [ existenCriterios, setExistenCriterios] = useState(false);
   const [ mostrarCriterios, setMostrarCriterios] = useState(false);
+  const [ editarCriterios, setEditarCriterios] = useState(false);
   const [ maximo, setMaximo ] = useState(0);
   
   const [archivoPDF, setArchivoPDF] = useState(null);
 
 
-  const crearCriteriosGenerales = () =>{
+  const crearCriteriosGenerales = async () => {
+   let nombresCriteriosBD = [];
+   let criteriosUnicos = []
+   let criteriosBD = criterios.filter( (c) => c.id>-1)
+   let criteriosActualizados = criteriosBD
+   let res = await getAllCriterios();
+     console.log("Inicio"+res.data);
+     nombresCriteriosBD = res.data.map( (c) => c.nombre);
+     criteriosUnicos = criterios.filter( (c) => !nombresCriteriosBD.includes(c.nombre));
+     console.log(criteriosUnicos + ":" + criterios)
+     if(criteriosUnicos.length>0)
+     {
+      for( let criterio of criteriosUnicos)
+      {
+       console.log("c"+criterio.nombre);
+       let res2 = await crearCriterio({"nombre":criterio.nombre})
+        let auxCriterioAgregado = {
+         "id": res2.data.id_criterio,
+         "nombre": criterio.nombre,
+         "ponderacion": criterio.ponderacion,
+        
+        }
+        criteriosActualizados.push( auxCriterioAgregado);
+      }
+     }
 
+     
+//   }).finally( () => {
+    console.log("Salida:"+ criteriosActualizados);
+   
+   
+   return await criteriosActualizados;
   }
 
-  const crearListaCriterios = () => {
+  const crearListaCriterios = async () => {
    if(maximo==100)
    {
-    crearCriteriosGenerales();
+     let criteriosActualizados = await crearCriteriosGenerales();
+
+
+     console.log("DD:"+criteriosActualizados)
+ //    crearCriteriosGenerales().then( (res) => console.log("R:"+ res));
+ //    console.log("CA:"+ criteriosActualizados)
+     for( let criterio of criteriosActualizados)
+     {
+      let claseCriterio = {
+       "id_clase": dataClase.nrc,
+       "id_criterio": criterio.id,
+       "ponderacion": criterio.ponderacion
+      }
+      createClaseCriterio(claseCriterio).then(console.log);
+
+    }
+
+    setEditarCriterios(false);
+    setExistenCriterios(true);
     toast.success("¡Se han guardado los criterios correctamente!")
    }
    else
@@ -46,6 +103,67 @@ const Criterios = () => {
    }
   }
   
+  const modificarCriterio = (nombreCriterio, valor) =>{
+   let auxCriterios = criterios;
+   let posicionCriterio = criterios.findIndex( (c) => c.nombre==nombreCriterio)
+   console.log(auxCriterios[posicionCriterio]);
+   if(!isNaN(valor))
+   {
+   // if(auxCriterios[posicionCriterio].ponderacion>valor)
+     
+     setMaximo(maximo- parseInt(auxCriterios[posicionCriterio].ponderacion)+parseInt(valor))
+   // else
+   //  setMaximo(maximo+1)
+    auxCriterios[posicionCriterio].ponderacion = parseInt(valor);
+   }
+   else
+   {
+    auxCriterios[posicionCriterio].nombre = valor;
+//    setMaximo(maximo)
+   }
+   setCriterios(auxCriterios);
+/*   else
+   {
+    let criterio = criterios.find( (c) => c.nombre==nombreCriterio)
+    if(!isNaN(valor))
+     criterio.ponderacion = valor; 
+    else
+     criterio.nombre = valor;
+    criteriosModificados.current.push(criterio);
+   }*/
+  }
+
+  const eliminarCriterio = (nombre) =>{
+   let criterio = criterios.find( (c) => c.nombre==nombre)
+   setCriteriosEliminados([...criteriosEliminados,criterio]);
+   console.log(criterios.filter( (c) => c.nombre!=nombre));
+   setCriterios(criterios.filter( (c) => c.nombre!=nombre));
+   setMaximo(maximo-criterio.ponderacion);
+  }
+
+  const guardarModificaciones = () => {
+   console.log(criteriosEliminados.length);
+   if(maximo==100)
+   {
+    if(criteriosEliminados.length>0)
+    {
+     for(let criterio of criteriosEliminados)
+     {
+      deleteClaseCriterio(criterio.id).then(console.log);
+     }
+    }
+    setEditarCriterios(false);
+    setExistenCriterios(true);
+    toast.success("¡Se han guardado los criterios correctamente!")
+    
+   }
+   else
+   {
+    toast.error("¡Accion no valida!, para guardar los cambios todos los criterios deben sumar 100%.")
+    
+   }
+
+  }
   //
   // ----------------------------------------------------
   // --- Estados de la variable 'resultadoExtraccion' ---
@@ -101,9 +219,40 @@ const Criterios = () => {
     
 
   
-  useEffect(() => {
+  useEffect( () => {
+
+    const cargarCriterios = async() =>{
+     try{
+      let listaCriterios = await getCriteriosByNRC(dataClase.nrc);
+      console.log("r"+listaCriterios.data.length)
+      if(listaCriterios.data.length>0)
+      {
+       console.log("r"+listaCriterios.data.length)
+       let criteriosClase = listaCriterios.data.map( (c) => {
+        let auxCriterio = {
+        "id": c.id,
+        "nombre": c.criterio_detail.nombre,
+        "ponderacion": c.ponderacion
+        }
+        return auxCriterio;
+       }
+       )
+       setCriterios(criteriosClase);
+       setExistenCriterios(true); 
+       setMostrarCriterios(true);
+       setMaximo(100);
+      }
+     } catch(e)
+     {
+      console.log(e);
+     }
+    }
+
+    cargarCriterios();
     showNav();
   }, [])
+
+  //useEffect(()=>{},[criterios])
 
   console.log(shownav)
 
@@ -119,7 +268,7 @@ const Criterios = () => {
                     <Button
                         radius="large"
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-2 mr-3 mb-10 font-bold text-base"
-                        onClick={ ()=>{setMostrarCriterios(true)}}
+                        onClick={ ()=>{setEditarCriterios(true); setMostrarCriterios(true);}}
                     >
                         <i className="pi pi-plus" style={{fontSize:"16px",fontWeight:"bold"}}></i> Crear criterios
                     </Button>
@@ -143,36 +292,90 @@ const Criterios = () => {
 
      mostrarCriterios && (
      <>
+
+     {
+      editarCriterios?
+     (
      <div className="flex items-col justify-between">
-      <Button className="py-6 text-base">
+      <Button onPress={ ()=> {setEditarCriterios(false); }} className="py-6 text-base">
         <i className="pi pi-times"></i>Cancelar</Button>
-      <Button onPress={crearListaCriterios} className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-2 ml-3 mb-10 text-base"
+      <Button onPress={existenCriterios?guardarModificaciones:crearListaCriterios} className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-2 ml-3 mb-10 text-base"
                         >
        <i className="pi pi-save" style={{fontSize:"20px"}}></i> Guardar</Button>
      </div>
+     )
+     :
+     (
+      <div className="flex justify-end">
+       <Button onPress={()=> setEditarCriterios(true)} className=" text-base">
+        <i className="pi pi-pencil"></i>
+        Editar
+       </Button>
+      </div>
+     )
+
+     }
       <div>
       {criterios.map((item, index) => (
         <Card key={index} className="my-2">
           <CardBody>
-            <div className="flex items-center justify-between">
-              <span>{item.nombre}</span>
-              <span>{item.ponderacion}%</span>
+            <div className="flex items-center justify-between font-medium text-xl ">
+            {
+             editarCriterios?
+             (
+              <>
+              <Input onChange={(e) => {modificarCriterio(item.nombre, parseInt(e.target.value))}} startContent={<button onClick={ ()=> { eliminarCriterio(item.nombre)}} className="mx-4"><MdDelete size="40px"/></button>} value={item.nombre} className={{input:["shadow-xl","text-white/90 dark:text-white/90 font-thin"],          innerWrapper: "bg-transparent",
+          inputWrapper: [
+            "shadow-xl",
+            "bg-default-200/50",
+            "dark:bg-default/60",
+            "backdrop-blur-xl",
+            "backdrop-saturate-200",
+            "hover:bg-default-200/70",
+            "dark:hover:bg-default/70",
+            "group-data-[focused=true]:bg-default-200/50",
+            "dark:group-data-[focused=true]:bg-default/60",
+            "!cursor-text",
+          ],
+}}/>
+              <Input type="number" max={100 - maximo + item.ponderacion} min={0} onChange={ (e) => {modificarCriterio(item.nombre, e.target.value)}} value={item.ponderacion}></Input>
+              </>
+              )
+              :
+              (
+               <>
+               <span>{item.nombre}</span> 
+               <span>{item.ponderacion}%</span>
+               </>
+              )
+              }
             </div>
           </CardBody>
         </Card>
       ))}
 
       {
+       editarCriterios &&
+       (
+        <>
+        <Card className="my-2">
+          <CardBody>
+           <div className="flex justify-end">
+            <span className="mr-2 text-xl font-medium">Total:</span>
+            <span className="text-xl font-medium">{maximo}%</span>
+           </div>
+          </CardBody>
+        </Card>
        
                     <Button
-
                         radius="large"
-
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-10 mt-3 mb-10 font-bold text-base"
                         onClick={controlModal.onOpen}
                     >
                     <i className="pi pi-plus"></i> Agregar criterio
                     </Button>
+        </>
+       )
       }
     </div>
 

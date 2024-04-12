@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Programmer, Alumno,Clase2, Profesor, Inscripcion, Entrega, Criterio
+from .models import Programmer, Alumno,Clase2, Profesor, Inscripcion, Entrega, Criterio, ClaseCriterio
 
 
 class ProgrammerSerializer(serializers.ModelSerializer):
@@ -41,13 +41,19 @@ class InscripcionSerializer(serializers.ModelSerializer):
             'alumno': {'write_only': True}
         }
 
-class EntregaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Entrega
-        fields = ('id_entrega', 'nombre', 'nrc', 'criterio')
-
-
 class CriterioSerializer(serializers.ModelSerializer):
     class Meta:
         model=Criterio
         fields='__all__'
+
+class ClaseCriterioSerializer(serializers.ModelSerializer):
+    clase_detail = Clase2Serializer(source='id_clase', read_only=True)
+    criterio_detail = CriterioSerializer(source='id_criterio', read_only=True)
+    class Meta:
+        model=ClaseCriterio
+        fields=('id','id_clase','id_criterio','ponderacion','clase_detail','criterio_detail')
+
+class EntregaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Entrega
+        fields = ('id_entrega', 'nombre', 'tipo')

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .serializer import ProgrammerSerializer,AlumnoSerializer,Clase2Serializer, ProfesorSerializer, InscripcionSerializer,EntregaSerializer,CriterioSerializer
-from .models import Programmer,Alumno,Clase2, Profesor, Inscripcion,Entrega,Criterio
+from .serializer import ProgrammerSerializer,AlumnoSerializer,Clase2Serializer, ProfesorSerializer, InscripcionSerializer,EntregaSerializer,CriterioSerializer, ClaseCriterioSerializer 
+from .models import Programmer,Alumno,Clase2, Profesor, Inscripcion,Entrega,Criterio, ClaseCriterio
 from rest_framework import filters, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -46,6 +46,12 @@ class CriterioViewSet(viewsets.ModelViewSet):
     serializer_class=CriterioSerializer
     filter_backends=[filters.SearchFilter]
     
+
+class ClaseCriterioViewSet(viewsets.ModelViewSet):
+    queryset = ClaseCriterio.objects.all()
+    serializer_class = ClaseCriterioSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["id_clase__nrc"]
 
 class EntregaViewSet(viewsets.ModelViewSet):
     queryset = Entrega.objects.all()  # Utiliza el queryset de Entrega en lugar de Clase2
