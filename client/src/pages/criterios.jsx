@@ -107,7 +107,7 @@ const Criterios = () => {
    let auxCriterios = criterios;
    let posicionCriterio = criterios.findIndex( (c) => c.nombre==nombreCriterio)
    console.log(auxCriterios[posicionCriterio]);
-   if(!isNaN(valor))
+   if(!isNaN(valor) && valor!="")
    {
    // if(auxCriterios[posicionCriterio].ponderacion>valor)
      
@@ -119,6 +119,7 @@ const Criterios = () => {
    else
    {
     auxCriterios[posicionCriterio].nombre = valor;
+    console.log(auxCriterios)
 //    setMaximo(maximo)
    }
    setCriterios(auxCriterios);
@@ -151,6 +152,11 @@ const Criterios = () => {
      {
       deleteClaseCriterio(criterio.id).then(console.log);
      }
+    }
+
+    for(let criterio of criterios)
+    {
+     updateClaseCriterio(criterio.id, criterio)
     }
     setEditarCriterios(false);
     setExistenCriterios(true);
@@ -252,7 +258,7 @@ const Criterios = () => {
     showNav();
   }, [])
 
-  //useEffect(()=>{},[criterios])
+  useEffect(()=>{},[criterios])
 
   console.log(shownav)
 
@@ -323,8 +329,9 @@ const Criterios = () => {
             {
              editarCriterios?
              (
-              <>
-              <Input onChange={(e) => {modificarCriterio(item.nombre, parseInt(e.target.value))}} startContent={<button onClick={ ()=> { eliminarCriterio(item.nombre)}} className="mx-4"><MdDelete size="40px"/></button>} value={item.nombre} className={{input:["shadow-xl","text-white/90 dark:text-white/90 font-thin"],          innerWrapper: "bg-transparent",
+              <div className="flex justify-between" style={{width:"100%"}} >
+            
+              <Input  type="text" onChange={(e) => {modificarCriterio(item.nombre, e.target.value)}} startContent={<button onClick={ ()=> { eliminarCriterio(item.nombre)}} className="mx-4"><MdDelete size="40px"/></button>} placeholder={item.nombre} className={{input:["w65 shadow-xl","text-white/90 dark:text-white/90 font-thin"],          innerWrapper: "bg-transparent",
           inputWrapper: [
             "shadow-xl",
             "bg-default-200/50",
@@ -338,8 +345,9 @@ const Criterios = () => {
             "!cursor-text",
           ],
 }}/>
-              <Input type="number" max={100 - maximo + item.ponderacion} min={0} onChange={ (e) => {modificarCriterio(item.nombre, e.target.value)}} value={item.ponderacion}></Input>
-              </>
+              <Input type="number" max={100 - maximo + item.ponderacion} min={0} onChange={ (e) => {modificarCriterio(item.nombre, e.target.value)}} endContent="%" value={item.ponderacion}></Input>
+              
+              </div>
               )
               :
               (
