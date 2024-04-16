@@ -2,6 +2,7 @@ import { IoMdNotificationsOutline } from "react-icons/io";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, AvatarIcon, User, Button } from "@nextui-org/react";
 import { claseContext } from "../layouts/layoutProfesor";
 import { useContext } from "react";
+import { Link } from 'react-router-dom';
 
 
 const profesor = new URLSearchParams(location.search).get('email');
@@ -41,7 +42,9 @@ export default function Header() {
                         </DropdownTrigger>
                         <DropdownMenu aria-label="User Actions" variant="flat">
                             <DropdownItem key="logout" color="danger">
+                            <Link to="/">
                                 Cerrar sesión
+                            </Link>
                             </DropdownItem>
                         </DropdownMenu>
                     </Dropdown>

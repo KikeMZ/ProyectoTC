@@ -274,7 +274,7 @@ const Criterios = () => {
                     <Button
                         radius="large"
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-2 mr-3 mb-10 font-bold text-base"
-                        onClick={ ()=>{setEditarCriterios(true); setMostrarCriterios(true);}}
+                        onClick={ () => {controlModal.onOpen(); setMostrarCriterios(true); setEditarCriterios(true);}}
                     >
                         <i className="pi pi-plus" style={{fontSize:"16px",fontWeight:"bold"}}></i> Crear criterios
                     </Button>
@@ -303,9 +303,9 @@ const Criterios = () => {
       editarCriterios?
      (
      <div className="flex items-col justify-between">
-      <Button onPress={ ()=> {setEditarCriterios(false); }} className="py-6 text-base">
+      <Button onPress={ ()=> {setEditarCriterios(false); if(!existenCriterios) {setMostrarCriterios(false)} }} className="py-6 text-base">
         <i className="pi pi-times"></i>Cancelar</Button>
-      <Button onPress={existenCriterios?guardarModificaciones:crearListaCriterios} className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-2 ml-3 mb-10 text-base"
+      <Button onPress={existenCriterios?guardarModificaciones:crearListaCriterios} isDisabled={maximo<100?true:false} className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-2 ml-3 mb-10 text-base"
                         >
        <i className="pi pi-save" style={{fontSize:"20px"}}></i> Guardar</Button>
      </div>
@@ -374,14 +374,17 @@ const Criterios = () => {
            </div>
           </CardBody>
         </Card>
+        <div className="flex justify-end">  
        
                     <Button
                         radius="large"
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-10 mt-3 mb-10 font-bold text-base"
                         onClick={controlModal.onOpen}
+                        isDisabled={maximo<100?false:true}
                     >
                     <i className="pi pi-plus"></i> Agregar criterio
                     </Button>
+        </div>
         </>
        )
       }

@@ -19,7 +19,7 @@ import axios from 'axios';
       "alumno": matricula,
      };
 
-    axios.post("http://127.0.0.1:8000/api/Inscripcion/", inscripcion).then(res => res.data);     
+    axios.post("http://150.230.40.105/api/v1/Inscripcion/", inscripcion).then(res => res.data);     
  }
 
 
@@ -33,7 +33,7 @@ import axios from 'axios';
         };
         console.log("Inscripcion: "+matricula+", "+nrc+","+inscripcion);
         // Retorna la promesa de la solicitud POST
-        return axios.post("http://127.0.0.1:8000/api/Inscripcion/", inscripcion);
+        return axios.post("http://150.230.40.105/api/v1/Inscripcion/", inscripcion);
     });
     // Retorna una promesa que se resuelve cuando todas las solicitudes POST han sido completadas
     return await Promise.all(promesas);
@@ -46,7 +46,7 @@ import axios from 'axios';
 
   // 1. Obtener todas los registros existentes de la tabla Inscripcion
   export const obtenerInscripciones = () => {
-    axios.get("http://127.0.0.1:8000/api/Inscripcion/").then( res => 
+    axios.get("http://150.230.40.105/api/v1/Inscripcion/").then( res => 
     {
      console.log(res.data);
     });      
@@ -54,7 +54,7 @@ import axios from 'axios';
   
   // 2. Obtener todos los registros cuyo nrc sea igual al de la clase buscada.
   export const obtenerListaAlumnos = async (nrc) => {
-    const response = await axios.get("http://127.0.0.1:8000/api/Inscripcion/?search="+nrc);
+    const response = await axios.get("http://150.230.40.105/api/v1/Inscripcion/?search="+nrc);
     console.log(response.data);
     return response.data;
 }

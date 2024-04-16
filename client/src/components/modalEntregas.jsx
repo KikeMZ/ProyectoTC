@@ -3,26 +3,33 @@ import { Modal, ModalHeader, ModalBody, ModalContent, ModalFooter, useDisclosure
 import { Link } from "react-router-dom";
 import { claseContext } from "../layouts/layoutProfesor";
 import { getCriteriosByNRC } from "../services/claseCriterio.api";
+import { createEntrega } from "../services/entrega.api"
 
 import {Select, SelectSection, SelectItem} from "@nextui-org/react";
 import { MdOutlineLibraryAdd } from "react-icons/md";
 
 
-export default function ModalEntregas({ controlModal, setEntregas, nrc}) {
+export default function ModalEntregas({ controlModal, setEntregas, setMostrarEntregas,nrc}) {
   const { datosClase } = useContext(claseContext)
   const [ criterios, setCriterios ] = useState([]);
   const [ nombreEntrega, setNombreEntrega ] = useState("");
-  const [ tipo, setTipo ] = useState(0); 
+  const [ tipo, setTipo ] = useState(null); 
 
 
   const crearEntrega = () =>{
-   let entregas = {
-    "id":-1,
+   let criterio = criterios.find( (c) => c.id==tipo);
+   console.log(criterio)
+   let entrega = {
     "nombre": nombreEntrega,
     "tipo": tipo,
    }
-   
-   setEntregas( (listaEntregas) => [...listaEntregas, entregas]);
+
+   createEntrega(entrega).then( (res) => {
+    setEntregas( (listaEntregas) => [...listaEntregas, res.data]);
+    setMostrarEntregas(true);
+ 
+   }
+   )   
    //setMaximo( (maximo) => maximo + ponderacion);
   }
 

@@ -73,7 +73,7 @@ export default function Home() {
       }
       setClases(nuevaLista);
       for (let i = 0; i < nuevaLista.length; i++) {
-        axios.post("http://127.0.0.1:8000/api/Clase2/", nuevaLista[i]).then( res => {
+        axios.post("http://150.230.40.105/api/v1/Clase2/", nuevaLista[i]).then( res => {
         console.log(res);
        });
       }

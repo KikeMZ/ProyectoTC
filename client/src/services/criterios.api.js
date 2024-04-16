@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: "http://127.0.0.1:8000/api/Criterio"
+    baseURL: "http://150.230.40.105/api/v1/Criterio"
 });
 
 export const getAllCriterios = () => {

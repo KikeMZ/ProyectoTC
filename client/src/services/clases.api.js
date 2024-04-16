@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: "http://127.0.0.1:8000/api/Clase2/"
+    baseURL: "http://150.230.40.105/api/v1/Clase2/"
 });
 
 export const getAllClases = () => {

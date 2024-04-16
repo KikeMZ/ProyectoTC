@@ -2,15 +2,15 @@ import axios from 'axios'
 
 
 const api = axios.create({
-    baseURL: "http://127.0.0.1:8000/api/Entrega"
+    baseURL: "http://150.230.40.105/api/v1/Entrega"
   });
 
 export const getAllEntregas = () => {
     return api.get('/');
 }
 
-export const createEntrega = (Entrega) => {
-    return api.post('/',Entrega);
+export const createEntrega = (entrega) => {
+    return api.post('/', entrega);
 }
 
 export const deleteEntrega = (id) => {
@@ -18,8 +18,12 @@ export const deleteEntrega = (id) => {
 }
 
 
-export const getEntrega = (id,Entrega) => {
-    return api.get(`/${id}/`,Entrega);
+export const getEntrega = (id, entrega) => {
+    return api.get(`/${id}/`, entrega);
 }
 
-export const updateEntrega = (id, Entrega) => api.patch(`/${id}/`,Entrega);
+export const getEntregasByNRC = (nrc) => {
+    return api.get(`/getEntregasByNRC/?nrc=${nrc}`); 
+}
+
+export const updateEntrega = (id, entrega) => api.patch(`/${id}/`,entrega);
