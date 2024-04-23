@@ -73,7 +73,7 @@ export default function Home() {
       }
       setClases(nuevaLista);
       for (let i = 0; i < nuevaLista.length; i++) {
-        axios.post("http://150.230.40.105/api/v1/Clase2/", nuevaLista[i]).then( res => {
+        axios.post(import.meta.env.VITE_BACKEND_URL + "Clase2/", nuevaLista[i]).then( res => {
         console.log(res);
        });
       }
