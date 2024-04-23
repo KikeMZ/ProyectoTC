@@ -13,7 +13,7 @@ router.register(r'Inscripcion',views.InscripcionViewSet,'Inscripcion')
 router.register(r'Criterio',views.CriterioViewSet,'Criterio')
 router.register(r'ClaseCriterio',views.ClaseCriterioViewSet,'ClaseCriterio')
 router.register(r'Entrega',views.EntregaViewSet,'Entrega')
-
+router.register(r'Calificacion', views.CalificacionViewSet,'Calificacion')
 
 
 urlpatterns =[

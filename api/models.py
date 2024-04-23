@@ -33,9 +33,6 @@ class Profesor(models.Model):
     def __str__(self):
         return self.nombre
 
-class Calificacion(models.Model):
-    id_entrega=models.PositiveBigIntegerField()
-    nota=models.FloatField()
 
 class Clase2(models.Model):
     nrc=models.BigIntegerField(primary_key=True)
@@ -55,14 +52,21 @@ class Criterio(models.Model):
     id_criterio = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=250)
 
+    def __str__(self):
+        return str(self.id_criterio)
+
 class ClaseCriterio(models.Model):
     id_clase = models.ForeignKey(Clase2, on_delete=models.DO_NOTHING, default=0)
     id_criterio = models.ForeignKey(Criterio, on_delete=models.DO_NOTHING, default=0)
     ponderacion = models.FloatField()
 
 class Entrega(models.Model):
-    id_entrega = models.AutoField(primary_key=True,default=1)
     nombre = models.CharField(max_length=250)
     tipo = models.ForeignKey(ClaseCriterio, on_delete=models.DO_NOTHING, default=1)  # Aquí estableces el valor predeterminado
 
+class Calificacion(models.Model):
+    nota=models.FloatField()
+    matricula = models.ForeignKey(Alumno, on_delete=models.DO_NOTHING, default=0)
+    id_entrega = models.ForeignKey(Entrega, on_delete=models.DO_NOTHING, default=0)
+    
 

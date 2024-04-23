@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .serializer import ProgrammerSerializer,AlumnoSerializer,Clase2Serializer, ProfesorSerializer, InscripcionSerializer,EntregaSerializer,CriterioSerializer, ClaseCriterioSerializer 
-from .models import Programmer,Alumno,Clase2, Profesor, Inscripcion,Entrega,Criterio, ClaseCriterio
+from .serializer import ProgrammerSerializer,AlumnoSerializer,Clase2Serializer, ProfesorSerializer, InscripcionSerializer,EntregaSerializer,CriterioSerializer, ClaseCriterioSerializer, CalificacionSerializer
+from .models import Programmer,Alumno,Clase2, Profesor, Inscripcion,Entrega,Criterio, ClaseCriterio, Calificacion
 from rest_framework import filters, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -59,3 +59,17 @@ class EntregaViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre']  # Asegúrate de que 'nombre' esté definido en tu modelo Entrega
 
+    @action(detail=False, methods=['get'])
+    def getEntregasByNRC(self, request, pk=None):
+        lista_entregas = []
+        nrc = request.GET['nrc']
+        entregas = Entrega.objects.all()
+        lista_entregas = [ self.get_serializer(e).data for e in entregas if str(e.tipo.id_clase)==nrc ]
+
+        return Response(lista_entregas,status=status.HTTP_200_OK)
+
+class CalificacionViewSet(viewsets.ModelViewSet):
+    queryset = Calificacion.objects.all()
+    serializer_class = CalificacionSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['id_entrega']

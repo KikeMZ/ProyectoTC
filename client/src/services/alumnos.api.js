@@ -2,7 +2,7 @@ import axios from 'axios'
 
 
 const api = axios.create({
-  baseURL: "http://150.230.40.105/api/v1/Alumno"
+  baseURL: import.meta.env.VITE_BACKEND_URL + "Alumno"
 });
 
 export const getAllAlumnos = () => {
