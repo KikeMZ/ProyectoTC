@@ -56,8 +56,8 @@ class Criterio(models.Model):
         return str(self.id_criterio)
 
 class ClaseCriterio(models.Model):
-    id_clase = models.ForeignKey(Clase2, on_delete=models.DO_NOTHING, default=0)
-    id_criterio = models.ForeignKey(Criterio, on_delete=models.DO_NOTHING, default=0)
+    id_clase = models.ForeignKey(Clase2, on_delete=models.DO_NOTHING, default=0, db_constraint=False)
+    id_criterio = models.ForeignKey(Criterio, on_delete=models.DO_NOTHING, default=0, db_constraint=False)
     ponderacion = models.FloatField()
 
 class Entrega(models.Model):

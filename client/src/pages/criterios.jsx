@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import 'primeicons/primeicons.css';
 import { MdDelete } from 'react-icons/md';
 
-const Crit = [
+const criteriosPredeterminados = [
   {"nombre": "Tareas", "ponderacion": 20},
   {"nombre": "Practicas", "ponderacion": 20},
   {"nombre": "Proyecto", "ponderacion": 20},
@@ -156,7 +156,10 @@ const Criterios = () => {
 
     for(let criterio of criterios)
     {
-     updateClaseCriterio(criterio.id, criterio)
+     if(criterio.id!=-1)
+      updateClaseCriterio(criterio.id, criterio)
+     
+      
     }
     setEditarCriterios(false);
     setExistenCriterios(true);
@@ -274,7 +277,7 @@ const Criterios = () => {
                     <Button
                         radius="large"
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-2 mr-3 mb-10 font-bold text-base"
-                        onClick={ () => {controlModal.onOpen(); setMostrarCriterios(true); setEditarCriterios(true);}}
+                        onClick={ () => {setCriterios(criteriosPredeterminados);setMaximo(100); toast("A continuacion se presenta una posible lista de criterios, puede modificarla si asi lo desea.");  setMostrarCriterios(true); setEditarCriterios(true);}}
                     >
                         <i className="pi pi-plus" style={{fontSize:"16px",fontWeight:"bold"}}></i> Crear criterios
                     </Button>

@@ -2,34 +2,49 @@ import React, { useState, useEffect, useContext } from "react";
 import { Modal, ModalHeader, ModalBody, ModalContent, ModalFooter, useDisclosure, Button, Card, CardHeader, CardBody, Divider } from "@nextui-org/react";
 import { Link } from "react-router-dom";
 import { claseContext } from "../layouts/layoutProfesor";
+import { obtenerListaAlumnos } from "../services/inscripcion.api";
 import { getCriteriosByNRC } from "../services/claseCriterio.api";
 import { createEntrega } from "../services/entrega.api"
+import { createCalificacion} from "../services/calificacion.api"
 
 import {Select, SelectSection, SelectItem} from "@nextui-org/react";
 import { MdOutlineLibraryAdd } from "react-icons/md";
 
 
-export default function ModalEntregas({ controlModal, setEntregas, setMostrarEntregas,nrc}) {
+export default function ModalEntregas({ controlModal, setEntregas, setMostrarEntregas, nrc}) {
   const { datosClase } = useContext(claseContext)
   const [ criterios, setCriterios ] = useState([]);
   const [ nombreEntrega, setNombreEntrega ] = useState("");
   const [ tipo, setTipo ] = useState(null); 
 
 
-  const crearEntrega = () =>{
+  const crearEntrega = async () =>{
    let criterio = criterios.find( (c) => c.id==tipo);
-   console.log(criterio)
+   let listaAlumnos = await obtenerListaAlumnos(nrc);
+
+   console.log(listaAlumnos)
    let entrega = {
     "nombre": nombreEntrega,
     "tipo": tipo,
    }
-
    createEntrega(entrega).then( (res) => {
     setEntregas( (listaEntregas) => [...listaEntregas, res.data]);
     setMostrarEntregas(true);
- 
+    for(let alumno of listaAlumnos)
+    {
+     let calificacion = {
+      "nota": 0,
+      "matricula": alumno.alumno_detail.matricula,
+      "id_entrega": res.data.id
+     }
+
+     console.log(calificacion);
+     createCalificacion(calificacion).then(console.log);
+    }
+
    }
-   )   
+   )
+
    //setMaximo( (maximo) => maximo + ponderacion);
   }
 

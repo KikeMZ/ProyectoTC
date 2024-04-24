@@ -9,8 +9,8 @@ export const getAllCalificaciones = () => {
     return api.get('/');
 }
 
-export const createCalificacion = (entrega) => {
-    return api.post('/', entrega);
+export const createCalificacion = (calificacion) => {
+    return api.post('/', calificacion);
 }
 
 export const deleteCalificacion = (id) => {
@@ -18,8 +18,8 @@ export const deleteCalificacion = (id) => {
 }
 
 
-export const getCalificacion = (id, entrega) => {
-    return api.get(`/${id}/`, entrega);
+export const getCalificacion = (id, calificacion) => {
+    return api.get(`/${id}/`, calificacion);
 }
 
-export const updateCalificacion = (id, entrega) => api.patch(`/${id}/`,entrega);
+export const updateCalificacion = (id, calificacion) => api.patch(`/${id}/`,calificacion);
