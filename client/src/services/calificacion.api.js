@@ -20,6 +20,10 @@ export const deleteCalificacion = (id) => {
 
 export const getCalificacion = (id, calificacion) => {
     return api.get(`/${id}/`, calificacion);
+}   
+    
+export const getCalificacionesByEntrega = (id_entrega) => {
+    return api.get("/?search="+id_entrega);
 }
 
 export const updateCalificacion = (id, calificacion) => api.patch(`/${id}/`,calificacion);

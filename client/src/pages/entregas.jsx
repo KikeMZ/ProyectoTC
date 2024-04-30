@@ -1,6 +1,7 @@
 import React, { useContext, useState,  useEffect } from "react";
 import { NavContext } from "../layouts/layoutProfesor";
 import { claseContext } from "../layouts/layoutProfesor";
+import Calificaciones from "./calificaciones"
 import ModalEntregas from "../components/modalEntregas";
 import { getEntregasByNRC } from "../services/entrega.api"
 
@@ -18,7 +19,11 @@ const Entregas = () => {
   const controlModal = useDisclosure();
   
   const [ entregas, setEntregas ] = useState([]);
+  const [ entregaSeleccionada, setEntregaSeleccionada ] = useState(null);
+
   const [ mostrarEntregas, setMostrarEntregas ] = useState(false);
+  const [ mostrarCalificaciones, setMostrarCalificaciones ] = useState(false);
+
 
     useEffect(() => {
 
@@ -38,10 +43,22 @@ const Entregas = () => {
     
     console.log(shownav)
 
+    const mostrarCalificacionesEntrega = (id_entrega) => {
+     let entrega = entregas.find( (e) => e.id == id_entrega);   
+     setEntregaSeleccionada(entrega);
+     setMostrarCalificaciones(true);
+     console.log("Entrega: " + entrega + ", "+ mostrarCalificaciones);
+    }  
   
     
   return (
     <>
+
+    {
+     !mostrarCalificaciones?
+
+     (
+     <>
     {
      !mostrarEntregas?
      (
@@ -76,7 +93,7 @@ const Entregas = () => {
        </div>
       {
        entregas.map( (entrega, index) => (
-        <Button className="flex bg-white justify-between w-full mb-4 py-9" key={index} endContent={<GrNext className="text-xl"/> }>
+        <Button onClick={ () => mostrarCalificacionesEntrega(entrega.id)} className="flex bg-white justify-between w-full mb-4 py-9" key={index} endContent={<GrNext className="text-xl"/> }>
          <div >
          <p className="text-2xl font-medium ml-4">
          {
@@ -97,8 +114,14 @@ const Entregas = () => {
      )
     }
       <ModalEntregas controlModal={controlModal} setEntregas={setEntregas} setMostrarEntregas={setMostrarEntregas} nrc={dataClase.nrc}></ModalEntregas>
+    </>
+    ):
+    (
+    <Calificaciones nrc={dataClase.nrc} entrega={entregaSeleccionada} />
+    )
+    }
       </>
 )
 }
 
-export default Entregas
+export default Entregas;

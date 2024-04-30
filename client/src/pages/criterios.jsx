@@ -42,6 +42,7 @@ const Criterios = () => {
   const crearCriteriosGenerales = async () => {
    let nombresCriteriosBD = [];
    let criteriosUnicos = []
+   
    let criteriosBD = criterios.filter( (c) => c.id>-1)
    let criteriosActualizados = criteriosBD
    let res = await getAllCriterios();
@@ -277,7 +278,7 @@ const Criterios = () => {
                     <Button
                         radius="large"
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-2 mr-3 mb-10 font-bold text-base"
-                        onClick={ () => {setCriterios(criteriosPredeterminados);setMaximo(100); toast("A continuacion se presenta una posible lista de criterios, puede modificarla si asi lo desea.");  setMostrarCriterios(true); setEditarCriterios(true);}}
+                        onClick={ () => {  setMostrarCriterios(true); setEditarCriterios(true);}}
                     >
                         <i className="pi pi-plus" style={{fontSize:"16px",fontWeight:"bold"}}></i> Crear criterios
                     </Button>
@@ -290,7 +291,7 @@ const Criterios = () => {
                     >
                         <i className="pi pi-folder-open" style={{fontSize:"18px",fontWeight:"bold"}}></i> Importar criterios
                     </Button>
-                    </div>
+                 </div>
         
         
                 </div>
