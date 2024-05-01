@@ -44,7 +44,8 @@ export const Nav = ({clase}) => {
    const existenCriterios = async () => {
     let auxExistenCriterios = false;
     let res = await getCriteriosByNRC(clase.nrc);
-    if(res.length>0)
+    console.log(res.data);
+    if(res.data.length>0)
      auxExistenCriterios = true;
     return auxExistenCriterios;
    }
@@ -54,6 +55,7 @@ export const Nav = ({clase}) => {
     {
      setMostrarAsistencia(true);
      existenCriterios().then( (resExistenCriterios) => {
+      console.log("Alumnos:"+resExistenAlumnos+", Criterios:"+resExistenCriterios)
       if(resExistenCriterios==true && resExistenAlumnos==true)
        setMostrarEntregas(true)
      })

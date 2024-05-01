@@ -316,7 +316,8 @@ const Criterios = () => {
      )
      :
      (
-      <div className="flex justify-end">
+      <div className="flex justify-between">
+       <h2 className="text-3xl font-semibold ml-1 mt-1 mb-4">Criterios</h2>
        <Button onPress={()=> setEditarCriterios(true)} className=" text-base">
         <i className="pi pi-pencil"></i>
         Editar
@@ -356,7 +357,7 @@ const Criterios = () => {
               :
               (
                <>
-               <span>{item.nombre}</span> 
+               <span className="ml-4">{item.nombre}</span> 
                <span>{item.ponderacion}%</span>
                </>
               )

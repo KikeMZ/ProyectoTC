@@ -268,6 +268,8 @@ export default function Alumnos() {
                 </div>
             )}
             {(mostrarTablas && datosImportados.length === 0) && (
+            <>
+
                 <div className="w-full">
                     <Table data={alumnos} columns={columns}></Table>
                     <Button
@@ -278,9 +280,13 @@ export default function Alumnos() {
                         Registrar alumnos
                     </Button>
                 </div>
+            </>
             )}
             {datosImportados.length !== 0 &&(
+
                 <div className="w-full">
+       <h2 className="text-3xl font-semibold ml-3 mt-5">Lista de Alumnos</h2>
+
                     <Table data={detallesAlumnos} columns={columns}></Table>
                 </div>
             )}
