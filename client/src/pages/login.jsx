@@ -7,7 +7,7 @@ export default function Login(){
                 <LoginCard></LoginCard>
             </div>
             <div className="hidden lg:flex h-full w-1/2 items-center justify-center">
-                <b>Esto se oculta</b>
+                <b>Sistema de Control Escolar</b>
             </div>
         </div>
     )

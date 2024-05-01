@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { obtenerListaAlumnos } from "../services/inscripcion.api";
+import { getCriteriosByNRC } from "../services/claseCriterio.api";
 
 
 
@@ -18,12 +20,46 @@ function NavLink({ to, text, active, onClick }) {
   );
 }
 
-export const Nav = () => {
+export const Nav = ({clase}) => {
   const [activeLink, setActiveLink] = useState("");
+  const [mostrarEntregas, setMostrarEntregas] = useState(false);
+  const [mostrarAsistencia, setMostrarAsistencia] = useState(false);
+
+  console.log(clase);
 
   const handleLinkClick = (link) => {
     setActiveLink(link);
   };
+
+  useEffect( () => {
+   const existenAlumnos = async () => {
+    let auxExistenAlumnos = false; 
+    let res = await obtenerListaAlumnos(clase.nrc)
+    if(res.length>0)
+     auxExistenAlumnos = true;
+    return auxExistenAlumnos;
+    
+   }
+   
+   const existenCriterios = async () => {
+    let auxExistenCriterios = false;
+    let res = await getCriteriosByNRC(clase.nrc);
+    if(res.length>0)
+     auxExistenCriterios = true;
+    return auxExistenCriterios;
+   }
+   
+   existenAlumnos().then( (resExistenAlumnos) => {
+    if(resExistenAlumnos==true)
+    {
+     setMostrarAsistencia(true);
+     existenCriterios().then( (resExistenCriterios) => {
+      if(resExistenCriterios==true && resExistenAlumnos==true)
+       setMostrarEntregas(true)
+     })
+    }
+   });
+  },[]);
 
   return (
     <div className="bg-secondary-900 w-full p-1">
@@ -34,24 +70,38 @@ export const Nav = () => {
           active={activeLink === "/profesor/alumnos"}
           onClick={() => handleLinkClick("/profesor/alumnos")}
         />
+
+        {
+         mostrarEntregas &&
+
+         (
         <NavLink
           to="/profesor/entregas"
           text="Entregas"
           active={activeLink === "/profesor/entregas"}
           onClick={() => handleLinkClick("/profesor/entregas")}
-        /> 
+        />
+         ) 
+        }
         <NavLink
           to="/profesor/criterios"
           text="Criterios"
           active={activeLink === "/profesor/criterios"}
           onClick={() => handleLinkClick("/profesor/criterios")}
         />
-        <NavLink
+
+        {
+         mostrarAsistencia &&
+
+         (
+         <NavLink
           to="/profesor/asistencias"
           text="Asistencias"
           active={activeLink === "/profesor/asistencias"}
           onClick={() => handleLinkClick("/profesor/asistencias")}
-        />     
+         />
+         )
+        }     
       </nav>
     </div>
   );

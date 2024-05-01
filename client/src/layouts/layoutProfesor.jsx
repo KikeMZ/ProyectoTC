@@ -47,7 +47,7 @@ export default function LayoutProfesor() {
                     <Sidebar />
                     <div className="flex flex-col flex-1">
                         <Header />
-                        {shownav && <Nav />}
+                        {shownav && <Nav clase={dataClase}/>}
                         <div className="flex-1 overflow-y-auto px-4 py-1">
                             <NavContext.Provider value={{ shownav, showNav, dontshowNav }}>
                                 <Outlet/>

@@ -72,4 +72,4 @@ class CalificacionViewSet(viewsets.ModelViewSet):
     queryset = Calificacion.objects.all()
     serializer_class = CalificacionSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['id_entrega']
+    search_fields = ['id_entrega__id']
