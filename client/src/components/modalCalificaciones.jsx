@@ -54,7 +54,7 @@ export default function ModalCalificaciones({ controlModal, setMostrarCalificaci
 
        </ModalBody>
        <ModalFooter>
-        <Button color="danger" style={{fontWeight:"bold"}} onPress={onClose}>Cancelar</Button>
+        <Button color="danger" style={{fontWeight:"bold"}} className="px-12 py-6 mt-2" onPress={onClose}>Cancelar</Button>
         <Button
                         radius="large"
 

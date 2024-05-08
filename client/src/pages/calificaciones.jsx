@@ -30,7 +30,7 @@ const Calificaciones = ({nrc, entrega}) => {
 
     obtenerCalificaciones();
     //console.log(getCalificacionesByEntrega(entrega.id)); 
-  }, [])
+  }, [mostrarCalificacionesExtraidas])
 
   const modificarCalificacion = (id_calificacion, valor) =>{
     let auxCalificaciones = calificaciones;
@@ -149,6 +149,7 @@ const Calificaciones = ({nrc, entrega}) => {
       console.log(datosCalificacion)
       console.log(await updateCalificacion(datosCalificacion.id, calificacion));
       setMostrarCalificacionesExtraidas(false);
+      
      }
     }
     else
@@ -162,6 +163,10 @@ const Calificaciones = ({nrc, entrega}) => {
     }
     toast.success("¡Se han actualizado las calificaciones existosamente!");
    }
+
+  const validarNombreEntrega = (contenidoArchivo) => {
+   return contenidoArchivo.includes(entrega.nombre);
+  }
   
   //
   // -----------------------------------------------------------------------------
@@ -188,7 +193,6 @@ const Calificaciones = ({nrc, entrega}) => {
  
    } 
 
-  
   //
   // --------------------------------------------------------
   //  Funcion que permite la extraccion de los datos del Excel
@@ -204,9 +208,14 @@ const Calificaciones = ({nrc, entrega}) => {
       console.log(worksheet);
       console.log(XLSX.utils.sheet_to_csv(worksheet))
       const excelValido = validarEstructuraCalificaciones(XLSX.utils.sheet_to_csv(worksheet));
+      const existeNombreEntrega = validarNombreEntrega(XLSX.utils.sheet_to_txt(worksheet));
       if(!excelValido)
       {
        setResultadoExtraccion(2);
+      }
+      else if(!existeNombreEntrega)
+      {
+       toast.error("¡El nombre de la entrega no coincide con alguna de las entregas que se encuentran dentro del archivo!")
       }
       else
       {

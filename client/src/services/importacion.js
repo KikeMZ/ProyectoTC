@@ -80,7 +80,7 @@ export async function extraerDatosMaterias(archivoPDF) {
               if (elementoString !== " ") {
                 if (/\d/.test(elementoString)) {
                   seccion = seccion.replaceAll("O", "0");
-                  nombreProfesor = nombreProfesor.replace("-", " ");
+                  nombreProfesor = nombreProfesor.replace("-", "");
                   nombreProfesor = nombreProfesor.replace("", " ");
                   let clase = {
                     "nrc": nrc,
