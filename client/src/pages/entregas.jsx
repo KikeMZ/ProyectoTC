@@ -8,7 +8,9 @@ import { getEntregasByNRC } from "../services/entrega.api"
 
 import { Input, Card, CardBody, Button, useDisclosure } from "@nextui-org/react";
 import toast from 'react-hot-toast';
+import { FiEdit2 } from 'react-icons/fi';
 import { GrNext } from "react-icons/gr";
+
 
 
 
@@ -23,7 +25,9 @@ const Entregas = () => {
 
   const [ mostrarEntregas, setMostrarEntregas ] = useState(false);
   const [ mostrarCalificaciones, setMostrarCalificaciones ] = useState(false);
-
+  const [ editarEntregas, setEditarEntregas ] = useState(false);
+  
+    
 
     useEffect(() => {
 
@@ -43,6 +47,14 @@ const Entregas = () => {
     
     console.log(shownav)
 
+
+    const mostrarCardModificarEntrega = (id_entrega) => {
+      let entrega = entregas.find( (e) => e.id == id_entrega);   
+      setEntregaSeleccionada(entrega);
+          controlModal.onOpen();
+        
+    }
+
     const mostrarCalificacionesEntrega = (id_entrega) => {
      let entrega = entregas.find( (e) => e.id == id_entrega);   
      setEntregaSeleccionada(entrega);
@@ -50,7 +62,31 @@ const Entregas = () => {
      console.log("Entrega: " + entrega + ", "+ mostrarCalificaciones);
     }  
   
-    
+  const pruebaActualizacion = () => {
+   setEntregas([    {
+    "id": 1,
+    "nombre": "Primer examen21",
+    "tipo": 2,
+    "claseCriterio_detail": {
+        "id": 2,
+        "id_clase": 59069,
+        "id_criterio": 2,
+        "ponderacion": 22.0,
+        "clase_detail": {
+            "nrc": 59069,
+            "clave": "IDTI 202",
+            "seccion": "002",
+            "nombreMateria": "Inteligencia de Negocios",
+            "nombreProfesor": "LOPEZ  POBLANO GILBERTO"
+        },
+        "criterio_detail": {
+            "id_criterio": 2,
+            "nombre": "Investigacion"
+        }
+    }
+},])
+  }
+  
   return (
     <>
 
@@ -82,18 +118,45 @@ const Entregas = () => {
       (
        <>
        <div className="flex justify-between">
-       <h2 className="text-3xl font-semibold ml-8 mt-5">Entregas</h2>
-          <Button
+       <h2 className="text-3xl font-semibold ml-8 mt-5 mb-9">{editarEntregas?(<> <FiEdit2 className="inline mr-3"/><span>Editar</span></>):"Entregas"}</h2>
+       <div>
+          {
+           !editarEntregas &&
+           (
+           <Button
               radius="large"
               className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-2 mr-3 mb-9 font-bold text-base"
-              onClick={controlModal.onOpen}
-          >
+              onClick={controlModal.onOpen} >
               <i className="pi pi-plus" style={{fontSize:"16px",fontWeight:"bold"}}></i> Crear entrega
+           </Button>
+           )
+          }
+          
+
+          <Button onClick={() => setEditarEntregas(!editarEntregas)} radius="large" className="py-6 ml-3 text-base">
+           {
+            editarEntregas
+            ?
+            (
+             <>
+              Regresar
+             </>
+            )
+            :
+            (
+            <>
+            <FiEdit2 size="19px"></FiEdit2>
+            Editar entregas
+            </>
+            )
+           }
           </Button>
+
+       </div>
        </div>
       {
        entregas.map( (entrega, index) => (
-        <Button onClick={ () => mostrarCalificacionesEntrega(entrega.id)} className="flex bg-white justify-between w-full mb-4 py-9" key={index} endContent={<GrNext className="text-xl"/> }>
+        <Button onClick={ () => editarEntregas?mostrarCardModificarEntrega(entrega.id):mostrarCalificacionesEntrega(entrega.id)} className="flex bg-white justify-between w-full mb-4 py-9" key={index} endContent={ editarEntregas?<p className="text-base mr-2"> Editar</p>:<GrNext className="text-xl"/> }>
          <div >
          <p className="text-2xl font-medium ml-4">
          {
@@ -113,7 +176,7 @@ const Entregas = () => {
       </>
      )
     }
-      <ModalEntregas controlModal={controlModal} setEntregas={setEntregas} setMostrarEntregas={setMostrarEntregas} nrc={dataClase.nrc}></ModalEntregas>
+      <ModalEntregas controlModal={controlModal} modoEdicion={editarEntregas} setEntregas={setEntregas} setMostrarEntregas={setMostrarEntregas} nrc={dataClase.nrc} entrega={entregaSeleccionada} pruebaLista={pruebaActualizacion}></ModalEntregas>
     </>
     ):
     (

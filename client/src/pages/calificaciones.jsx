@@ -7,6 +7,7 @@ import { getCalificacionesByEntrega } from "../services/calificacion.api";
 import axios from "axios";
 import * as XLSX from 'xlsx';
 import { Input, Card, CardBody, Button, useDisclosure } from "@nextui-org/react";
+import toast from 'react-hot-toast';
 
 const Calificaciones = ({nrc, entrega}) => {
 
@@ -126,14 +127,15 @@ const Calificaciones = ({nrc, entrega}) => {
        let calificacion = {
         "nota": nota,
         "matricula": datosAlumno.matricula,
-        "id_entrega": 4
+        "id_entrega": entrega.id
        };
        calificacionesEncontradas.push(calificacion);
        console.log(calificacion)
       }
     }
     setCalificacionesExtraidas(calificacionesEncontradas);
-    console.log(calificacionesEncontradas)
+    console.log(calificacionesEncontradas);
+
    }
 
    const actualizarCalificaciones = async () => {
@@ -143,7 +145,10 @@ const Calificaciones = ({nrc, entrega}) => {
      for(let calificacion of calificacionesExtraidas )
      {
       let datosCalificacion = calificaciones.find( (c) => c.matricula == calificacion.matricula);
+      console.log("Datos calificaciones encontradas:")
+      console.log(datosCalificacion)
       console.log(await updateCalificacion(datosCalificacion.id, calificacion));
+      setMostrarCalificacionesExtraidas(false);
      }
     }
     else
@@ -155,6 +160,7 @@ const Calificaciones = ({nrc, entrega}) => {
     
      }
     }
+    toast.success("¡Se han actualizado las calificaciones existosamente!");
    }
   
   //
@@ -216,6 +222,7 @@ const Calificaciones = ({nrc, entrega}) => {
        crearListaCalificaciones(auxCalificaciones,6,12,notaMaxima);
        setMostrarCalificacionesExtraidas(true);
 
+       toast.success("¡Se han extraido los datos exitosamente!");
       setResultadoExtraccion(0); //Se indica que el proceso de extraccion se realizo correctamente.
      }
     }

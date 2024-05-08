@@ -3,7 +3,7 @@ import { useReactTable, getCoreRowModel, flexRender, getSortedRowModel, getFilte
 import { CiSearch } from "react-icons/ci";
 import { Input } from "@nextui-org/react";
 
-const Table = ({data, columns}) => {
+const Table = ({data, columns, esVistaExtraccion}) => {
 
     const [sorting, setSorting] = useState([])
     const [filtering, setFiltering] = useState("")
@@ -21,13 +21,20 @@ const Table = ({data, columns}) => {
 
     return (
         <div className='flex flex-col w-full p-2'>
-            <div className='py-2 w-96'>
+
+            {
+            !esVistaExtraccion &&
+             (
+            
+             <div className='py-2 w-96'>
                 <Input placeholder="Ingresa algun dato de la persona" startContent={<CiSearch className='fill-black'/>}
                 value={filtering}
                 onChange={e => setFiltering(e.target.value)}>
                     
                 </Input>
-            </div>
+             </div>
+             )
+            }
             <table className="text-left text-md font-light dark:text-white py-2">
                 <thead className="font-medium dark:border-white/10 bg-secondary-100">
                     {tabla.getHeaderGroups().map(headerGroup => (

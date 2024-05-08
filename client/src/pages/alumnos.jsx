@@ -33,7 +33,7 @@ export default function Alumnos() {
         }
         cargaralumnos();
         showNav();
-    }, [])
+    }, [mostrarTablas])
 
 
     const detallesAlumnos = datosImportados.map(item => {
@@ -198,7 +198,7 @@ export default function Alumnos() {
                 console.log(listaAlumnos);
                 setAlumnos(listaAlumnos); //Se guarda el arreglo obtenido en el estado "listaAlumnos";
                 setResultadoExtraccion(0); //Se indica que el proceso de extraccion se realizo correctamente.
-                toast.success("¡Se han importado los datos del Excel exitosamente!")
+                toast.success("¡Se han extraido los datos del Excel exitosamente!")
                 setMostrarTablas(true)
             }
         }
@@ -232,6 +232,9 @@ export default function Alumnos() {
                 console.log('Inscripción registrada:', response.data);
             });
             console.log("Finaliza la creacion de inscripciones");
+            setMostrarTablas(false);
+            //setDatosImportados(alumnos);
+            toast.success("¡Se han registrado a los alumnos exitosamente!")
         } catch (error) {
             console.error('Error al registrar la inscripción:', error);
         }
@@ -260,7 +263,7 @@ export default function Alumnos() {
                     </form>
                     <Button
                         radius="large"
-                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white mt-20"
+              className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-2 mr-3 mb-9 font-bold text-base"
                         onClick={leerExcel}
                     >
                         Extraer datos
@@ -269,16 +272,23 @@ export default function Alumnos() {
             )}
             {(mostrarTablas && datosImportados.length === 0) && (
             <>
-
                 <div className="w-full">
-                    <Table data={alumnos} columns={columns}></Table>
+                <h2 className="text-3xl font-semibold ml-2 mt-5 mb-6">Datos extraidos del archivo</h2>
+                    <Table data={alumnos} columns={columns} esVistaExtraccion={true}></Table>
+                    <div className="mt-3">
+                     <span className="text-xl font-semibold  ml-2">Numero de alumnos:</span>
+                     <span className="text-xl "> {alumnos.length}</span>
+                    </div>
+                    <div className="flex justify-end">
                     <Button
                         radius="large"
-                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white mt-20"
+                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-2 mr-3 mb-9 font-bold text-base"
                         onClick={registrarInscripcion}
                     >
                         Registrar alumnos
                     </Button>
+                    </div>
+
                 </div>
             </>
             )}
@@ -287,7 +297,7 @@ export default function Alumnos() {
                 <div className="w-full">
        <h2 className="text-3xl font-semibold ml-3 mt-5">Lista de Alumnos</h2>
 
-                    <Table data={detallesAlumnos} columns={columns}></Table>
+                    <Table data={detallesAlumnos} columns={columns} esVistaExtraccion={false}></Table>
                 </div>
             )}
         </div>
