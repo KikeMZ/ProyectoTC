@@ -48,6 +48,10 @@ const Entregas = () => {
     console.log(shownav)
 
 
+    const mostrarVistaEntregas = () => {
+     setMostrarCalificaciones(false);
+    }
+
     const mostrarCardModificarEntrega = (id_entrega) => {
       let entrega = entregas.find( (e) => e.id == id_entrega);   
       setEntregaSeleccionada(entrega);
@@ -180,7 +184,7 @@ const Entregas = () => {
     </>
     ):
     (
-    <Calificaciones nrc={dataClase.nrc} entrega={entregaSeleccionada} />
+    <Calificaciones nrc={dataClase.nrc} entrega={entregaSeleccionada} mostrarVistaEntregas={mostrarVistaEntregas} />
     )
     }
       </>

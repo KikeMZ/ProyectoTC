@@ -6,16 +6,18 @@ import { getCalificacionesByEntrega } from "../services/calificacion.api";
 
 import axios from "axios";
 import * as XLSX from 'xlsx';
+import Papa from 'papaparse';
 import { Input, Card, CardBody, Button, useDisclosure } from "@nextui-org/react";
+import { IoIosArrowBack } from 'react-icons/io';
 import toast from 'react-hot-toast';
 
-const Calificaciones = ({nrc, entrega}) => {
+const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
 
   const { showNav, shownav } = useContext(NavContext);
   const controlModal = useDisclosure();
 
 
-  const [archivoCalificaciones, setArchivoCalificaciones] = useState(null);
+  const [archivoCalificaciones, setArchivoCalificaciones] = useState({"datos":"", "tipo":0});
   const [calificaciones, setCalificaciones] = useState(null);
   const [calificacionesExtraidas, setCalificacionesExtraidas] = useState([]);
   const [mostrarCalificacionesExtraidas, setMostrarCalificacionesExtraidas] = useState(false)
@@ -88,12 +90,17 @@ const Calificaciones = ({nrc, entrega}) => {
         let leerArchivo = new FileReader();
         leerArchivo.readAsArrayBuffer(archivoSeleccionado);
         leerArchivo.onload = (e) => {
-          setArchivoCalificaciones(e.target.result);
+          setArchivoCalificaciones({"datos":e.target.result,"tipo":1});
         };
       }
       else if(tipoArchivo === "text/csv")
       {
-       setArchivoCalificaciones(archivoSeleccionado)
+       Papa.parse(archivoSeleccionado, {
+        complete: (res) => {
+         setArchivoCalificaciones({"datos":res,"tipo":2});
+        }
+       })
+       //setArchivoCalificaciones()
       }
       else
       {
@@ -111,7 +118,7 @@ const Calificaciones = ({nrc, entrega}) => {
   // ---------------------------------------------------------------------------------------------------------
   //
 
-  const crearListaCalificaciones = async ( datosCalificaciones, posicionCorreo, posicionNota, notaMaxima) => {
+  const crearListaCalificaciones = async ( datosCalificaciones, posicionIdentificador, posicionNota, notaMaxima) => {
     let calificacionesEncontradas = [];
     let correo = "";
     let inscripciones = await axios.get("http://127.0.0.1:8000/api/Inscripcion/?search="+nrc);
@@ -119,8 +126,20 @@ const Calificaciones = ({nrc, entrega}) => {
     console.log(inscripciones)
     for(let d of datosCalificaciones)
     {
-      correo = d.split(",")[posicionCorreo];
-      let datosAlumno = listaAlumnos.find( (alumno) => alumno.correo == correo)
+     let datosAlumno;
+      if(archivoCalificaciones.tipo == 1)
+      {
+       correo = d.split(",")[posicionIdentificador.correo];
+       datosAlumno = listaAlumnos.find( (alumno) => alumno.correo == correo)
+      }
+      else
+      {
+       
+       let identificador = d.split(",")[posicionIdentificador.apellidos] + d.split(",")[posicionIdentificador.nombre]
+       console.log("Apellidos:"+posicionIdentificador.apellidos+", Nombre:"+posicionIdentificador.nombre);
+       datosAlumno = listaAlumnos.find( (alumno) => (alumno.apellidos + alumno.nombre) == identificador)
+       
+      }
       if(datosAlumno)
       {
        let nota = (parseFloat(d.split(",")[posicionNota]) * 10.0) / notaMaxima; 
@@ -149,6 +168,7 @@ const Calificaciones = ({nrc, entrega}) => {
       console.log(datosCalificacion)
       console.log(await updateCalificacion(datosCalificacion.id, calificacion));
       setMostrarCalificacionesExtraidas(false);
+      setEditarCalificaciones(false);
       
      }
     }
@@ -184,11 +204,16 @@ const Calificaciones = ({nrc, entrega}) => {
 
   const validarEstructuraCalificaciones = (contenidoArchivo) => {
     const campoCorreo = /\w+\.\w+@alumno.buap.mx/g;
+    const campoNombre = /Nombre/g;
+    const campoApellidos = /Apellidos/g
     const campoNota = /(Puntos|Calificación),/g;
+
     let existeCorreo = contenidoArchivo.search(campoCorreo) != -1?true:false;
+    let existeNombre = contenidoArchivo.search(campoNombre) != -1?true:false;
+    let existenApellidos = contenidoArchivo.search(campoApellidos) != -1?true:false;
     let existeNota = contenidoArchivo.search(campoNota) != -1?true:false;
     console.log("Correo:"+existeCorreo+" Nota:"+existeNota); 
-    let esValido = existeCorreo && existeNota;
+    let esValido = (existeCorreo || (existeNombre && existenApellidos)) && existeNota;
     return esValido;
  
    } 
@@ -200,40 +225,74 @@ const Calificaciones = ({nrc, entrega}) => {
   //
   const leerArchivoCalificaciones = async (e) =>{
     //e.preventDefault();
+    console.log("l")
     if(archivoCalificaciones!=null)
     { //Se verifica si el usuario ha seleccionado el archivo Excel.
-      const workbook =  XLSX.read(archivoCalificaciones, {type: 'buffer'});
-      const worksheetName =  workbook.SheetNames[0];
-      const worksheet =  workbook.Sheets[worksheetName];
-      console.log(worksheet);
-      console.log(XLSX.utils.sheet_to_csv(worksheet))
-      const excelValido = validarEstructuraCalificaciones(XLSX.utils.sheet_to_csv(worksheet));
-      const existeNombreEntrega = validarNombreEntrega(XLSX.utils.sheet_to_txt(worksheet));
-      if(!excelValido)
+      if(archivoCalificaciones.tipo == 1)
       {
-       setResultadoExtraccion(2);
-      }
-      else if(!existeNombreEntrega)
-      {
-       toast.error("¡El nombre de la entrega no coincide con alguna de las entregas que se encuentran dentro del archivo!")
+       const workbook =  XLSX.read(archivoCalificaciones.datos, {type: 'buffer'});
+       const worksheetName =  workbook.SheetNames[0];
+       const worksheet =  workbook.Sheets[worksheetName];
+       console.log(worksheet);
+       console.log(XLSX.utils.sheet_to_csv(worksheet))
+       const excelValido = validarEstructuraCalificaciones(XLSX.utils.sheet_to_csv(worksheet));
+       const existeNombreEntrega = validarNombreEntrega(XLSX.utils.sheet_to_txt(worksheet));
+       if(!excelValido)
+       {
+        setResultadoExtraccion(2);
+       }
+       else if(!existeNombreEntrega)
+       {
+        toast.error("¡El nombre de la entrega no coincide con alguna de las entregas que se encuentran dentro del archivo!")
+       }
+       else
+       {
+        let datosCalificaciones =  XLSX.utils.sheet_to_csv(worksheet, {RS:"#"});
+        let auxCalificaciones = datosCalificaciones.split("#").filter( (fila) => fila.search(/[\d\w]/g)!= -1);
+        auxCalificaciones.shift();
+        let posicionIdentificador = {
+         "correo":6
+        };
+        let posicionNota = 12;
+        let posicionNotaMaxima = 13;
+        let notaMaxima = auxCalificaciones[1].split(",")[13];
+        auxCalificaciones.shift();
+        auxCalificaciones.shift();
+        crearListaCalificaciones(auxCalificaciones,posicionIdentificador,12,notaMaxima);
+        setMostrarCalificacionesExtraidas(true);
+
+        toast.success("¡Se han extraido los datos exitosamente!");
+        setResultadoExtraccion(0); //Se indica que el proceso de extraccion se realizo correctamente.
+       }
       }
       else
       {
-       let datosCalificaciones =  XLSX.utils.sheet_to_csv(worksheet, {RS:"#"});
-       let auxCalificaciones = datosCalificaciones.split("#").filter( (fila) => fila.search(/[\d\w]/g)!= -1);
-       auxCalificaciones.shift();
-       let posicionCorreo = 6;
-       let posicionNota = 12;
-       let posicionNotaMaxima = 13;
-       let notaMaxima = auxCalificaciones[1].split(",")[13];
-       auxCalificaciones.shift();
-       auxCalificaciones.shift();
-       crearListaCalificaciones(auxCalificaciones,6,12,notaMaxima);
-       setMostrarCalificacionesExtraidas(true);
+       let contenidoArchivoCSV = Papa.unparse(archivoCalificaciones.datos)
+       let archivoValido = validarEstructuraCalificaciones(contenidoArchivoCSV);
+       let existeNombreEntrega = validarNombreEntrega(contenidoArchivoCSV);
+       if(!archivoValido)
+       {
+        setResultadoExtraccion(2);
+       }
+       else if(!existeNombreEntrega)
+       {
+        toast.error("¡Calificaciones no encontradas!, verifica que el nombre de la entrega se igual a la que se encuentra en el archivo."); 
+       }
+       else
+       {
+        let posicionIdentificador = {
+         "nombre": archivoCalificaciones.datos.data[0].findIndex( (columna) => columna=="Nombre"),
+         "apellidos": archivoCalificaciones.datos.data[0].findIndex( (columna) => columna=="Apellidos")
+        }
 
-       toast.success("¡Se han extraido los datos exitosamente!");
-      setResultadoExtraccion(0); //Se indica que el proceso de extraccion se realizo correctamente.
-     }
+        let posicionNota = archivoCalificaciones.datos.data[0].findIndex( (columna) => columna==entrega.nombre);
+        let notaMaxima = archivoCalificaciones.datos.data[2][posicionNota];
+        let auxCalificaciones = Papa.unparse(archivoCalificaciones.datos, {newline:"#"}).split("#");
+        crearListaCalificaciones(auxCalificaciones,posicionIdentificador,posicionNota,notaMaxima);
+        setMostrarCalificacionesExtraidas(true);
+   
+       }
+      }
     }
     else
     { //Si el usuario aun no ha seleccionado algun archivo, se asignara un valor igual a 4 al estado "resultadoExtraccion".
@@ -247,30 +306,35 @@ const Calificaciones = ({nrc, entrega}) => {
   return (
     <>
 
-    {
+     <Button onClick={mostrarVistaEntregas} variant="faded" radius="large" startContent={<IoIosArrowBack size="23px"/>} className="text-base px-4"> Regresar a entregas</Button>
+    <div className="flex justify-between">
 
+    {
       !editarCalificaciones && !mostrarCalificacionesExtraidas &&
       (
+       <>
+       <h2 className="text-3xl font-semibold mt-5">Calificaciones para {entrega.nombre}</h2>
                     <Button
                         radius="large"
 
-                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-2 ml-3 mb-10 font-bold text-base"
+                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mb-10 font-bold text-base"
                         onClick={ () => {setEditarCalificaciones(true)}}
                     >
                         <i className="pi pi-pencil" style={{fontSize:"18px",fontWeight:"bold"}}></i> Modificar calificaciones
                     </Button>
+      </>
       )
                     
     }
                     <Button
                         radius="large"
 
-                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-2 ml-3 mb-10 font-bold text-base"
+                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mb-10 font-bold text-base"
                         onClick={controlModal.onOpen}
                     >
                         <i className="pi pi-folder-open" style={{fontSize:"18px",fontWeight:"bold"}}></i> { mostrarCalificacionesExtraidas?"Cambiar archivo":"Importar calificaciones"}
                     </Button>
-
+    </div>
     {
      mostrarCalificacionesExtraidas
      ? 

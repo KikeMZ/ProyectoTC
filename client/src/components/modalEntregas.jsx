@@ -19,11 +19,12 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
   const [ nombreEntrega, setNombreEntrega ] = useState("");
   const [ tipo, setTipo ] = useState(null); 
 
-  const actualizarListaEntregas = (listaEntregas) => {
+  const actualizarListaEntregas = (listaEntregas, entregaActualizada) => {
    let auxEntregas = [...listaEntregas];
    let posicionEntrega = listaEntregas.findIndex( (e) => e.id == entrega.id )
-   auxEntregas[posicionEntrega].nombre = nombreEntrega;
-   auxEntregas[posicionEntrega].tipo = tipo;
+   auxEntregas[posicionEntrega].nombre = entregaActualizada.nombre;
+   auxEntregas[posicionEntrega].tipo = entregaActualizada.tipo;
+   auxEntregas[posicionEntrega].claseCriterio_detail = entregaActualizada.claseCriterio_detail;
    return auxEntregas;
   }
 
@@ -37,7 +38,7 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
 
    updateEntrega(entrega.id,entregaActualizada).then( (res) => {
     console.log(res)
-    setEntregas( (listaEntregas) => actualizarListaEntregas(listaEntregas) );
+    setEntregas( (listaEntregas) => actualizarListaEntregas(listaEntregas, res.data) );
    } );
 
   

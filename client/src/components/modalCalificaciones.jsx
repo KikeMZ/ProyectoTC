@@ -47,7 +47,7 @@ export default function ModalCalificaciones({ controlModal, setMostrarCalificaci
         
        <label htmlFor="cargar">Seleccione su archivo: </label>
 
-<input type="file" accept=".xlsx" id="cargar" name="archivo" onChange={manejarArchivo} />
+<input type="file" accept=".xlsx,text/csv" id="cargar" name="archivo" onChange={manejarArchivo} />
 
 
 
