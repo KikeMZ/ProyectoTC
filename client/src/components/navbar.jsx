@@ -74,7 +74,7 @@ export const Nav = ({clase}) => {
         />
 
         {
-         mostrarEntregas &&
+       //  mostrarEntregas &&
 
          (
         <NavLink
@@ -93,7 +93,7 @@ export const Nav = ({clase}) => {
         />
 
         {
-         mostrarAsistencia &&
+        // mostrarAsistencia &&
 
          (
          <NavLink
