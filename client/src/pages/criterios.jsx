@@ -105,10 +105,11 @@ const Criterios = () => {
   }
   
   const modificarCriterio = (nombreCriterio, valor) =>{
+
    let auxCriterios = criterios;
    let posicionCriterio = criterios.findIndex( (c) => c.nombre==nombreCriterio)
    console.log(auxCriterios[posicionCriterio]);
-   if(!isNaN(valor) && valor!="")
+   if(!isNaN(valor) && valor!="" && (maximo - parseInt(valor)+ parseInt(auxCriterios[posicionCriterio].ponderacion))>0 )
    {
    // if(auxCriterios[posicionCriterio].ponderacion>valor)
      

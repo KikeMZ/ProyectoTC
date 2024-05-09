@@ -35,13 +35,16 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
   }, [mostrarCalificacionesExtraidas])
 
   const modificarCalificacion = (id_calificacion, valor) =>{
-    let auxCalificaciones = calificaciones;
-    let posicionCalificacion = calificaciones.findIndex( (c) => c.id==id_calificacion)
-    console.log(auxCalificaciones[posicionCalificacion]);
+    if(valor<=10)
+    {
+     let auxCalificaciones = [...calificaciones];
+     let posicionCalificacion = calificaciones.findIndex( (c) => c.id==id_calificacion)
+     console.log(auxCalificaciones[posicionCalificacion]);
 
-    auxCalificaciones[posicionCalificacion].nota = parseFloat(valor);
-    setCalificaciones(auxCalificaciones);
-    setEditarCalificaciones(true);
+     auxCalificaciones[posicionCalificacion].nota = parseFloat(valor);
+     setCalificaciones(auxCalificaciones);
+     setEditarCalificaciones(true);
+    }
   }
     
 
@@ -306,7 +309,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
   return (
     <>
 
-     <Button onClick={mostrarVistaEntregas} variant="faded" radius="large" startContent={<IoIosArrowBack size="23px"/>} className="text-base px-4"> Regresar a entregas</Button>
+     <Button onClick={ () => { if(editarCalificaciones || mostrarCalificacionesExtraidas) {setEditarCalificaciones(false);setMostrarCalificacionesExtraidas(false);} else {mostrarVistaEntregas()}}} variant="faded" radius="large" startContent={<IoIosArrowBack size="23px"/>} className="text-base px-4"> { (editarCalificaciones || mostrarCalificacionesExtraidas)?"Regresar a calificaciones":"Regresar a entregas"}</Button>
     <div className="flex justify-between">
 
     {
@@ -317,7 +320,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
                     <Button
                         radius="large"
 
-                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mb-10 font-bold text-base"
+                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mr-3 mb-10 font-bold text-base"
                         onClick={ () => {setEditarCalificaciones(true)}}
                     >
                         <i className="pi pi-pencil" style={{fontSize:"18px",fontWeight:"bold"}}></i> Modificar calificaciones
@@ -329,41 +332,59 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
                     <Button
                         radius="large"
 
-                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mb-10 font-bold text-base"
+                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-0 mb-10 font-bold text-base"
                         onClick={controlModal.onOpen}
                     >
                         <i className="pi pi-folder-open" style={{fontSize:"18px",fontWeight:"bold"}}></i> { mostrarCalificacionesExtraidas?"Cambiar archivo":"Importar calificaciones"}
                     </Button>
+
+                    {
+                     (editarCalificaciones || mostrarCalificacionesExtraidas) &&
+                     (
+                     <Button
+                        radius="large"
+
+                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mb-10 font-bold text-base"
+                        onClick={actualizarCalificaciones}
+                     >
+                        <i className="pi pi-save" style={{fontSize:"18px",fontWeight:"bold"}}></i> Guardar calificaciones
+                    </Button>
+                     )
+                    }
+
     </div>
     {
      mostrarCalificacionesExtraidas
      ? 
      (
       <>
-                    <Button
-                        radius="large"
-
-                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-2 ml-3 mb-10 font-bold text-base"
-                        onClick={actualizarCalificaciones}
-                    >
-                        <i className="pi pi-folder-open" style={{fontSize:"18px",fontWeight:"bold"}}></i> Guardar calificaciones
-                    </Button>
-      
-      <h2>Numero de calificaciones identificadas: {calificacionesExtraidas.length}</h2>
+      <h2 className="text-3xl font-semibold mb-2">Resumen de la extraccion</h2>
+      <hr></hr>
+      <h2 className="text-2xl my-3">Numero de calificaciones identificadas: {calificacionesExtraidas.length}</h2>
+      <h2 className="text-2xl my-3">Numero de calificaciones no encontradas: {calificaciones.length - calificacionesExtraidas.length}</h2>
       <hr></hr>
       <br></br>
+      <table style={{width:"100%"}}>
+      <thead>
+        <tr>
+          <th className="text-xl py-3">Matricula</th>
+          <th className="text-xl py-3">Nota</th>
+        </tr>
+      </thead>
+      <tbody>
       {
 
       calificacionesExtraidas.map( (calificacion, index) => (
-      <div key={index}>
-       <div>Matricula: {calificacion.matricula} | Nota: {calificacion.nota}</div>      
-      </div>
+      <tr key={index} style={{border:"2px solid"}}>
+       <td className="text-xl text-center py-3"> {calificacion.matricula} </td>
+       <td className="text-xl text-center py-3"> {calificacion.nota}</td>      
+      </tr>
       ))
       
       }
+      </tbody>
+      </table>
       <br></br>
-      <hr></hr>
-      <h2>Numero de calificaciones no encontradas: {calificaciones.length - calificacionesExtraidas.length}</h2>
 
       </>
      )
@@ -371,38 +392,45 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
 
      (
       <>
-      {
-      editarCalificaciones &&
-      (
-      <>
-      <Button
-      radius="large"
+      <table style={{width:"100%", borderCollapse:"collapse", border:"3px solid white"}}>
+       <thead>
+        <tr style={{border:"3px solid white"}}>
+          <th className="text-2xl py-3">Matricula</th>
+          <th className="text-2xl py-3">Nota</th>
+          <th className="text-2xl py-3">Nota redondeada</th>
+        </tr>
+       </thead>
+       <tbody>
 
-      className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-2 ml-3 mb-10 font-bold text-base"
-      onClick={actualizarCalificaciones}
-  >
-      <i className="pi pi-save" style={{fontSize:"18px",fontWeight:"bold"}}></i> Guardar calificaciones
-  </Button>
-  </>
-  )
-      }
     {
      calificaciones?.map( (calificacion, index) => (
       
-    <div key={calificacion.id}>
-     <div>Matricula: {calificacion.matricula} | Nota: {calificacion.nota}</div>
-     { editarCalificaciones &&
+    <tr key={calificacion.id} className="text-center" style={{border:"3px solid grey"}}>
+     <td className="text-xl py-3"> {calificacion.matricula} </td>
+      
+     { editarCalificaciones?
 
       (
       <>
-        <Input type="number" max={10} min={0} onChange={ (e) => {modificarCalificacion(calificacion.id, e.target.value)}} endContent={"%"} placeholder={calificacion.nota}></Input>
+        <Input classNames={{input: ["text-xl font-semibold text-end"]}}  type="number" max={10} min={0} step={0.1} onChange={ (e) => {modificarCalificacion(calificacion.id, e.target.value)}} endContent={"%"} value={calificacion.nota}></Input>
       </>
       )
+      :
+      (
+       <>
+     <td className="text-xl py-3"> {calificacion.nota} </td>
+       <td className="text-xl py-3"> {Math.round(calificacion.nota)} </td>
+        
+       </>
+      )
      }
-    </div>
+
+    </tr>
     )
     )
     }
+     </tbody>
+    </table>
     </>
     )
    }
