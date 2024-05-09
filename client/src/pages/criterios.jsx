@@ -42,14 +42,34 @@ const Criterios = () => {
   const crearCriteriosGenerales = async () => {
    let nombresCriteriosBD = [];
    let criteriosUnicos = []
-   
-   let criteriosBD = criterios.filter( (c) => c.id>-1)
-   let criteriosActualizados = criteriosBD
+   let criteriosBD = [];
+   let criteriosActualizados = [];
    let res = await getAllCriterios();
-     console.log("Inicio"+res.data);
-     nombresCriteriosBD = res.data.map( (c) => c.nombre);
-     criteriosUnicos = criterios.filter( (c) => !nombresCriteriosBD.includes(c.nombre));
-     console.log(criteriosUnicos + ":" + criterios)
+   console.log("Inicio"+res.data);
+   criteriosBD = res.data;
+   nombresCriteriosBD = res.data.map( (c) => c.nombre);
+   let nombresCriterios = criterios.map( (c) => c.nombre)
+   criteriosUnicos = criterios.filter( (c) => !nombresCriteriosBD.includes(c.nombre));
+   let criteriosExistentes = [];
+   for(let criterio of criterios)
+   {
+    let criterioExistente = criteriosBD.find( (c) => c.nombre == (criterio.nombre));
+    console.log(criterioExistente)
+    if(criterioExistente)
+    {
+      let auxCriterioAgregado = {
+        "id": criterioExistente.id_criterio,
+        "nombre": criterio.nombre,
+        "ponderacion": criterio.ponderacion,
+       
+       }
+
+       criteriosExistentes.push(auxCriterioAgregado);
+    
+    }
+   }
+   criteriosActualizados = criteriosExistentes;
+   console.log(criteriosUnicos + ":" + criterios)
      if(criteriosUnicos.length>0)
      {
       for( let criterio of criteriosUnicos)
