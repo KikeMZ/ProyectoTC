@@ -57,7 +57,7 @@ class EntregaSerializer(serializers.ModelSerializer):
     claseCriterio_detail = ClaseCriterioSerializer(source='tipo', read_only=True)
     class Meta:
         model = Entrega
-        fields = ('id', 'nombre', 'tipo','claseCriterio_detail')
+        fields = ('id', 'nombre', 'tipo', 'fecha','claseCriterio_detail')
 
 class CalificacionSerializer(serializers.ModelSerializer):
     class Meta:

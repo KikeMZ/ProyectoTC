@@ -26,4 +26,8 @@ export const getEntregasByNRC = (nrc) => {
     return api.get(`/getEntregasByNRC/?nrc=${nrc}`); 
 }
 
+export const getEntregasByTipo = (tipo) => {
+    return api.get(`/?search=${tipo}`)
+}
+
 export const updateEntrega = (id, entrega) => api.patch(`/${id}/`,entrega);

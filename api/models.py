@@ -65,6 +65,7 @@ class ClaseCriterio(models.Model):
 class Entrega(models.Model):
     nombre = models.CharField(max_length=250)
     tipo = models.ForeignKey(ClaseCriterio, on_delete=models.DO_NOTHING, default=1)  # Aquí estableces el valor predeterminado
+    fecha = models.DateField()
 
 class Calificacion(models.Model):
     nota=models.FloatField()

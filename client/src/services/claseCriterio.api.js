@@ -6,7 +6,7 @@ const api = axios.create({
 });
 
 export const getAllClaseCriterio = () => {
-  return api.get('/').then(res => res.data);
+  return api.get('/');
 }
 
 
