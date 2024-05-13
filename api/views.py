@@ -17,6 +17,13 @@ class AlumnoViewSet(viewsets.ModelViewSet):
     queryset = Alumno.objects.all()
     serializer_class = AlumnoSerializer
 
+    @action(detail=False, methods=['get'])
+    def borrarAlumnos(self, request, pk=None):
+        alumnos = Alumno.objects.all()
+        for j in alumnos:
+            j.delete()
+        return Response(status=status.HTTP_200_OK)
+
 
 class Clase2ViewSet(viewsets.ModelViewSet):
     queryset = Clase2.objects.all()
@@ -57,7 +64,7 @@ class EntregaViewSet(viewsets.ModelViewSet):
     queryset = Entrega.objects.all()  # Utiliza el queryset de Entrega en lugar de Clase2
     serializer_class = EntregaSerializer
     filter_backends = [filters.SearchFilter]
-    search_fields = ['nombre']  # Asegúrate de que 'nombre' esté definido en tu modelo Entrega
+    search_fields = ['tipo__id']  # Asegúrate de que 'nombre' esté definido en tu modelo Entrega
 
     @action(detail=False, methods=['get'])
     def getEntregasByNRC(self, request, pk=None):

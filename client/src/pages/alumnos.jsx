@@ -209,25 +209,28 @@ export default function Alumnos() {
 
     }
 
-    const registrarAlumnos = () => {
-        alumnos.forEach(alumno => {
-            createAlumno(alumno).then(response => {
-                console.log('Alumno registrado:', response.data);
-            }).catch(error => {
-                console.error('Error al registrar alumno:', error);
-            });
+    const registrarAlumnos = async () => {
+        let alumnosBD = await getAllAlumnos();
+        let matriculasBD = alumnosBD.data.map( (alumno) => alumno.matricula);
+        let alumnosNoEncontrados = alumnos.filter( (alumno) => !matriculasBD.includes(alumno.matricula) ) 
+        let promesas = alumnosNoEncontrados.map(alumno => {
+            return createAlumno(alumno);
         });
+        return await Promise.all(promesas);
     }
 
     const registrarInscripcion = async () => {
         try {
-            registrarAlumnos();
-            console.log(alumnos)
+             let respuestaAlumno = await registrarAlumnos()
+             console.log(respuestaAlumno)
+          //  {
+            //console.log(res)
             let listaMatriculas = alumnos.map( (alumno) => (alumno.matricula));
             setMatriculas(listaMatriculas);
-            console.log(matriculas);
+            console.log(listaMatriculas);
             console.log("Creacion de las inscripciones");
-            const responses = await crearListaInscripcion(listaMatriculas, nrc);
+
+            let responses = await crearListaInscripcion(listaMatriculas, nrc);
             responses.forEach(response => {
                 console.log('Inscripción registrada:', response.data);
             });
@@ -235,6 +238,8 @@ export default function Alumnos() {
             setMostrarTablas(false);
             //setDatosImportados(alumnos);
             toast.success("¡Se han registrado a los alumnos exitosamente!")
+          //  }
+        // );
         } catch (error) {
             console.error('Error al registrar la inscripción:', error);
         }
@@ -272,7 +277,7 @@ export default function Alumnos() {
             )}
             {(mostrarTablas && datosImportados.length === 0) && (
             <>
-                <div className="w-full">
+                <div className="w-full mb-12">
                 <h2 className="text-3xl font-semibold ml-2 mt-5 mb-6">Datos extraidos del archivo</h2>
                     <Table data={alumnos} columns={columns} esVistaExtraccion={true}></Table>
                     <div className="mt-3">
@@ -282,7 +287,7 @@ export default function Alumnos() {
                     <div className="flex justify-end">
                     <Button
                         radius="large"
-                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-2 mr-3 mb-9 font-bold text-base"
+                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-2 mr-3 mb-11 font-bold text-base"
                         onClick={registrarInscripcion}
                     >
                         Registrar alumnos

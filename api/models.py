@@ -47,8 +47,8 @@ class Clase2(models.Model):
         return str(self.nrc)
 
 class Inscripcion(models.Model):
-    clase = models.ForeignKey(Clase2, on_delete=models.SET_NULL, null=True)
-    alumno = models.ForeignKey(Alumno, on_delete=models.SET_NULL, null=True)
+    clase = models.ForeignKey(Clase2, on_delete=models.DO_NOTHING, null=True)
+    alumno = models.ForeignKey(Alumno, on_delete=models.DO_NOTHING, null=True)
 
 class Criterio(models.Model):
     id_criterio = models.AutoField(primary_key=True)

@@ -61,6 +61,7 @@ const Criterios = () => {
         "id": criterioExistente.id_criterio,
         "nombre": criterio.nombre,
         "ponderacion": criterio.ponderacion,
+        "existente":true
        
        }
 
@@ -80,6 +81,7 @@ const Criterios = () => {
          "id": res2.data.id_criterio,
          "nombre": criterio.nombre,
          "ponderacion": criterio.ponderacion,
+         "existente":false
         
         }
         criteriosActualizados.push( auxCriterioAgregado);
@@ -126,19 +128,18 @@ const Criterios = () => {
   
   const modificarCriterio = (nombreCriterio, valor) =>{
 
-   let auxCriterios = criterios;
+   let auxCriterios = [...criterios];
    let posicionCriterio = criterios.findIndex( (c) => c.nombre==nombreCriterio)
    console.log(auxCriterios[posicionCriterio]);
-   if(!isNaN(valor) && valor!="" && (maximo - parseInt(valor)+ parseInt(auxCriterios[posicionCriterio].ponderacion))>0 )
+   if(!isNaN(valor) && valor!="") //&& (maximo - parseInt(valor)+ parseInt(auxCriterios[posicionCriterio].ponderacion))>0 )
    {
-   // if(auxCriterios[posicionCriterio].ponderacion>valor)
-     
-     setMaximo(maximo- parseInt(auxCriterios[posicionCriterio].ponderacion)+parseInt(valor))
-   // else
-   //  setMaximo(maximo+1)
-    auxCriterios[posicionCriterio].ponderacion = parseInt(valor);
+    let valorNumerico = 0;
+    if(valor!="")
+     valorNumerico = parseInt(valor)
+    setMaximo(maximo- parseInt(auxCriterios[posicionCriterio].ponderacion)+parseInt(valorNumerico))
+    auxCriterios[posicionCriterio].ponderacion = parseInt(valorNumerico);
    }
-   else
+   else if(valor!="")
    {
     auxCriterios[posicionCriterio].nombre = valor;
     console.log(auxCriterios)
@@ -164,7 +165,7 @@ const Criterios = () => {
    setMaximo(maximo-criterio.ponderacion);
   }
 
-  const guardarModificaciones = () => {
+  const guardarModificaciones = async () => {
    console.log(criteriosEliminados.length);
    if(maximo==100)
    {
@@ -176,13 +177,33 @@ const Criterios = () => {
      }
     }
 
-    for(let criterio of criterios)
+    let criteriosActualizados = await crearCriteriosGenerales();
+
+    console.log(criteriosActualizados)
+
+    for(let criterio of criteriosActualizados)
     {
-     if(criterio.id!=-1)
-      updateClaseCriterio(criterio.id, criterio)
-     
-      
+      let claseCriterio = {
+        "id_clase": dataClase.nrc,
+        "id_criterio": criterio.id,
+        "ponderacion": criterio.ponderacion
+      }
+
+      if(!criterio.existente || (criterios.find( (c)=> c.nombre == criterio.nombre).id == -1) )
+      {
+       createClaseCriterio(claseCriterio).then(console.log);
+      }
+      else
+      {
+       let auxCriterio = criterios.find( (c) => c.nombre == criterio.nombre);
+       console.log("Else")
+       updateClaseCriterio(auxCriterio.id, claseCriterio).then(console.log)
+      }
     }
+
+    if(criterios.find( (c) => c.id==-1))
+     setCriterios(criteriosActualizados)
+
     setEditarCriterios(false);
     setExistenCriterios(true);
     toast.success("¡Se han guardado los criterios correctamente!")

@@ -6,7 +6,7 @@ const api = axios.create({
 });
 
 export const getAllAlumnos = () => {
-  return api.get('/').then(res => res.data);
+  return api.get('/');
 }
 
 
