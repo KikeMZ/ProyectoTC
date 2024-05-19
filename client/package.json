@@ -10,12 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@nextui-org/react": "^2.2.9",
+    "@nextui-org/date-picker": "^2.0.7",
+    "@nextui-org/react": "^2.3.6",
     "@tanstack/react-table": "^8.13.2",
     "axios": "^1.6.7",
-    "framer-motion": "^11.0.5",
+    "framer-motion": "^11.1.9",
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.4",
+    "papaparse": "^5.4.1",
     "pdfjs-dist": "^2.16.105",
     "primeicons": "^7.0.0",
     "react": "^18.2.0",

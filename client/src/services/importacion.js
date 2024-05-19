@@ -1,3 +1,198 @@
+import { createEntrega } from "./entrega.api";
+
+import axios from "axios";
+import * as XLSX from "xlsx";
+import Papa from "papaparse";
+import toast from "react-hot-toast";
+
+export const manejarArchivo = (e, setArchivoEntrega) =>{
+  let archivoSeleccionado = e.target.files[0];
+
+  if (archivoSeleccionado) {
+    let tipoArchivo = archivoSeleccionado.type;
+    console.log(tipoArchivo);
+    if (tipoArchivo === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") { // Validar que sea un archivo PDF
+      let leerArchivo = new FileReader();
+      leerArchivo.readAsArrayBuffer(archivoSeleccionado);
+      leerArchivo.onload = (e) => {
+        setArchivoEntrega({"datos":e.target.result,"tipo":1});
+      };
+    }
+    else if(tipoArchivo === "text/csv")
+    {
+     Papa.parse(archivoSeleccionado, {
+      complete: (res) => {
+       setArchivoEntrega({"datos":res,"tipo":2});
+      }
+     })
+     //setArchivoCalificaciones()
+    }
+    else
+    {
+     //setResultadoExtraccion(3);
+    } 
+
+  }
+}
+
+
+  //
+  // ---------------------------------------------------------------------------------------------------------
+  //  Esta funcion permite crear un arreglo de objetos (JSON) con las calificaciones encontradas dentro del 
+  //  archivo de Excel que genera Teams para poder almacenarlas posteriormente en la base de datos.
+  // ---------------------------------------------------------------------------------------------------------
+  //
+
+  const crearListaCalificaciones = async (archivoCalificaciones, setCalificacionesExtraidas, datosCalificaciones, posicionIdentificador, posicionNota, notaMaxima, nrc) => {
+    let calificacionesEncontradas = [];
+    let correo = "";
+    let inscripciones = await axios.get("http://127.0.0.1:8000/api/Inscripcion/?search="+nrc);
+    let listaAlumnos = inscripciones.data.map( (inscripcion) => inscripcion.alumno_detail);
+    console.log(inscripciones)
+    for(let d of datosCalificaciones)
+    {
+     let datosAlumno;
+      if(archivoCalificaciones.tipo == 1)
+      {
+       correo = d.split(",")[posicionIdentificador.correo];
+       datosAlumno = listaAlumnos.find( (alumno) => alumno.correo == correo)
+      }
+      else
+      {
+       
+       let identificador = d.split(",")[posicionIdentificador.apellidos] + d.split(",")[posicionIdentificador.nombre]
+       console.log("Apellidos:"+posicionIdentificador.apellidos+", Nombre:"+posicionIdentificador.nombre);
+       datosAlumno = listaAlumnos.find( (alumno) => (alumno.apellidos + alumno.nombre) == identificador)
+       
+      }
+      if(datosAlumno)
+      {
+       let nota = (parseFloat(d.split(",")[posicionNota]) * 10.0) / notaMaxima; 
+       let calificacion = {
+        "nota": nota,
+        "matricula": datosAlumno.matricula,
+        "id_entrega": -1
+       };
+       calificacionesEncontradas.push(calificacion);
+       console.log(calificacion)
+      }
+    }
+    setCalificacionesExtraidas(calificacionesEncontradas);
+    console.log(calificacionesEncontradas);
+
+   }
+
+
+/*const validarNombreEntrega = (contenidoArchivo) => {
+  return contenidoArchivo.includes(entrega.nombre);
+ }*/
+ 
+ //
+ // -----------------------------------------------------------------------------
+ // Funcion la cual permite validar si la estructura interna del Excel es valida.
+ // ------------------------------------------------------------------------------
+ //
+ //  ---------------
+ //  ---Variables---
+ //  ---------------
+ //
+ //  -------------------------------------------------------------------
+ //   existeCorreo, existeNota, esValido -> Booleano
+ //  -------------------------------------------------------------------
+ //
+
+ const validarEstructuraCalificaciones = (contenidoArchivo) => {
+   const campoCorreo = /\w+\.\w+@alumno.buap.mx/g;
+   const campoNombre = /Nombre/g;
+   const campoApellidos = /Apellidos/g
+   const campoNota = /(Puntos|Calificación),/g;
+
+   let existeCorreo = contenidoArchivo.search(campoCorreo) != -1?true:false;
+   let existeNombre = contenidoArchivo.search(campoNombre) != -1?true:false;
+   let existenApellidos = contenidoArchivo.search(campoApellidos) != -1?true:false;
+   let existeNota = contenidoArchivo.search(campoNota) != -1?true:false;
+   console.log("Correo:"+existeCorreo+" Nota:"+existeNota); 
+   let esValido = (existeCorreo || (existeNombre && existenApellidos)) && existeNota;
+   return esValido;
+
+  } 
+
+ //
+ // --------------------------------------------------------
+ //  Funcion que permite la extraccion de los datos del Excel
+ // --------------------------------------------------------
+ //
+ export const leerArchivoEntrega = async (archivoEntrega,setMostrarEntregaExtraida, setCalificacionesExtraidas,nrc) =>{
+   //e.preventDefault();
+   console.log("l")
+   if(archivoEntrega!=null)
+   { //Se verifica si el usuario ha seleccionado el archivo Excel.
+     if(archivoEntrega.tipo == 1)
+     {
+      const workbook =  XLSX.read(archivoEntrega.datos, {type: 'buffer'});
+      const worksheetName =  workbook.SheetNames[0];
+      const worksheet =  workbook.Sheets[worksheetName];
+      console.log(worksheet);
+      console.log(XLSX.utils.sheet_to_csv(worksheet))
+      const excelValido = validarEstructuraCalificaciones(XLSX.utils.sheet_to_csv(worksheet));
+      //const existeNombreEntrega = validarNombreEntrega(XLSX.utils.sheet_to_txt(worksheet));
+      if(!excelValido)
+      {
+       toast.error("¡La estructura del archivo no es valida!, verifica que el archivo contenga el nombre de la entrega que desea importar y sus calificaciones")
+      }
+      else
+      {
+       let datosCalificaciones =  XLSX.utils.sheet_to_csv(worksheet, {RS:"#"});
+       let auxCalificaciones = datosCalificaciones.split("#").filter( (fila) => fila.search(/[\d\w]/g)!= -1);
+       auxCalificaciones.shift();
+       let posicionIdentificador = {
+        "correo":6
+       };
+       let posicionNota = 12;
+       let posicionNotaMaxima = 13;
+       let notaMaxima = auxCalificaciones[1].split(",")[13];
+       auxCalificaciones.shift();
+       auxCalificaciones.shift();
+       crearListaCalificaciones(archivoEntrega, setCalificacionesExtraidas,auxCalificaciones,posicionIdentificador,12,notaMaxima,nrc);
+       setMostrarEntregaExtraida(true);
+
+       toast.success("¡Se han extraido los datos exitosamente!");
+       //setResultadoExtraccion(0); //Se indica que el proceso de extraccion se realizo correctamente.
+      }
+     }
+     else
+     {
+      let contenidoArchivoCSV = Papa.unparse(archivoEntrega.datos)
+      let archivoValido = validarEstructuraCalificaciones(contenidoArchivoCSV);
+     // let existeNombreEntrega = validarNombreEntrega(contenidoArchivoCSV);
+      if(!archivoValido)
+      {
+      // setResultadoExtraccion(2);
+      }
+      else
+      {
+       let posicionIdentificador = {
+        "nombre": archivoEntrega.datos.data[0].findIndex( (columna) => columna=="Nombre"),
+        "apellidos": archivoEntrega.datos.data[0].findIndex( (columna) => columna=="Apellidos")
+       }
+
+       let posicionNota = archivoEntrega.datos.data[0].findIndex( (columna) => columna==nrc);
+       let notaMaxima = archivoEntrega.datos.data[2][posicionNota];
+       //let fecha = archivoCalificaciones.datos.data[1][posicionNota];
+       let auxCalificaciones = Papa.unparse(archivoEntrega.datos, {newline:"#"}).split("#");
+       crearListaCalificaciones(archivoEntrega,auxCalificaciones,posicionIdentificador, posicionNota,notaMaxima,nrc);
+       setMostrarEntregaExtraida(true);
+  
+      }
+     }
+   }
+   else
+   { //Si el usuario aun no ha seleccionado algun archivo, se asignara un valor igual a 4 al estado "resultadoExtraccion".
+   // setResultadoExtraccion(4);
+   }
+  }
+
+
 
 
 

@@ -3,6 +3,8 @@ import { NavContext } from "../layouts/layoutProfesor";
 import { claseContext } from "../layouts/layoutProfesor";
 import Calificaciones from "./calificaciones"
 import ModalEntregas from "../components/modalEntregas";
+import ModalImportarEntrega from "../components/modalImportarEntrega";
+import { manejarArchivo, leerArchivoEntrega } from "../services/importacion"
 import { getEntregasByNRC } from "../services/entrega.api"
 
 
@@ -19,13 +21,20 @@ const Entregas = () => {
   const { showNav, shownav } = useContext(NavContext);
   const { dataClase } = useContext(claseContext);
   const controlModal = useDisclosure();
+  const controlModalImportacion = useDisclosure();
   
+  const [ archivoEntrega, setArchivoEntrega ] = useState(null);
   const [ entregas, setEntregas ] = useState([]);
+  const [ entregaExtraida, setEntregaExtraida ] = useState(null)
   const [ entregaSeleccionada, setEntregaSeleccionada ] = useState(null);
+  const [ calificacionesExtraidas, setCalificacionesExtraidas ] = useState(null);
 
   const [ mostrarEntregas, setMostrarEntregas ] = useState(false);
   const [ mostrarCalificaciones, setMostrarCalificaciones ] = useState(false);
+  const [ mostrarEntregaExtraida, setMostrarEntregaExtraida ] = useState(false);
+  const [ editarEntregaExtraida, setEditarEntregaExtraida ] = useState(false);  
   const [ editarEntregas, setEditarEntregas ] = useState(false);
+  
   
     
 
@@ -47,6 +56,7 @@ const Entregas = () => {
     
     console.log(shownav)
 
+    const modificarEstadoArchivo = (archivoEntrega) => setArchivoEntrega(archivoEntrega)
 
     const mostrarVistaEntregas = () => {
      setMostrarCalificaciones(false);
@@ -65,31 +75,19 @@ const Entregas = () => {
      setMostrarCalificaciones(true);
      console.log("Entrega: " + entrega + ", "+ mostrarCalificaciones);
     }  
-  
-  const pruebaActualizacion = () => {
-   setEntregas([    {
-    "id": 1,
-    "nombre": "Primer examen21",
-    "tipo": 2,
-    "claseCriterio_detail": {
-        "id": 2,
-        "id_clase": 59069,
-        "id_criterio": 2,
-        "ponderacion": 22.0,
-        "clase_detail": {
-            "nrc": 59069,
-            "clave": "IDTI 202",
-            "seccion": "002",
-            "nombreMateria": "Inteligencia de Negocios",
-            "nombreProfesor": "LOPEZ  POBLANO GILBERTO"
-        },
-        "criterio_detail": {
-            "id_criterio": 2,
-            "nombre": "Investigacion"
-        }
+
+    const extraerDatosArchivoEntrega = (tipo) => {
+    
+     if( archivoEntrega!=null && tipo!=null)
+     {
+      controlModal.onClose();
+      leerArchivoEntrega(archivoEntrega, setMostrarEntregaExtraida, setCalificacionesExtraidas, dataClase.nrc);
+     }
+     else
+     {
+      toast.error("¡Se deben llenar todos los campos para poder crear la entrega!");
+     }
     }
-},])
-  }
   
   return (
     <>
@@ -127,17 +125,28 @@ const Entregas = () => {
           {
            !editarEntregas &&
            (
+           <>
+
            <Button
               radius="large"
               className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-2 mr-3 mb-9 font-bold text-base"
               onClick={controlModal.onOpen} >
               <i className="pi pi-plus" style={{fontSize:"16px",fontWeight:"bold"}}></i> Crear entrega
            </Button>
+
+           <Button
+              radius="large"
+              className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-2 mr-3 mb-9 font-bold text-base"
+              onClick={controlModalImportacion.onOpen} >
+              <i className="pi pi-plus" style={{fontSize:"16px",fontWeight:"bold"}}></i> Importar entrega
+           </Button>
+
+           </>
            )
           }
           
 
-          <Button onClick={() => setEditarEntregas(!editarEntregas)} radius="large" className="py-6 ml-3 text-base">
+          <Button onClick={() => setEditarEntregas(!editarEntregas)} variant="faded" radius="large" className="py-6 ml-3 text-base">
            {
             editarEntregas
             ?
@@ -160,9 +169,9 @@ const Entregas = () => {
        </div>
       {
        entregas.map( (entrega, index) => (
-        <Button onClick={ () => editarEntregas?mostrarCardModificarEntrega(entrega.id):mostrarCalificacionesEntrega(entrega.id)} className="flex bg-white justify-between w-full mb-4 py-9" key={index} endContent={ editarEntregas?<p className="text-base mr-2"> Editar</p>:<GrNext className="text-xl"/> }>
+        <Button onClick={ () => editarEntregas?mostrarCardModificarEntrega(entrega.id):mostrarCalificacionesEntrega(entrega.id)} className="flex bg-white justify-between w-full mb-4 py-11" key={index} endContent={ editarEntregas?<p className="text-base mr-2"> Editar</p>:<GrNext className="text-xl"/> }>
          <div >
-         <p className="text-2xl font-medium ml-4">
+         <p className="text-2xl font-medium ml-4" style={{width:'0px'}}>
          {
           entrega.nombre
          }
@@ -170,6 +179,12 @@ const Entregas = () => {
          <p className="flex justify-start ml-4">
          {
           entrega.claseCriterio_detail.criterio_detail.nombre
+         }
+         </p>
+
+         <p className="text-xs ml-4">
+         {
+          entrega.fecha
          }
          </p>
          </div>
@@ -180,7 +195,8 @@ const Entregas = () => {
       </>
      )
     }
-      <ModalEntregas controlModal={controlModal} modoEdicion={editarEntregas} setEntregas={setEntregas} setMostrarEntregas={setMostrarEntregas} nrc={dataClase.nrc} entrega={entregaSeleccionada} pruebaLista={pruebaActualizacion}></ModalEntregas>
+      <ModalEntregas controlModal={controlModal} modoEdicion={editarEntregas} setEntregas={setEntregas} setMostrarEntregas={setMostrarEntregas} nrc={dataClase.nrc} entrega={entregaSeleccionada} ></ModalEntregas>
+      <ModalImportarEntrega controlModal={controlModalImportacion} modoEdicion={editarEntregaExtraida} entrega={entregaExtraida} setEntregaExtraida={setEntregaExtraida} setCalificacionesExtraidas={setCalificacionesExtraidas} manejarArchivo={manejarArchivo} setArchivoEntrega={modificarEstadoArchivo} extraerDatosArchivoEntrega={extraerDatosArchivoEntrega} nrc={dataClase.nrc}/>
     </>
     ):
     (

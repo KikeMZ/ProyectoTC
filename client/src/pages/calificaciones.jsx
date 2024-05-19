@@ -160,6 +160,8 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
 
    }
 
+
+   
    const actualizarCalificaciones = async () => {
 
     if(mostrarCalificacionesExtraidas)
@@ -290,8 +292,9 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
 
         let posicionNota = archivoCalificaciones.datos.data[0].findIndex( (columna) => columna==entrega.nombre);
         let notaMaxima = archivoCalificaciones.datos.data[2][posicionNota];
+        //let fecha = archivoCalificaciones.datos.data[1][posicionNota];
         let auxCalificaciones = Papa.unparse(archivoCalificaciones.datos, {newline:"#"}).split("#");
-        crearListaCalificaciones(auxCalificaciones,posicionIdentificador,posicionNota,notaMaxima);
+        crearListaCalificaciones(auxCalificaciones,posicionIdentificador, posicionNota,notaMaxima);
         setMostrarCalificacionesExtraidas(true);
    
        }
@@ -303,6 +306,9 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
     }
    }
 
+
+   
+
    useEffect(()=>{},[calificaciones])
 
 
@@ -310,13 +316,16 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
     <>
 
      <Button onClick={ () => { if(editarCalificaciones || mostrarCalificacionesExtraidas) {setEditarCalificaciones(false);setMostrarCalificacionesExtraidas(false);} else {mostrarVistaEntregas()}}} variant="faded" radius="large" startContent={<IoIosArrowBack size="23px"/>} className="text-base px-4"> { (editarCalificaciones || mostrarCalificacionesExtraidas)?"Regresar a calificaciones":"Regresar a entregas"}</Button>
-    <div className="flex justify-between">
+    <div className="flex">
 
     {
       !editarCalificaciones && !mostrarCalificacionesExtraidas &&
       (
        <>
+       <div className="w-2/4">
        <h2 className="text-3xl font-semibold mt-5">Calificaciones para {entrega.nombre}</h2>
+       </div>
+       <div className="w-2/4 justify-end">
                     <Button
                         radius="large"
 
@@ -325,6 +334,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
                     >
                         <i className="pi pi-pencil" style={{fontSize:"18px",fontWeight:"bold"}}></i> Modificar calificaciones
                     </Button>
+       </div>
       </>
       )
                     

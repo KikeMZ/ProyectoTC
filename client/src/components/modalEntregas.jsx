@@ -8,16 +8,20 @@ import { createEntrega } from "../services/entrega.api"
 import { createCalificacion} from "../services/calificacion.api"
 import { updateEntrega } from "../services/entrega.api";
 
+import { parseDate } from "@internationalized/date";
 import {Select, SelectSection, SelectItem} from "@nextui-org/react";
+import {DatePicker} from '@nextui-org/react';
 import { MdOutlineLibraryAdd } from "react-icons/md";
 import { TbEdit } from "react-icons/tb";
+import toast from "react-hot-toast";
 
 
-export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, setMostrarEntregas,nrc, entrega, pruebaLista}) {
+export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, setMostrarEntregas,nrc, entrega}) {
   const { datosClase } = useContext(claseContext)
   const [ criterios, setCriterios ] = useState([]);
   const [ nombreEntrega, setNombreEntrega ] = useState("");
   const [ tipo, setTipo ] = useState(null); 
+  const [ fecha, setFecha ] = useState(null);
 
   const actualizarListaEntregas = (listaEntregas, entregaActualizada) => {
    let auxEntregas = [...listaEntregas];
@@ -28,30 +32,44 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
    return auxEntregas;
   }
 
-  const actualizarEntrega =  () => {
+  const actualizarEntrega =  (onClose) => 
+  {
+   if(nombreEntrega!="")
+   { 
+    onClose();
+    let entregaActualizada = {
+     "nombre": nombreEntrega,
+     "tipo": tipo,
+     "fecha": fecha.year + "-" + fecha.month + "-" + fecha.day
+    }
 
-    
-   let entregaActualizada = {
-    "nombre": nombreEntrega,
-    "tipo": tipo,
+    updateEntrega(entrega.id,entregaActualizada).then( (res) => {
+     console.log(res)
+     setEntregas( (listaEntregas) => actualizarListaEntregas(listaEntregas, res.data) );
+     toast.success("¡Se ha actualizado la entrega exitosamente!")
+    } );
    }
-
-   updateEntrega(entrega.id,entregaActualizada).then( (res) => {
-    console.log(res)
-    setEntregas( (listaEntregas) => actualizarListaEntregas(listaEntregas, res.data) );
-   } );
-
-  
   }
 
-  const crearEntrega = async () =>{
-   let criterio = criterios.find( (c) => c.id==tipo);
-   let listaAlumnos = await obtenerListaAlumnos(nrc);
+
+
+  const crearEntrega = async (onClose) =>{
+
+   if(nombreEntrega==null || tipo==null || fecha==null)
+   {
+
+   }
+   else
+   {   
+    onClose();
+    let criterio = criterios.find( (c) => c.id==tipo);
+    let listaAlumnos = await obtenerListaAlumnos(nrc);
 
    console.log(listaAlumnos)
    let entrega = {
     "nombre": nombreEntrega,
     "tipo": tipo,
+    "fecha": fecha.year +"-"+ fecha.month +"-"+ fecha.day
    }
    createEntrega(entrega).then( (res) => {
     setEntregas( (listaEntregas) => [...listaEntregas, res.data]);
@@ -67,11 +85,13 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
      console.log(calificacion);
      createCalificacion(calificacion).then(console.log);
     }
-
+    toast.success("¡Se ha creado la entrega exitosamente!")
    }
    )
 
    //setMaximo( (maximo) => maximo + ponderacion);
+   }
+  
   }
 
   useEffect( ()=>{
@@ -91,6 +111,7 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
      setNombreEntrega(entrega.nombre);
      console.log("Nombre:"+entrega.nombre)
      setTipo(entrega.tipo)
+     setFecha( parseDate(entrega.fecha));
     }  
   }, [entrega]);
 
@@ -137,6 +158,9 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
 
          </Select>
 
+         <label htmlFor="nombreE" className=" font-semibold mt-3">Fecha de entrega</label>
+
+         <DatePicker onChange={setFecha} variant="bordered" radius="sm" value={fecha} ></DatePicker>
        </ModalBody>
        <ModalFooter>
         <Button color="danger" style={{fontWeight:"bold"}} onPress={onClose}>Cancelar</Button>
@@ -145,14 +169,14 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
          modoEdicion?
          (
           <>
-          <Button type="submit" color="success" style={{background:"green",color:"white" ,fontWeight:"bold"}} onPress={() => {actualizarEntrega(); onClose(); }}>Guardar cambios</Button>
+          <Button type="submit" color="success" style={{background:"green",color:"white" ,fontWeight:"bold"}} onPress={() => {actualizarEntrega(onClose); }}>Guardar cambios</Button>
            
           </>
          )
          :
          (
           <>
-          <Button type="submit" color="success" style={{background:"green",color:"white" ,fontWeight:"bold"}} onPress={() => {crearEntrega(); onClose(); }}>Crear</Button>
+          <Button type="submit" color="success" style={{background:"green",color:"white" ,fontWeight:"bold"}} onPress={() => {crearEntrega(onClose);  }}>Crear</Button>
           </>
          )
         }
