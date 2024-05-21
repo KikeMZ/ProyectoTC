@@ -126,10 +126,34 @@ const RegistroCalificaciones = () => {
       auxCalificaciones.sort(ordenAlfabetico);
       calificacionesAlumno.push(auxCalificaciones);
      }
-     alumno["calificaciones"] = calificacionesAlumno;
+     alumno["calificacionesPorTipo"] = calificacionesAlumno;
     } 
     console.log(auxAlumnos)
     return auxAlumnos;
+   }
+
+   const obtenerCalificacionesParciales = (listaAlumnos, listaCriterios) => {
+    let auxAlumnos = [...listaAlumnos];
+    let calificacionAlumno = 0;
+    let calificacionCriterio = 0;
+    let ponderacionCriterio = 0;
+    let numeroEntregas = 0;
+    let sumaEntregas = 0;
+    for(let alumno of auxAlumnos)
+    {
+     calificacionAlumno = 0;
+     for(let k=0; k<listaCriterios.length;k++)
+     {
+      numeroEntregas = alumno.calificacionesPorTipo[k].length;
+      ponderacionCriterio = listaCriterios[k].ponderacion; 
+      sumaEntregas = alumno.calificacionesPorTipo[k].reduce( (valorPrevio, elementoActual) => valorPrevio+elementoActual.nota,0)
+      calificacionCriterio = (sumaEntregas * ponderacionCriterio)/(numeroEntregas*10)
+      calificacionAlumno += calificacionCriterio;
+      //console.log("Alumno:"+alumno.nombre+", Suma:"+ parseFloat(calificacionCriterio))
+     }
+     alumno["calificacion"] = calificacionAlumno / 10;      
+    }
+    console.log(auxAlumnos)
    }
 
     const obtenerNombresCamposTabla = (listaEntregas) => {
@@ -157,6 +181,7 @@ const RegistroCalificaciones = () => {
      nombreCampos.push("Acta");
      let calificacionesPorAlumno = ordenarCalificacionesPorAlumno(listaCalificaciones, listaAlumnos);
      listaAlumnos = filtrarCalificacionesAlumnosPorTipo(calificacionesPorAlumno, listaAlumnos, listaCriterios)
+     obtenerCalificacionesParciales(listaAlumnos, listaCriterios);
      setCamposTabla(nombreCampos)
      setAlumnos(listaAlumnos)
     }
@@ -247,12 +272,16 @@ const RegistroCalificaciones = () => {
         <td className="p-2" style={{border:"1px solid white"}}>{alumno.apellidos +" "+ alumno.nombre +" "}</td>
         <td className="p-2" style={{border:"1px solid white"}}>{alumno.matricula}</td>
         {
-         alumno.calificaciones.map( (tipoCalificacion) => tipoCalificacion.map( (calificacion, index) => (
+         alumno.calificacionesPorTipo.map( (tipoCalificacion) => tipoCalificacion.map( (calificacion, index) => (
           <td key={index} className="text-center" style={{border:"1px solid white"}}> {calificacion.nota}</td>
           )
          )
         )
         }
+        <td className="p-2" style={{border:"1px solid white"}}> {alumno.calificacion}</td>
+        <td className="p-2 text-center" style={{border:"1px solid white"}}> {Math.round(alumno.calificacion)}</td>
+        <td className="p-2 text-center" style={{border:"1px solid white"}}> {Math.round(alumno.calificacion)>6?Math.round(alumno.calificacion):"5"}</td>
+
        </tr>
        )
       )

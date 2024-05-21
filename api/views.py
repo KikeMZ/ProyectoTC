@@ -87,5 +87,5 @@ class CalificacionViewSet(viewsets.ModelViewSet):
         nrc = request.GET['nrc']
         calificaciones = Calificacion.objects.all()
         lista_calificaciones = [ self.get_serializer(c).data for c in calificaciones if str(c.id_entrega.tipo.id_clase)==nrc]
-        print(lista_calificaciones)
+        #print(lista_calificaciones)
         return Response(lista_calificaciones, status=status.HTTP_200_OK)
