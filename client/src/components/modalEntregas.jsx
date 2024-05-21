@@ -116,7 +116,7 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
   }, [entrega]);
 
   return (  
-    <Modal classNames={{closeButton:"text-foreground-white text-2xl hover:bg-black active:text-black"}} isOpen={controlModal.isOpen} onOpenChange={controlModal.onOpenChange} >
+    <Modal isDismissable={false} classNames={{closeButton:"text-foreground-white text-2xl hover:bg-black active:text-black"}} isOpen={controlModal.isOpen} onOpenChange={controlModal.onOpenChange} >
     <ModalContent>
      {
       (onClose) => (

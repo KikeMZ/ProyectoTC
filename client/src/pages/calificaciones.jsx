@@ -186,7 +186,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
     
      }
     }
-    toast.success("¡Se han actualizado las calificaciones existosamente!");
+    toast.success("¡Se han actualizado las calificaciones exitosamente!");
    }
 
   const validarNombreEntrega = (contenidoArchivo) => {
@@ -325,7 +325,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
        <div className="w-2/4">
        <h2 className="text-3xl font-semibold mt-5">Calificaciones para {entrega.nombre}</h2>
        </div>
-       <div className="w-2/4 justify-end">
+       <div className="flex w-2/4 justify-end">
                     <Button
                         radius="large"
 
@@ -334,11 +334,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
                     >
                         <i className="pi pi-pencil" style={{fontSize:"18px",fontWeight:"bold"}}></i> Modificar calificaciones
                     </Button>
-       </div>
-      </>
-      )
-                    
-    }
+
                     <Button
                         radius="large"
 
@@ -348,10 +344,28 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
                         <i className="pi pi-folder-open" style={{fontSize:"18px",fontWeight:"bold"}}></i> { mostrarCalificacionesExtraidas?"Cambiar archivo":"Importar calificaciones"}
                     </Button>
 
+       </div>
+      </>
+      )
+                    
+    }
+
                     {
                      (editarCalificaciones || mostrarCalificacionesExtraidas) &&
                      (
-                     <Button
+                      <div className="flex justify-between w-full">
+                      <Button
+                      radius="large"
+
+                      className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-0 mb-10 font-bold text-base"
+                      onClick={controlModal.onOpen}
+                      >
+                      <i className="pi pi-folder-open" style={{fontSize:"18px",fontWeight:"bold"}}></i> { mostrarCalificacionesExtraidas?"Cambiar archivo":"Importar calificaciones"}
+                  </Button>
+
+
+                      
+                      <Button
                         radius="large"
 
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mb-10 font-bold text-base"
@@ -359,6 +373,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
                      >
                         <i className="pi pi-save" style={{fontSize:"18px",fontWeight:"bold"}}></i> Guardar calificaciones
                     </Button>
+                    </div>
                      )
                     }
 

@@ -15,6 +15,7 @@ import Login from "./pages/login";
 import HomeProfesor from "./pages/homepageProfesor";
 import Criterios from "./pages/criterios";
 import Entregas from "./pages/entregas";
+import RegistroCalificaciones from "./pages/registroCalificaciones";
 import Asistencias from "./pages/asistencias";
 
 export default function App() {
@@ -30,7 +31,9 @@ export default function App() {
         <Route path="historico" element ={<Historico/>}/>
         <Route path="alumnos" element={<Alumnos/>}/>
         <Route path="asistencias" element={<Asistencias/>}/>
-        <Route path="entregas" element={<Entregas/>}/>
+        <Route path="entregas" element={<Entregas/>}>
+         <Route path="reporte" element={<RegistroCalificaciones/>}/> 
+        </Route>
         <Route path="criterios" element={<Criterios/>}/>
       </Route>
       <Route path="/alumno" element={<LayoutAlumno/>}>

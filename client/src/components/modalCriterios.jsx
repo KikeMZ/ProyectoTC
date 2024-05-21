@@ -24,7 +24,7 @@ export default function CriterioModal({ controlModal, setCriterios, setMaximo, m
   [maximo])
 
   return (  
-    <Modal isOpen={controlModal.isOpen} onOpenChange={controlModal.onOpenChange} >
+    <Modal isDismissable={false} isOpen={controlModal.isOpen} onOpenChange={controlModal.onOpenChange} >
     <ModalContent>
      {
       (onClose) => (

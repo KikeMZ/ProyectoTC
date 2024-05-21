@@ -33,7 +33,7 @@ export default function ModalImportarEntrega({ controlModal, modoEdicion, entreg
   }, []);
 
   return (  
-    <Modal classNames={{closeButton:"text-foreground-white text-2xl hover:bg-black active:text-black"}} isOpen={controlModal.isOpen} onOpenChange={controlModal.onOpenChange} >
+    <Modal isDismissable={false} classNames={{closeButton:"text-foreground-white text-2xl hover:bg-black active:text-black"}} isOpen={controlModal.isOpen} onOpenChange={controlModal.onOpenChange} >
     <ModalContent>
      {
       (onClose) => (

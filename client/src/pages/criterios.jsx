@@ -131,13 +131,16 @@ const Criterios = () => {
    let auxCriterios = [...criterios];
    let posicionCriterio = criterios.findIndex( (c) => c.nombre==nombreCriterio)
    console.log(auxCriterios[posicionCriterio]);
-   if(!isNaN(valor) && valor!="") //&& (maximo - parseInt(valor)+ parseInt(auxCriterios[posicionCriterio].ponderacion))>0 )
-   {
-    let valorNumerico = 0;
-    if(valor!="")
-     valorNumerico = parseInt(valor)
-    setMaximo(maximo- parseInt(auxCriterios[posicionCriterio].ponderacion)+parseInt(valorNumerico))
-    auxCriterios[posicionCriterio].ponderacion = parseInt(valorNumerico);
+   if(!isNaN(valor) && valor!="") 
+   { 
+    if((maximo + parseInt(valor) - parseInt(auxCriterios[posicionCriterio].ponderacion))<=100 && parseInt(valor)>=0)
+    {
+     let valorNumerico = 0;
+     if(valor!="")
+      valorNumerico = parseInt(valor)
+     setMaximo(maximo- parseInt(auxCriterios[posicionCriterio].ponderacion)+parseInt(valorNumerico))
+     auxCriterios[posicionCriterio].ponderacion = parseInt(valorNumerico);
+    }
    }
    else if(valor!="")
    {
@@ -392,7 +395,7 @@ const Criterios = () => {
             "!cursor-text",
           ],
 }}/>
-              <Input type="number" max={100 - maximo + item.ponderacion} min={0} onChange={ (e) => {modificarCriterio(item.nombre, e.target.value)}} endContent="%" value={item.ponderacion}></Input>
+              <Input type="number" maxLength={3} max={100 - maximo + item.ponderacion} min={0} onChange={ (e) => {modificarCriterio(item.nombre, e.target.value)}} endContent="%" value={item.ponderacion}></Input>
               
               </div>
               )

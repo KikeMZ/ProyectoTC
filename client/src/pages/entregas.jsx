@@ -1,13 +1,15 @@
 import React, { useContext, useState,  useEffect } from "react";
 import { NavContext } from "../layouts/layoutProfesor";
 import { claseContext } from "../layouts/layoutProfesor";
-import Calificaciones from "./calificaciones"
+import Calificaciones from "./calificaciones";
+import RegistroCalificaciones from "./registroCalificaciones";
 import ModalEntregas from "../components/modalEntregas";
 import ModalImportarEntrega from "../components/modalImportarEntrega";
 import { manejarArchivo, leerArchivoEntrega } from "../services/importacion"
 import { getEntregasByNRC } from "../services/entrega.api"
 
 
+import { Link } from "react-router-dom";
 import { Input, Card, CardBody, Button, useDisclosure } from "@nextui-org/react";
 import toast from 'react-hot-toast';
 import { FiEdit2 } from 'react-icons/fi';
@@ -31,6 +33,7 @@ const Entregas = () => {
 
   const [ mostrarEntregas, setMostrarEntregas ] = useState(false);
   const [ mostrarCalificaciones, setMostrarCalificaciones ] = useState(false);
+  const [ mostrarReporte, setMostrarReporte ] = useState(false); 
   const [ mostrarEntregaExtraida, setMostrarEntregaExtraida ] = useState(false);
   const [ editarEntregaExtraida, setEditarEntregaExtraida ] = useState(false);  
   const [ editarEntregas, setEditarEntregas ] = useState(false);
@@ -116,7 +119,7 @@ const Entregas = () => {
       </div>
       </div>
       )
-      :
+      : !mostrarReporte?
       (
        <>
        <div className="flex justify-between">
@@ -144,7 +147,10 @@ const Entregas = () => {
            </>
            )
           }
-          
+
+          <Button onClick={() => setMostrarReporte(!mostrarReporte)} variant="faded" radius="large" className="py-6 ml-3 text-base">
+            Registro
+          </Button>
 
           <Button onClick={() => setEditarEntregas(!editarEntregas)} variant="faded" radius="large" className="py-6 ml-3 text-base">
            {
@@ -193,6 +199,9 @@ const Entregas = () => {
       )
       }
       </>
+     ):
+     (
+      <RegistroCalificaciones/>
      )
     }
       <ModalEntregas controlModal={controlModal} modoEdicion={editarEntregas} setEntregas={setEntregas} setMostrarEntregas={setMostrarEntregas} nrc={dataClase.nrc} entrega={entregaSeleccionada} ></ModalEntregas>

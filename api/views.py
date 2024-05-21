@@ -80,3 +80,12 @@ class CalificacionViewSet(viewsets.ModelViewSet):
     serializer_class = CalificacionSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['id_entrega__id']
+
+    @action(detail=False, methods=['get'])
+    def getCalificacionesByNRC(self, request, pk=None):
+        lista_calificaciones = []
+        nrc = request.GET['nrc']
+        calificaciones = Calificacion.objects.all()
+        lista_calificaciones = [ self.get_serializer(c).data for c in calificaciones if str(c.id_entrega.tipo.id_clase)==nrc]
+        print(lista_calificaciones)
+        return Response(lista_calificaciones, status=status.HTTP_200_OK)

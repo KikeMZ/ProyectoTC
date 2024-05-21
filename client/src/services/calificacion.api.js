@@ -22,8 +22,14 @@ export const getCalificacion = (id, calificacion) => {
     return api.get(`/${id}/`, calificacion);
 }   
     
+export const getCalificacionesByNRC = (nrc) => {
+    return api.get("/getCalificacionesByNRC/?nrc="+nrc);
+}
+
 export const getCalificacionesByEntrega = (id_entrega) => {
     return api.get("/?search="+id_entrega);
 }
+
+
 
 export const updateCalificacion = (id, calificacion) => api.patch(`/${id}/`,calificacion);
