@@ -32,6 +32,7 @@ const RegistroCalificaciones = () => {
   const [ entregas, setEntregas ] = useState([]);
   const [ criterios, setCriterios ] = useState([]);
   const [ calificaciones, setCalificaciones ] = useState([])
+  const [ camposTabla, setCamposTabla ] = useState([])
 
   const [ entregaExtraida, setEntregaExtraida ] = useState(null)
   const [ entregaSeleccionada, setEntregaSeleccionada ] = useState(null);
@@ -70,14 +71,96 @@ const RegistroCalificaciones = () => {
      const listaAlumnos = inscripciones.map( (inscripcion) => inscripcion.alumno_detail);
      return listaAlumnos;
     }
+    
+   const ordenarEntregasPorTipo = (listaEntregas, listaCriterios) => {
+    let entregasOrdenadas = []
+    let auxEntregas;
+    for(let criterio of listaCriterios)
+    {
+     auxEntregas = listaEntregas.filter( (entrega) => entrega.tipo == criterio.id);
+     entregasOrdenadas.push(auxEntregas);
+    }
+    return entregasOrdenadas;
+   }
+
+  
+   
+   const ordenarCalificacionesPorAlumno = (listaCalificaciones, listaAlumnos) => {
+    let calificacionesPorAlumno = {}
+    for(let alumno of listaAlumnos)
+    {
+     let auxCalificaciones = listaCalificaciones.filter( (calificacion) => calificacion.matricula == alumno.matricula)
+     calificacionesPorAlumno[alumno.matricula] = auxCalificaciones;
+    }
+    console.log(calificacionesPorAlumno)
+    return calificacionesPorAlumno;
+   }
+
+   const ordenAlfabetico = (a,b) =>{
+    let entregaA = a.entrega_detail.nombre.toUpperCase();
+    let entregaB = b.entrega_detail.nombre.toUpperCase();
+    
+    if(entregaA < entregaB)
+    {
+     return -1;
+    }
+    else if(entregaA > entregaB)
+    {
+     return 1;
+    }
+    else
+     return 0;
+   }
+
+   const filtrarCalificacionesAlumnosPorTipo = (listaCalificaciones, listaAlumnos, listaCriterios) =>
+   {
+    let auxAlumnos = [...listaAlumnos];
+    let auxCalificaciones;
+    let calificacionesAlumno = [];
+    for(let alumno of auxAlumnos)
+    {
+     calificacionesAlumno = []
+     for(let criterio of listaCriterios)
+     {
+      auxCalificaciones = listaCalificaciones[alumno.matricula].filter( (calificacion) => calificacion.entrega_detail.tipo==criterio.id)
+      auxCalificaciones.sort(ordenAlfabetico);
+      calificacionesAlumno.push(auxCalificaciones);
+     }
+     alumno["calificaciones"] = calificacionesAlumno;
+    } 
+    console.log(auxAlumnos)
+    return auxAlumnos;
+   }
+
+    const obtenerNombresCamposTabla = (listaEntregas) => {
+     let nombresCampos = ["Alumno","Matricula"]
+     let auxNombresCampos;
+     for(let entrega of listaEntregas)
+     {
+      auxNombresCampos = entrega.map( (e) => e.nombre).toSorted();
+      nombresCampos.push(...auxNombresCampos) 
+     }
+     console.log(nombresCampos);
+     return nombresCampos;
+    }
 
     const cargarDatosTabla = async () => {
      let listaAlumnos = await obtenerAlumnos();
      let listaEntregas = await cargarEntregas();
      let listaCriterios = await cargarCriterios();
      let listaCalificaciones = await cargarCalificaciones();
+
+     let entregasPorTipo = ordenarEntregasPorTipo(listaEntregas, listaCriterios);
+     let nombreCampos = obtenerNombresCamposTabla(entregasPorTipo);
+     nombreCampos.push("Calificacion")
+     nombreCampos.push("Final")
+     nombreCampos.push("Acta");
+     let calificacionesPorAlumno = ordenarCalificacionesPorAlumno(listaCalificaciones, listaAlumnos);
+     listaAlumnos = filtrarCalificacionesAlumnosPorTipo(calificacionesPorAlumno, listaAlumnos, listaCriterios)
+     setCamposTabla(nombreCampos)
      setAlumnos(listaAlumnos)
     }
+
 
     useEffect(() => {
 
@@ -146,19 +229,30 @@ const RegistroCalificaciones = () => {
 
        </div>
       </div>
-      <table>
+      <table >
       <thead>
        <tr>
-        <th>Alumno</th>
-        <th>Matricula</th>
+       {
+        camposTabla.map( (campo, index) => (
+          <th key={index} className="p-3" style={{border:"1px solid white"}}>{campo}</th>
+         )
+        )
+       }
        </tr>
       </thead>
       <tbody>
       {
        alumnos.map( (alumno, index) => (
        <tr key={index}>
-        <td>{alumno.apellidos +" "+ alumno.nombre +" "}</td>
-        <td>{alumno.matricula}</td>
+        <td className="p-2" style={{border:"1px solid white"}}>{alumno.apellidos +" "+ alumno.nombre +" "}</td>
+        <td className="p-2" style={{border:"1px solid white"}}>{alumno.matricula}</td>
+        {
+         alumno.calificaciones.map( (tipoCalificacion) => tipoCalificacion.map( (calificacion, index) => (
+          <td key={index} className="text-center" style={{border:"1px solid white"}}> {calificacion.nota}</td>
+          )
+         )
+        )
+        }
        </tr>
        )
       )
