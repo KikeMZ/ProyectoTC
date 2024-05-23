@@ -182,6 +182,8 @@ const RegistroCalificaciones = () => {
      let calificacionesPorAlumno = ordenarCalificacionesPorAlumno(listaCalificaciones, listaAlumnos);
      listaAlumnos = filtrarCalificacionesAlumnosPorTipo(calificacionesPorAlumno, listaAlumnos, listaCriterios)
      obtenerCalificacionesParciales(listaAlumnos, listaCriterios);
+     setEntregas(entregasPorTipo)
+     setCriterios(listaCriterios);
      setCamposTabla(nombreCampos)
      setAlumnos(listaAlumnos)
     }
@@ -254,12 +256,38 @@ const RegistroCalificaciones = () => {
 
        </div>
       </div>
-      <table >
-      <thead>
+      <table className="border-separate border-spacing-0 overflow-scroll" >
+      <thead className="sticky top-0 bg-black mt-0 ">
+       <tr>
+        <th className="bg-secondary-900 "></th>
+        <th className="bg-secondary-900"></th>
+        {
+         criterios.map( (criterio, index) => (
+          <th key={index} className="py-1 border-1" colSpan={entregas[index].length}> {criterio.ponderacion}%</th>
+         ))
+        }
+        <th className="bg-secondary-900"></th>
+        <th className="bg-secondary-900"></th>
+        <th className="bg-secondary-900"></th>
+       </tr>
+    
+       <tr>
+        <th className="bg-secondary-900"></th>
+        <th className="bg-secondary-900"></th>
+        {
+         criterios.map( (criterio, index) => (
+          <th key={index} className="p-1 border-1" colSpan={entregas[index].length}> {criterio.criterio_detail.nombre}</th>
+         ))
+        }
+        <th className="bg-secondary-900"></th>
+        <th className="bg-secondary-900"></th>
+        <th className="bg-secondary-900"></th>
+       </tr>
+
        <tr>
        {
         camposTabla.map( (campo, index) => (
-          <th key={index} className="p-3" style={{border:"1px solid white"}}>{campo}</th>
+          <th key={index} className="p-3" style={{border:"2px solid white"}}>{campo}</th>
          )
         )
        }
