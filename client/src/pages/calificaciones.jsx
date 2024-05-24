@@ -28,6 +28,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
     const obtenerCalificaciones = async () => {
      let res = await getCalificacionesByEntrega(entrega.id);
      setCalificaciones(res.data);
+     console.log(res)
     }
 
     obtenerCalificaciones();
@@ -309,7 +310,6 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
 
    
 
-   useEffect(()=>{},[calificaciones])
 
 
   return (

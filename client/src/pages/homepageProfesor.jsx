@@ -14,7 +14,7 @@ export default function HomeProfesor() {
   const { dontshowNav } = useContext(NavContext); 
   const {limpiarDatos} = useContext(claseContext);
   const {dataProfesor} = useContext(profesorContext);
-  const profesor = dataProfesor
+  const profesor = dataProfesor.toUpperCase();
 
 
 

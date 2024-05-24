@@ -89,3 +89,13 @@ class CalificacionViewSet(viewsets.ModelViewSet):
         lista_calificaciones = [ self.get_serializer(c).data for c in calificaciones if str(c.id_entrega.tipo.id_clase)==nrc]
         #print(lista_calificaciones)
         return Response(lista_calificaciones, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'])
+    def getCalificacionesByEntrega(self, request, pk=None):
+        lista_calificaciones = []
+        entrega = request.GET['id']
+        calificaciones = Calificacion.objects.all()
+        lista_calificaciones = [ self.get_serializer(c).data for c in calificaciones if str(c.id_entrega.id)==entrega]
+        print("e")
+        print(lista_calificaciones)
+        return Response(lista_calificaciones, status=status.HTTP_200_OK)

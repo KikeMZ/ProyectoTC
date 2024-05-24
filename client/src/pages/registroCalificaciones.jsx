@@ -153,7 +153,7 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
     return auxAlumnos;
    }
 
-   const obtenerCalificacionActa = (calificacion) => Math.round(calificacion)>6?calificacion:5;
+   const obtenerCalificacionActa = (calificacion) => Math.round(calificacion)>=6?Math.round(calificacion):5;
 
    const obtenerCalificacionFinal = (calificacion) => Math.round(calificacion);
 
@@ -352,7 +352,7 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
         }
         <td className="p-2" style={{border:"1px solid white"}}> {alumno.calificacion}</td>
         <td className="p-2 text-center" style={{border:"1px solid white"}}> {Math.round(alumno.calificacion)}</td>
-        <td className="p-2 text-center" style={{border:"1px solid white"}}> {Math.round(alumno.calificacion)>6?Math.round(alumno.calificacion):"5"}</td>
+        <td className="p-2 text-center" style={{border:"1px solid white"}}> {Math.round(alumno.calificacion)>=6?Math.round(alumno.calificacion):"5"}</td>
 
        </tr>
        )

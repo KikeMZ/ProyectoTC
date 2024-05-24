@@ -30,6 +30,11 @@ export default function ModalImportarEntrega({ controlModal, modoEdicion, entreg
     }
 
     obtenerCriterios();
+
+    if(modoEdicion)
+    {
+     setTipo(entrega.tipo)
+    }
   }, []);
 
   return (  
@@ -50,7 +55,7 @@ export default function ModalImportarEntrega({ controlModal, modoEdicion, entreg
        <input type="file" accept=".xlsx,text/csv" id="cargar" name="archivo" onChange={ (e) => {manejarArchivo(e, setArchivoEntrega)} } />
 
        <label htmlFor="nombreP" className="font-semibold mt-2">Tipo de entrega</label>
-         <Select onChange={(e) => setTipo( e.target.value)} isRequired radius="sm" classNames={{ label:"text-black"}} variant="bordered" labelPlacement={"outside"} placeholder={modoEdicion?entrega.tipo:"Seleccione un criterio"} aria-label="Tipo">
+         <Select onChange={(e) => setTipo( e.target.value)} isRequired radius="sm" classNames={{ label:"text-black"}} variant="bordered" labelPlacement={"outside"} placeholder={modoEdicion?criterios.find((c)=> c.id_criterio==entrega.tipo)?.criterio_detail.nombre:"Seleccione un criterio"} aria-label="Tipo">
           {
            criterios.map( (c) => (
             <SelectItem key={c.id} value={c.id} className="text-black text-2xl">

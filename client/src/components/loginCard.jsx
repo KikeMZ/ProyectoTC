@@ -5,6 +5,11 @@ import { Link } from "react-router-dom";
 export default function LoginCard() {
   const [email, setEmail] = useState(""); // Estado para almacenar el valor del email
 
+
+  const limpiarTexto = (texto) => {
+   return texto.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  }
+
   const handleEmailChange = (e) => {
     setEmail(e.target.value); // Actualizar el estado del email cuando cambia el valor del campo de entrada
   };
@@ -33,7 +38,7 @@ export default function LoginCard() {
             Admin
           </Button>
         </Link>
-        <Link to={`/profesor?email=${email}`}>
+        <Link to={`/profesor?email=${ limpiarTexto(email.toUpperCase())}`}>
           <Button variant="solid" className="bg-gray-300">
             Profesor
           </Button>

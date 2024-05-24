@@ -117,12 +117,29 @@ export const manejarArchivo = (e, setArchivoEntrega) =>{
 
   } 
 
+ const transformarFechaFormatoDjango = (fecha) => {
+  let fechaDjango = "";
+  console.log("Fecha: "+fecha)
+  let [ mes, dia, año ] = fecha.split("/");
+  fechaDjango = "20"+año+"-"+mes+"-"+dia;
+  return fechaDjango;
+ }
+
+ const generarFormatoJSONEntrega = (nombreEntrega, tipo, fecha) => {
+  let entregaJSON = {
+   "nombre": nombreEntrega,
+   "tipo": tipo,
+   "fecha": transformarFechaFormatoDjango(fecha),
+  }
+
+  return entregaJSON;
+ }
  //
  // --------------------------------------------------------
  //  Funcion que permite la extraccion de los datos del Excel
  // --------------------------------------------------------
  //
- export const leerArchivoEntrega = async (archivoEntrega,setMostrarEntregaExtraida, setCalificacionesExtraidas,nrc) =>{
+ export const leerArchivoEntrega = async (archivoEntrega,setMostrarEntregaExtraida, setEntregaExtraida,setCalificacionesExtraidas,tipo,nrc) =>{
    //e.preventDefault();
    console.log("l")
    if(archivoEntrega!=null)
@@ -148,14 +165,24 @@ export const manejarArchivo = (e, setArchivoEntrega) =>{
        let posicionIdentificador = {
         "correo":6
        };
+       let posicionNombreEntrega = 7;
        let posicionNota = 12;
        let posicionNotaMaxima = 13;
+       let posicionFecha = 8;
+       let nombreEntrega = auxCalificaciones[1].split(",")[posicionNombreEntrega];
+       let fecha = auxCalificaciones[1].split(",")[posicionFecha];
        let notaMaxima = auxCalificaciones[1].split(",")[13];
-       auxCalificaciones.shift();
-       auxCalificaciones.shift();
-       crearListaCalificaciones(archivoEntrega, setCalificacionesExtraidas,auxCalificaciones,posicionIdentificador,12,notaMaxima,nrc);
-       setMostrarEntregaExtraida(true);
 
+       console.log(auxCalificaciones[1].split(","))
+       auxCalificaciones.shift();
+       auxCalificaciones.shift();
+       
+       let entregaExtraida = generarFormatoJSONEntrega(nombreEntrega, tipo, fecha)
+       crearListaCalificaciones(archivoEntrega, setCalificacionesExtraidas,auxCalificaciones,posicionIdentificador,12,notaMaxima,nrc);
+       console.log(entregaExtraida)
+       setEntregaExtraida(entregaExtraida);
+
+       setMostrarEntregaExtraida(true);
        toast.success("¡Se han extraido los datos exitosamente!");
        //setResultadoExtraccion(0); //Se indica que el proceso de extraccion se realizo correctamente.
       }

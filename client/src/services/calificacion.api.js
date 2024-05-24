@@ -27,7 +27,7 @@ export const getCalificacionesByNRC = (nrc) => {
 }
 
 export const getCalificacionesByEntrega = (id_entrega) => {
-    return api.get("/?search="+id_entrega);
+    return api.get("/getCalificacionesByEntrega/?id="+id_entrega);
 }
 
 
