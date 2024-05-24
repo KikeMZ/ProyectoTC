@@ -22,6 +22,8 @@ import toast from 'react-hot-toast';
 import { FiEdit2 } from 'react-icons/fi';
 import { IoIosArrowBack } from 'react-icons/io';
 import { GrNext } from "react-icons/gr";
+import { MdDownload } from "react-icons/md";
+
 
 
 
@@ -172,10 +174,15 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
       numeroEntregas = alumno.calificacionesPorTipo[k].length;
       ponderacionCriterio = listaCriterios[k].ponderacion; 
       sumaEntregas = alumno.calificacionesPorTipo[k].reduce( (valorPrevio, elementoActual) => valorPrevio+ Math.round( elementoActual.nota),0)
-      calificacionCriterio = (sumaEntregas * ponderacionCriterio)/(numeroEntregas*10)
+      if(sumaEntregas>0)
+       calificacionCriterio = (sumaEntregas * ponderacionCriterio)/(numeroEntregas*10)
+      else
+       calificacionCriterio = 0;
       calificacionAlumno += calificacionCriterio;
-      //console.log("Alumno:"+alumno.nombre+", Suma:"+ parseFloat(calificacionCriterio))
+      console.log("Alumno:"+alumno.nombre+", Suma:"+ parseFloat(calificacionAlumno))
      }
+     console.log("Calificacion Parcial:")
+     console.log(calificacionAlumno)
      alumno["calificacion"] = calificacionAlumno / 10;      
     }
     console.log(auxAlumnos)
@@ -187,7 +194,11 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
      for(let entrega of listaEntregas)
      {
       auxNombresCampos = entrega.map( (e) => e.nombre).toSorted();
-      nombresCampos.push(...auxNombresCampos) 
+      console.log(auxNombresCampos)
+      if(auxNombresCampos.length>0)
+       nombresCampos.push(...auxNombresCampos);
+      else
+       nombresCampos.push("N/A"); 
      }
      console.log(nombresCampos);
      return nombresCampos;
@@ -205,6 +216,8 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
      nombreCampos.push("Final")
      nombreCampos.push("Acta");
      let calificacionesPorAlumno = ordenarCalificacionesPorAlumno(listaCalificaciones, listaAlumnos);
+     console.log("Calificaciones por alumno:")
+     console.log(calificacionesPorAlumno);
      listaAlumnos = filtrarCalificacionesAlumnosPorTipo(calificacionesPorAlumno, listaAlumnos, listaCriterios)
      obtenerCalificacionesParciales(listaAlumnos, listaCriterios);
      setEntregas(entregasPorTipo)
@@ -292,7 +305,7 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
 
       <Dropdown>
        <DropdownTrigger>
-        <Button  variant="faded" radius="large" startContent={<GrNext size="23px"/>} className="text-base mt-4">Descargar lista final</Button>
+        <Button  variant="faded" radius="large" startContent={<MdDownload size="23px"/>} className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-4 mr-3 mb-2 font-bold text-base">Descargar lista final</Button>
        </DropdownTrigger>
        <DropdownMenu aria-label="Acciones estaticas" variant="faded">
         <DropdownItem key="excel" onPress={exportarListaFinalExcel} className="text-black">Formato Excel</DropdownItem>
@@ -344,7 +357,7 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
         <td className="p-2" style={{border:"1px solid white"}}>{alumno.apellidos +" "+ alumno.nombre +" "}</td>
         <td className="p-2" style={{border:"1px solid white"}}>{alumno.matricula}</td>
         {
-         alumno.calificacionesPorTipo.map( (tipoCalificacion) => tipoCalificacion.map( (calificacion, index) => (
+         alumno.calificacionesPorTipo.map( (tipoCalificacion) => tipoCalificacion.length==0?(<td key="99" className="text-center" style={{border:"1px solid white"}}>N/A</td>):tipoCalificacion.map( (calificacion, index) => (
           <td key={index} className="text-center" style={{border:"1px solid white"}}> { Math.round(calificacion.nota)}</td>
           )
          )

@@ -46,7 +46,7 @@ export default function ModalImportarEntrega({ controlModal, modoEdicion, entreg
        <ModalHeader className="bg-gradient-to-tr from-primary-100 to-primary-200 text-xl text-white font-bold">
        <MdOutlineLibraryAdd size="28px" className="mr-2"/>
 
-        Importar calificaciones
+        Importar entrega
        </ModalHeader>
        <ModalBody className="gap-1 text-black">
         

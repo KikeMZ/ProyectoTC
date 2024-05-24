@@ -328,14 +328,7 @@ const Criterios = () => {
                         <i className="pi pi-plus" style={{fontSize:"16px",fontWeight:"bold"}}></i> Crear criterios
                     </Button>
 
-                    <Button
-                        radius="large"
 
-                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-2 ml-3 mb-10 font-bold text-base"
-                        onClick={ ()=>{setMostrarCriterios(true)}}
-                    >
-                        <i className="pi pi-folder-open" style={{fontSize:"18px",fontWeight:"bold"}}></i> Importar criterios
-                    </Button>
                  </div>
         
         

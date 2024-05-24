@@ -18,6 +18,8 @@ import toast from 'react-hot-toast';
 import { FiEdit2 } from 'react-icons/fi';
 import { IoIosArrowBack } from 'react-icons/io'
 import { GrNext } from "react-icons/gr";
+import { RiFileList3Line } from "react-icons/ri";
+
 
 
 
@@ -193,16 +195,17 @@ const Entregas = () => {
            )
           }
 
-          <Button onClick={controlModalRegistro.onOpen} variant="faded" radius="large" className="py-6 ml-3 text-base">
-            Registro
+          <Button onClick={controlModalRegistro.onOpen} variant="faded" radius="large" className="py-6 mt-2 ml-3 text-base" startContent={<RiFileList3Line size="22px"/>}>
+            Previsualizar calificaciones
           </Button>
 
-          <Button onClick={() => setEditarEntregas(!editarEntregas)} variant="faded" radius="large" className="py-6 ml-3 text-base">
+          <Button onClick={() => setEditarEntregas(!editarEntregas)} variant="faded" radius="large" className="py-6 mt-2 ml-3 text-base" >
            {
             editarEntregas
             ?
             (
              <>
+              <IoIosArrowBack size="25px"></IoIosArrowBack>
               Regresar
              </>
             )
