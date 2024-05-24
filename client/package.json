@@ -15,6 +15,8 @@
     "@tanstack/react-table": "^8.13.2",
     "axios": "^1.6.7",
     "framer-motion": "^11.1.9",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.4",
     "papaparse": "^5.4.1",

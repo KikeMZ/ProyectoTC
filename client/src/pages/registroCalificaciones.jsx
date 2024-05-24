@@ -1,5 +1,10 @@
 import React, { useContext, useState,  useEffect } from "react";
+import { Modal, ModalHeader, ModalBody, ModalContent, ModalFooter, useDisclosure, Button, Card, CardHeader, CardBody, Divider } from "@nextui-org/react";
+import {  Dropdown,  DropdownTrigger,  DropdownMenu,  DropdownSection,  DropdownItem} from "@nextui-org/dropdown";
 import { NavContext } from "../layouts/layoutProfesor";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable";
 import { claseContext } from "../layouts/layoutProfesor";
 import Calificaciones from "./calificaciones"
 import ModalEntregas from "../components/modalEntregas";
@@ -12,20 +17,19 @@ import { getCriteriosByNRC } from "../services/claseCriterio.api";
 
 
 
-import { Input, Card, CardBody, Button, useDisclosure } from "@nextui-org/react";
+import { Input } from "@nextui-org/react";
 import toast from 'react-hot-toast';
 import { FiEdit2 } from 'react-icons/fi';
+import { IoIosArrowBack } from 'react-icons/io';
 import { GrNext } from "react-icons/gr";
 
 
 
 
-const RegistroCalificaciones = () => {
+const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
 
   const { showNav, shownav } = useContext(NavContext);
   const { dataClase } = useContext(claseContext);
-  const controlModal = useDisclosure();
-  const controlModalImportacion = useDisclosure();
   
   const [ archivoEntrega, setArchivoEntrega ] = useState(null);
   const [ alumnos, setAlumnos ] = useState([]);
@@ -96,6 +100,23 @@ const RegistroCalificaciones = () => {
     return calificacionesPorAlumno;
    }
 
+   const ordenAlfabeticoAlumno = (a,b) => {
+    let alumnoA = a.apellidos.toUpperCase();
+    let alumnoB = b.apellidos.toUpperCase();
+    
+    if(alumnoA < alumnoB)
+    {
+     return -1;
+    }
+    else if(alumnoA > alumnoB)
+    {
+     return 1;
+    }
+    else
+     return 0;
+
+   }
+
    const ordenAlfabetico = (a,b) =>{
     let entregaA = a.entrega_detail.nombre.toUpperCase();
     let entregaB = b.entrega_detail.nombre.toUpperCase();
@@ -132,6 +153,10 @@ const RegistroCalificaciones = () => {
     return auxAlumnos;
    }
 
+   const obtenerCalificacionActa = (calificacion) => Math.round(calificacion)>6?calificacion:5;
+
+   const obtenerCalificacionFinal = (calificacion) => Math.round(calificacion);
+
    const obtenerCalificacionesParciales = (listaAlumnos, listaCriterios) => {
     let auxAlumnos = [...listaAlumnos];
     let calificacionAlumno = 0;
@@ -146,7 +171,7 @@ const RegistroCalificaciones = () => {
      {
       numeroEntregas = alumno.calificacionesPorTipo[k].length;
       ponderacionCriterio = listaCriterios[k].ponderacion; 
-      sumaEntregas = alumno.calificacionesPorTipo[k].reduce( (valorPrevio, elementoActual) => valorPrevio+elementoActual.nota,0)
+      sumaEntregas = alumno.calificacionesPorTipo[k].reduce( (valorPrevio, elementoActual) => valorPrevio+ Math.round( elementoActual.nota),0)
       calificacionCriterio = (sumaEntregas * ponderacionCriterio)/(numeroEntregas*10)
       calificacionAlumno += calificacionCriterio;
       //console.log("Alumno:"+alumno.nombre+", Suma:"+ parseFloat(calificacionCriterio))
@@ -185,7 +210,7 @@ const RegistroCalificaciones = () => {
      setEntregas(entregasPorTipo)
      setCriterios(listaCriterios);
      setCamposTabla(nombreCampos)
-     setAlumnos(listaAlumnos)
+     setAlumnos(listaAlumnos.toSorted(ordenAlfabeticoAlumno))
     }
 
 
@@ -197,73 +222,92 @@ const RegistroCalificaciones = () => {
         cargarDatosTabla();
 
         //showNav();
-    }, [])
+    }, [entregasExistentes])
     
     console.log(shownav)
 
-    const modificarEstadoArchivo = (archivoEntrega) => setArchivoEntrega(archivoEntrega)
-
-    const mostrarVistaEntregas = () => {
-     setMostrarCalificaciones(false);
+    const generarListaFinalArreglo = () => {     
+      let listaFinalArreglo = []
+      listaFinalArreglo = alumnos.map( (alumno, indice) => [alumno.apellidos+" "+alumno.nombre,alumno.matricula, obtenerCalificacionActa(alumno.calificacion)]);
+      return listaFinalArreglo;
     }
 
-    const mostrarCardModificarEntrega = (id_entrega) => {
-      let entrega = entregas.find( (e) => e.id == id_entrega);   
-      setEntregaSeleccionada(entrega);
-          controlModal.onOpen();
-        
+    const generarListaFinalJSON = () => {
+     let listaFinalJSON = []
+     let auxCalificaciones = {
+      "nombre":"",
+      "matricula":"",
+      "calificacion":"",
+     }
+
+     listaFinalJSON = alumnos.map( (alumno, indice) => ({"Nombre":alumno.apellidos+" "+alumno.nombre,"Matricula":alumno.matricula,"Calificacion": obtenerCalificacionActa(alumno.calificacion)}));
+     return listaFinalJSON;
     }
 
-    const mostrarCalificacionesEntrega = (id_entrega) => {
-     let entrega = entregas.find( (e) => e.id == id_entrega);   
-     setEntregaSeleccionada(entrega);
-     setMostrarCalificaciones(true);
-     console.log("Entrega: " + entrega + ", "+ mostrarCalificaciones);
-    }  
+    const exportarListaFinalPDF = () => {
+     const pdf = new jsPDF();
+     const tituloPDF = "Lista de Calificaciones Finales\n"
+     const subtitulosPDF = "Docente:"+dataClase.nombreProfesor+" \nNRC: "+dataClase.nrc 
+     const datosTabla = generarListaFinalArreglo();
+     console.log(datosTabla);
+     pdf.setFontSize(19);
+     pdf.text(tituloPDF, 14 , 20)
+     pdf.setFontSize(12)
+     pdf.text(subtitulosPDF,14,27)
+     autoTable(pdf, {
+      startY: 40,
+      head: [["Nombre del Alumno","Matricula","Calificacion"]],
+      body: datosTabla
+     })
+     pdf.save("Calificaciones finales.pdf")
+    } 
 
-    const extraerDatosArchivoEntrega = (tipo) => {
-    
-     if( archivoEntrega!=null && tipo!=null)
-     {
-      controlModal.onClose();
-      leerArchivoEntrega(archivoEntrega, setMostrarEntregaExtraida, setCalificacionesExtraidas, dataClase.nrc);
-     }
-     else
-     {
-      toast.error("¡Se deben llenar todos los campos para poder crear la entrega!");
-     }
+    const exportarListaFinalExcel = () => {
+     let listaFinalJSON = generarListaFinalJSON();
+     console.log(listaFinalJSON)
+     let workbook = XLSX.utils.book_new();
+     let worksheet = XLSX.utils.json_to_sheet(listaFinalJSON)
+     console.log(worksheet)
+     XLSX.utils.book_append_sheet(workbook, worksheet, "Lista final");
+     worksheet["!cols"]  = [{wch:40},{wch:15},{wch:15}];
+     XLSX.writeFile(workbook,"Calificaciones finales.xlsx");
     }
 
   return (
     <>
-       <div className="flex justify-between">
-       <h2 className="text-3xl font-semibold ml-8 mt-5 mb-9">{editarEntregas?(<> <FiEdit2 className="inline mr-3"/><span>Editar 2</span></>):"Calificaciones de las entregas"}</h2>
-       <div>
-           <Button
-              radius="large"
-              className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-2 mr-3 mb-9 font-bold text-base"
-              onClick={controlModal.onOpen} >
-              <i className="pi pi-question-circle" style={{fontSize:"16px",fontWeight:"bold"}}></i> 
-           </Button>
+    
+    <Modal isDismissable={false} size={"full"} classNames={{closeButton:"text-foreground-white text-2xl hover:bg-black active:text-black"}} isOpen={controlModal.isOpen} onOpenChange={controlModal.onOpenChange} >
+    <ModalContent>
+    {
+     (onClose) => (
+      <>
+       <ModalHeader className="bg-gradient-to-tr from-primary-100 to-primary-200 text-2xl text-white font-bold">
 
-           <Button
-              radius="large"
-              className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-2 mr-3 mb-9 font-bold text-base"
-              onClick={controlModalImportacion.onOpen} >
-              <i className="pi pi-download" style={{fontSize:"16px",fontWeight:"bold"}}></i> Descargar lista final
-           </Button>
+        Registro de calificaciones
+       </ModalHeader>
 
+      <ModalBody className="overflow-x-scroll bg-secondary-900 p-0 pb-4 px-4 ">
+      <div className="flex justify-between">
+      <Button onClick={onClose} variant="faded" radius="large" startContent={<IoIosArrowBack size="23px"/>} className="text-base mt-4">Regresar a entregas</Button>
 
-       </div>
+      <Dropdown>
+       <DropdownTrigger>
+        <Button  variant="faded" radius="large" startContent={<GrNext size="23px"/>} className="text-base mt-4">Descargar lista final</Button>
+       </DropdownTrigger>
+       <DropdownMenu aria-label="Acciones estaticas" variant="faded">
+        <DropdownItem key="excel" onPress={exportarListaFinalExcel} className="text-black">Formato Excel</DropdownItem>
+        <DropdownItem key="pdf" onPress={exportarListaFinalPDF} className="text-black">Formato PDF</DropdownItem>
+       </DropdownMenu>
+      </Dropdown>
       </div>
-      <table className="border-separate border-spacing-0 overflow-scroll" >
+      <table className="border-separate border-spacing-0 " >
       <thead className="sticky top-0 bg-black mt-0 ">
        <tr>
         <th className="bg-secondary-900 "></th>
         <th className="bg-secondary-900"></th>
         {
          criterios.map( (criterio, index) => (
-          <th key={index} className="py-1 border-1" colSpan={entregas[index].length}> {criterio.ponderacion}%</th>
+          <th key={index} className="py-1 border-2" colSpan={entregas[index].length}> {criterio.ponderacion}%</th>
          ))
         }
         <th className="bg-secondary-900"></th>
@@ -276,7 +320,7 @@ const RegistroCalificaciones = () => {
         <th className="bg-secondary-900"></th>
         {
          criterios.map( (criterio, index) => (
-          <th key={index} className="p-1 border-1" colSpan={entregas[index].length}> {criterio.criterio_detail.nombre}</th>
+          <th key={index} className="p-1 border-2" colSpan={entregas[index].length}> {criterio.criterio_detail.nombre}</th>
          ))
         }
         <th className="bg-secondary-900"></th>
@@ -301,7 +345,7 @@ const RegistroCalificaciones = () => {
         <td className="p-2" style={{border:"1px solid white"}}>{alumno.matricula}</td>
         {
          alumno.calificacionesPorTipo.map( (tipoCalificacion) => tipoCalificacion.map( (calificacion, index) => (
-          <td key={index} className="text-center" style={{border:"1px solid white"}}> {calificacion.nota}</td>
+          <td key={index} className="text-center" style={{border:"1px solid white"}}> { Math.round(calificacion.nota)}</td>
           )
          )
         )
@@ -316,6 +360,12 @@ const RegistroCalificaciones = () => {
       }
       </tbody>
       </table>
+      </ModalBody>
+      </>
+      )
+      }
+      </ModalContent>
+      </Modal>
       </>
 )
 }

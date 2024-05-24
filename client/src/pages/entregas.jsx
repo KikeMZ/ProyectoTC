@@ -24,6 +24,7 @@ const Entregas = () => {
   const { dataClase } = useContext(claseContext);
   const controlModal = useDisclosure();
   const controlModalImportacion = useDisclosure();
+  const controlModalRegistro = useDisclosure();
   
   const [ archivoEntrega, setArchivoEntrega ] = useState(null);
   const [ entregas, setEntregas ] = useState([]);
@@ -119,7 +120,7 @@ const Entregas = () => {
       </div>
       </div>
       )
-      : !mostrarReporte?
+      : 
       (
        <>
        <div className="flex justify-between">
@@ -148,7 +149,7 @@ const Entregas = () => {
            )
           }
 
-          <Button onClick={() => setMostrarReporte(!mostrarReporte)} variant="faded" radius="large" className="py-6 ml-3 text-base">
+          <Button onClick={controlModalRegistro.onOpen} variant="faded" radius="large" className="py-6 ml-3 text-base">
             Registro
           </Button>
 
@@ -199,13 +200,11 @@ const Entregas = () => {
       )
       }
       </>
-     ):
-     (
-      <RegistroCalificaciones/>
      )
     }
       <ModalEntregas controlModal={controlModal} modoEdicion={editarEntregas} setEntregas={setEntregas} setMostrarEntregas={setMostrarEntregas} nrc={dataClase.nrc} entrega={entregaSeleccionada} ></ModalEntregas>
       <ModalImportarEntrega controlModal={controlModalImportacion} modoEdicion={editarEntregaExtraida} entrega={entregaExtraida} setEntregaExtraida={setEntregaExtraida} setCalificacionesExtraidas={setCalificacionesExtraidas} manejarArchivo={manejarArchivo} setArchivoEntrega={modificarEstadoArchivo} extraerDatosArchivoEntrega={extraerDatosArchivoEntrega} nrc={dataClase.nrc}/>
+      <RegistroCalificaciones controlModal={controlModalRegistro} entregasExistentes={entregas}/>
     </>
     ):
     (
