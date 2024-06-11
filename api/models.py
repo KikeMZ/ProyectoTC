@@ -27,10 +27,9 @@ class Clase(models.Model):
 
 
 class Profesor(models.Model):
-    id_profesor=models.PositiveBigIntegerField()
     nombre=models.CharField(max_length=250)
-    correo=models.CharField(max_length=100)
-    contrasena=models.CharField(max_length=100)
+    correo=models.CharField(max_length=100, blank=True)
+    contrasena=models.CharField(max_length=100, blank=True)
 
     def __str__(self):
         return self.nombre
@@ -41,7 +40,7 @@ class Clase2(models.Model):
     clave=models.CharField(max_length=10)
     seccion=models.CharField(max_length=4)
     nombreMateria=models.CharField(max_length=250)
-    nombreProfesor=models.CharField(max_length=250)
+    id_profesor=models.ForeignKey(Profesor, on_delete=models.DO_NOTHING, default=0)
 
     def __str__(self):
         return str(self.nrc)

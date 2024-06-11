@@ -4,7 +4,8 @@ import { extraerDatosMaterias } from '../services/importacion.js';
 import MateriaCard from "../components/card"
 import { Button } from "@nextui-org/react";
 import {toast} from 'react-hot-toast';
-import { getAllClases } from '../services/clases.api.js';
+import { getAllProfesores, createProfesor } from '../services/profesor.api.js';
+import { getAllClases, crearClase } from '../services/clases.api.js';
 import axios from "axios";
 
 
@@ -35,7 +36,60 @@ export default function Home() {
   },[]);
 
 
+  const registrarProfesores = async (listaClases) => {
+   //console.log("Profesores:")
+   let respuesta = await getAllProfesores();
+   let nombreProfesoresBD = respuesta.data.map( (profesor) => profesor.nombre )
+   let nombreProfesores = listaClases.map( (clase) => clase.nombreProfesor); 
+   //console.log(nombreProfesores);
+   let auxProfesores = new Set(nombreProfesores);
+   let listaProfesoresEncontrados = [...auxProfesores];
+   console.log(listaProfesoresEncontrados);
+   let profesoresUnicos = listaProfesoresEncontrados.filter( (profesor) => !nombreProfesoresBD.includes(profesor) );
+   let profesoresCreados = []
+   for(let profesor of profesoresUnicos)
+   {
+    createProfesor({"nombre":profesor}).then( (res) => {
+     profesoresCreados.push({"nombre":res.data});
+    });
+   }
 
+   console.log(profesoresUnicos);
+   
+  }
+
+  const obtenerDatosProfesores = async (listaClases) => {
+   let respuesta = await getAllProfesores();
+   let profesoresBD = respuesta.data;
+   let profesoresExtraccion = [...new Set(listaClases.map( (clase) => clase.nombreProfesor))]; 
+   let listaProfesores = profesoresBD.filter( (profesor) => profesoresExtraccion.includes(profesor.nombre) );
+   return listaProfesores;
+   
+
+  }
+  
+  const registrarClases = async (listaClases) => {
+   let profesores = await obtenerDatosProfesores(listaClases);
+   let JSONClase = {
+    "nrc":"",
+    "clave":"",
+    "seccion":"",
+    "nombreMateria":"",
+    "id_profesor":""
+   }
+   for(let clase of listaClases)
+   {
+    let profesor = profesores.find( (profesor) => profesor.nombre==clase.nombreProfesor)
+    JSONClase = {
+     "nrc": clase.nrc,
+     "clave": clase.clave,
+     "seccion": clase.seccion,
+     "nombreMateria": clase.nombreMateria,
+     "id_profesor": profesor.id
+    }
+    console.log( await crearClase(JSONClase) );
+   }
+  }
 
   const manejarArchivo = (e) => {
     let archivoSeleccionado = e.target.files[0];
@@ -72,11 +126,14 @@ export default function Home() {
         }
       }
       setClases(nuevaLista);
-      for (let i = 0; i < nuevaLista.length; i++) {
+      await registrarProfesores(nuevaLista);
+      await registrarClases(nuevaLista);
+
+    /*  for (let i = 0; i < nuevaLista.length; i++) {
         axios.post(import.meta.env.VITE_BACKEND_URL + "Clase2/", nuevaLista[i]).then( res => {
         console.log(res);
        });
-      }
+      } */
       setResultadoExtraccion(resultado);
       setMostrarTarjetas(resultado === 0);
       

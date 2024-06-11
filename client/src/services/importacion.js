@@ -309,7 +309,7 @@ export async function extraerDatosMaterias(archivoPDF) {
                     "clave": clave,
                     "seccion": seccion,
                     "nombreMateria": materia,
-                    "nombreProfesor": nombreProfesor,
+                    "nombreProfesor": nombreProfesor.trim(),
                   };
                   console.log(clase);
                   listaClases.push(clase);
