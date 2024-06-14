@@ -29,6 +29,18 @@ class Clase2ViewSet(viewsets.ModelViewSet):
     queryset = Clase2.objects.all()
     serializer_class=Clase2Serializer
 
+    @action(detail=False, methods=['get'])
+    def getClasesByProfesor(self, request, pk=None):
+        clases_filtradas = []
+        lista_clases = []
+        nombreProfesor = request.GET['profesor']
+        profesor = Profesor.objects.get(nombre=nombreProfesor)
+        print(profesor.id)
+        clases_filtradas = Clase2.objects.filter(id_profesor=profesor.id)
+        lista_clases = [ self.get_serializer(c).data for c in clases_filtradas ]
+        print(lista_clases)
+        return Response(lista_clases, status=status.HTTP_200_OK)
+
 class ProfesorViewSet(viewsets.ModelViewSet):
     queryset = Profesor.objects.all()
     serializer_class=ProfesorSerializer

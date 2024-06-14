@@ -18,16 +18,19 @@ class MateriaSerializer(serializers.ModelSerializer):
         model=Alumno
         fields='__all__'
 
-
-class Clase2Serializer(serializers.ModelSerializer):
-    class Meta:
-        model=Clase2
-        fields='__all__'
-
 class ProfesorSerializer(serializers.ModelSerializer):
     class Meta:
         model=Profesor
         fields= '__all__'
+
+class Clase2Serializer(serializers.ModelSerializer):
+    profesor_detail = ProfesorSerializer(source="id_profesor", read_only=True)
+
+    class Meta:
+        model=Clase2
+        fields = ('nrc', 'clave', 'seccion', 'nombreMateria', 'id_profesor', 'profesor_detail')
+
+
 
 class InscripcionSerializer(serializers.ModelSerializer):
     clase_detail = Clase2Serializer(source='clase', read_only=True)

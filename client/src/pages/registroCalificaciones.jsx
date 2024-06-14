@@ -260,7 +260,7 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
     const exportarListaFinalPDF = () => {
      const pdf = new jsPDF();
      const tituloPDF = "Lista de Calificaciones Finales\n"
-     const subtitulosPDF = "Docente:"+dataClase.nombreProfesor+" \nNRC: "+dataClase.nrc 
+     const subtitulosPDF = "Docente: "+dataClase.profesor_detail.nombre+" \nNRC: "+dataClase.nrc 
      const datosTabla = generarListaFinalArreglo();
      console.log(datosTabla);
      pdf.setFontSize(19);

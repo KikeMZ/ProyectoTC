@@ -8,6 +8,10 @@ export const getAllClases = () => {
     return api.get("/");
 };
 
+export const getClasesByProfesor = (profesor) => {
+    return api.get("/getClasesByProfesor/?profesor="+profesor)
+}
+
 export const crearClase = (Clase) => {
     return api.post("/", Clase);
 };
@@ -15,6 +19,8 @@ export const crearClase = (Clase) => {
 export const eliminarClase = (id) => {
     return api.delete(`/${id}/`);
 };
+
+
 
 export const actualizarClase = (id, datosActualizados) => {
     return api.put(`/${id}/`, datosActualizados);
