@@ -21,17 +21,35 @@ const Profesores = () => {
 
   const [archivoProfesores, setArchivoProfesores] = useState();
   const [profesores, setProfesores] = useState(null);
+  const [profesoresModificados, setProfesoresModificados] = useState([])
   const [datosExtraidos, setDatosExtraidos] = useState([]);
   const [mostrarDatosExtraidos, setMostrarDatosExtraidos] = useState(false)
   const [editarProfesores, setEditarProfesores] = useState(false);
 
-  const actualizarProfesores = () => {
-   console.log("as")
-   let nombresProfesoresBD = profesores.map((profesor) => profesor.nombre);
-   let profesoresFiltrados = datosExtraidos.filter( (p) => nombresProfesoresBD.includes(p.nombre));
-   let JSONProfesores = {"profesores": profesoresFiltrados}
-   //console.log(profesoresFiltrados)
-   actualizarDatosProfesores(JSONProfesores).then((res) => console.log("Actualizacion"));
+  const actualizarProfesores = (tipoActualizacion) => {
+   console.log("as"+tipoActualizacion)
+   console.log("Extraccion:"+mostrarDatosExtraidos+"Edicion"+editarProfesores)
+   let JSONActualizacion = {}
+   if(tipoActualizacion==1)
+   {
+    let nombresProfesoresBD = profesores.map((profesor) => profesor.nombre);
+    let profesoresFiltrados = datosExtraidos.filter( (p) => nombresProfesoresBD.includes(p.nombre));
+    JSONActualizacion = {"profesores": profesoresFiltrados,"tipoActualizacion":'1'}
+    //console.log(profesoresFiltrados)
+   }
+   else
+   {
+    JSONActualizacion = {"profesores": profesoresModificados,"tipoActualizacion":'2'}    
+   }
+   actualizarDatosProfesores(JSONActualizacion).then((res) => 
+   {
+    console.log("Actualizacion")
+    setEditarProfesores(false);
+    setMostrarDatosExtraidos(false);
+    toast.success("¡Se han guardado los cambios exitosamente!");
+   }
+   );
+
   }
 
   const modificarEstadoArchivoProfesores = (archivoPDF) => setArchivoProfesores(archivoPDF);
@@ -41,8 +59,46 @@ const Profesores = () => {
    {
     await leerArchivoProfesores(archivoProfesores, setDatosExtraidos);
     setMostrarDatosExtraidos(true);
+    setEditarProfesores(false);
 
    }
+  }
+
+  const modificarProfesor = (id_profesor, valorModificado, tipoCampo) => {
+   let listaProfesores = [...profesores];
+   let listaModificada = [...profesoresModificados];
+   let profesor;
+   let posicionProfesor = -1;
+   let posicionProfesorListaModificada = -1;
+
+   posicionProfesor = profesores.findIndex((p) => p.id==id_profesor)
+
+   if(profesoresModificados.length!=0 )
+   {
+    posicionProfesorListaModificada = profesoresModificados.findIndex((p) => p.id==id_profesor);
+    if(posicionProfesorListaModificada==-1)
+     posicionProfesorListaModificada = listaModificada.push(profesores[posicionProfesor])-1;
+    
+   }
+   else
+   {
+    posicionProfesorListaModificada = listaModificada.push(profesores[posicionProfesor])-1;
+   }
+    
+
+   if(tipoCampo==1)
+   {
+    listaProfesores[posicionProfesor].nombre = valorModificado;
+    listaModificada[posicionProfesorListaModificada].nombre = valorModificado;
+   }
+   else
+   {
+    listaProfesores[posicionProfesor].correo = valorModificado;
+    listaModificada[posicionProfesorListaModificada].correo = valorModificado;
+   }
+
+   setProfesores(listaProfesores);
+   setProfesoresModificados(listaModificada);
   }
 
 
@@ -135,7 +191,7 @@ const Profesores = () => {
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mr-3 mb-10 font-bold text-base"
                         onClick={ () => {setEditarProfesores(true)}}
                     >
-                        <i className="pi pi-pencil" style={{fontSize:"18px",fontWeight:"bold"}}></i> Modificar calificaciones
+                        <i className="pi pi-pencil" style={{fontSize:"18px",fontWeight:"bold"}}></i> Modificar profesores
                     </Button>
 
                     <Button
@@ -187,7 +243,7 @@ const Profesores = () => {
                         radius="large"
 
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mb-10 font-bold text-base"
-                        onClick={actualizarProfesores}
+                        onClick={() => editarProfesores?actualizarProfesores(2):actualizarProfesores(1)}
                      >
                         <i className="pi pi-save" style={{fontSize:"18px",fontWeight:"bold"}}></i> Guardar cambios
                     </Button>
@@ -249,19 +305,24 @@ const Profesores = () => {
      profesores?.map( (profesor, index) => (
       
     <tr key={index} className="text-center" style={{border:"3px solid grey"}}>
-     <td className="text-xl py-3"> {profesor.nombre} </td>
       
      { editarProfesores?
 
       (
       <>
-        <Input classNames={{input: ["text-xl font-semibold text-end"]}}  type="number" max={10} min={0} step={0.1} onChange={ (e) => {  }} endContent={"%"} ></Input>
+        <td className="py-2 px-2">
+         <Input classNames={{input: ["text-xl font-semibold text-start"]}}  type="text" onChange={ (e) => {modificarProfesor(profesor.id, e.target.value, 1)}} value={profesor.nombre} ></Input>
+        </td>
+        <td className="py-2 px-2">
+         <Input classNames={{input: ["text-xl font-semibold text-start"]}}  type="text" onChange={ (e) => {modificarProfesor(profesor.id, e.target.value, 2)}} value={profesor.correo} ></Input>
+        </td>
       </>
       )
       :
       (
        <>
-       <td className="text-xl py-3"> {profesor.correo!=""?profesor.correo:"Vacio"} </td>
+     <td className="text-xl py-3"> {profesor.nombre} </td>
+     <td className="text-xl py-3"> {profesor.correo!=""?profesor.correo:"Vacio"} </td>
         
        </>
       )

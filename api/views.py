@@ -63,16 +63,27 @@ class ProfesorViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def actualizarDatosProfesores(self, request, pk=None):
         datosProfesores = request.data["profesores"]
+        tipoActualizacion = request.data["tipoActualizacion"]
+        posicionProfesor = -1
         print(datosProfesores)
         profesores = Profesor.objects.all()
-        nombreProfesores = [ profesor.nombre for profesor in profesores]
-        for p in datosProfesores:
-            posicionProfesor = nombreProfesores.index(p["nombre"])
-            contrasena = generarContrasena()
-            print(f"{p["correo"]} || {profesores[posicionProfesor]} || {contrasena}")
-            profesores[posicionProfesor].correo = p["correo"]
-            profesores[posicionProfesor].contrasena = contrasena 
-            profesores[posicionProfesor].save()
+        if tipoActualizacion=='1':
+            nombreProfesores = [ profesor.nombre for profesor in profesores]
+            for p in datosProfesores:
+                posicionProfesor = nombreProfesores.index(p["nombre"])
+                contrasena = generarContrasena()
+                profesores[posicionProfesor].contrasena = contrasena
+        else:
+            identificadorProfesores = [ profesor.id for profesor in profesores]
+            for p in datosProfesores:
+                posicionProfesor = identificadorProfesores.index(p["id"])
+                profesores[posicionProfesor].nombre = p["nombre"]
+                if profesores[posicionProfesor].correo=="":
+                    contrasena = generarContrasena()
+                    profesores[posicionProfesor].contrasena = contrasena
+                      
+        profesores[posicionProfesor].correo = p["correo"]
+        profesores[posicionProfesor].save()
             
 
         print(request.data)
