@@ -41,7 +41,7 @@ export default function ModalExtraerCorreo({ controlModal, extraerDatosArchivoPr
         
        <label htmlFor="cargar" className="text-xl font-semibold my-2">Seleccione su archivo: </label>
        
-       <input type="file" accept=".xlsx,text/csv" id="cargar" name="archivo" onChange={ (e) => {manejarArchivo(e, setArchivoProfesores)} } />
+       <input type="file" accept=".pdf" id="cargar" name="archivo" onChange={ (e) => {manejarArchivo(e, setArchivoProfesores)} } />
 
        </ModalBody>
        <ModalFooter>

@@ -1,9 +1,11 @@
-import { Outlet, useLocation } from "react-router-dom"
+import { useEffect } from 'react'
+import { Outlet, useLocation, useNavigate } from "react-router-dom"
 import Sidebar from "../components/sidebar"
 import Header from "../components/header"
 import Toast from "../components/toast"
 import { Nav } from "../components/navbar"
 import { useState, createContext } from "react"
+import { autenticarProfesor } from "../services/profesor.api"
 
 
 export const NavContext = createContext();
@@ -12,7 +14,9 @@ export const profesorContext = createContext();
 
 export default function LayoutProfesor() {
     const location = useLocation();
+    const navigate = useNavigate();
     const profesor = new URLSearchParams(location.search).get('email');
+    const contrasena = new URLSearchParams(location.search).get('password');
 
     //Estados de la NavBar
     const [shownav, setshownav] = useState(false);
@@ -37,6 +41,22 @@ export default function LayoutProfesor() {
     const limpiarProfesor = () =>{
         setDataProfesor("");
     }
+
+    useEffect(() => {
+     async function autenticacion () {
+      let res = await autenticarProfesor(profesor,contrasena);
+      if(res.data.estadoSesion==0)
+       setDataProfesor(res.data.nombre)
+      else if(res.data.estadoSesion==1)
+       navigate("/?estado=1");
+      else
+       navigate("/?estado=2");
+     }
+
+     autenticacion();
+
+    }
+    ,[])
 
 
     return (

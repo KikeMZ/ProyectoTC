@@ -3,11 +3,20 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, AvatarIcon, User
 import { claseContext } from "../layouts/layoutProfesor";
 import { useContext } from "react";
 import { Link } from 'react-router-dom';
+import { getProfesorByCorreo } from '../services/profesor.api'
 
+const obtenerNombreProfesor = async (correoProfesor) => {
+ let res = await getProfesorByCorreo(correoProfesor);
+ let nombre = res.data[0].nombre;
+ console.log(nombre)
+ return nombre;
+} 
 
-const profesor = new URLSearchParams(location.search).get('email');
-
-
+const correo = new URLSearchParams(location.search).get('email');
+let nombreProfesor = ""
+if(correo)
+ nombreProfesor = await obtenerNombreProfesor(correo);
+console.log(nombreProfesor)
 
 export default function Header() {
   const {dataClase} = useContext(claseContext)
@@ -36,8 +45,8 @@ export default function Header() {
                                     icon: <AvatarIcon/>
                                 }}
                                 className="transition-transform"
-                                description="Correo"
-                                name={profesor}
+                                description={correo}
+                                name={nombreProfesor}
                             />
                         </DropdownTrigger>
                         <DropdownMenu aria-label="User Actions" variant="flat">

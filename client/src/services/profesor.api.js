@@ -23,6 +23,14 @@ export const getProfesor = (id) => {
   return api.get(`/${id}/`);
 }
 
+export const getProfesorByCorreo = (correo) => {
+  return api.get("/?search="+correo)
+}
 
 export const updateProfesor = (id, profesor) => api.put(`/${id}/`, profesor);
 
+export const actualizarDatosProfesores = (datosProfesores) => {return api.post("/actualizarDatosProfesores/", datosProfesores)};
+
+export const autenticarProfesor = (correo, password) => {
+ return api.get("/autenticarProfesor/?correo="+correo+"&password="+password)
+}

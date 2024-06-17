@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 export default function LoginCard() {
   const [email, setEmail] = useState(""); // Estado para almacenar el valor del email
+  const [contrasena, setContrasena] = useState("");
 
 
   const limpiarTexto = (texto) => {
@@ -15,6 +16,11 @@ export default function LoginCard() {
   };
   console.log("Valor actual de email:", email);
 
+  const handleContrasenaChange = (e) => {
+    setContrasena(e.target.value); // Actualizar el estado del email cuando cambia el valor del campo de entrada
+  };
+
+  
   return (
     <div className="bg-secondary-100 px-10 py-14 rounded-3xl">
       <h1 className="text-6xl font-semibold">Bienvenido</h1>
@@ -30,7 +36,7 @@ export default function LoginCard() {
         />
       </div>
       <div className="mt-4">
-        <Input type="password" label="Contraseña" variant="bordered" color="primary" />
+        <Input onChange={handleContrasenaChange} type="password" label="Contraseña" variant="bordered" color="primary" />
       </div>
       <div className="flex justify-between items-center pt-8">
         <Link to="/admin">
@@ -38,8 +44,8 @@ export default function LoginCard() {
             Admin
           </Button>
         </Link>
-        <Link to={`/profesor?email=${ limpiarTexto(email.toUpperCase())}`}>
-          <Button variant="solid" className="bg-gray-300">
+        <Link to={`/profesor?email=${ limpiarTexto(email.includes("@")?email:email.toUpperCase())}&password=${contrasena}`}>
+          <Button  variant="solid" className="bg-gray-300">
             Profesor
           </Button>
         </Link>

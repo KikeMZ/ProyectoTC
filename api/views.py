@@ -5,6 +5,18 @@ from .models import Programmer,Alumno,Clase2, Profesor, Inscripcion,Entrega,Crit
 from rest_framework import filters, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
+import smtplib
+from email.message import EmailMessage
+import random
+import string
+
+def generarContrasena():
+    Characters=string.ascii_letters + "1234567890_-/?¿@$%"
+    word=""
+    for i in range (10):
+        letra=random.choice(Characters)
+        word=word+letra
+    return word
 
 
 # Create your views here.
@@ -44,6 +56,46 @@ class Clase2ViewSet(viewsets.ModelViewSet):
 class ProfesorViewSet(viewsets.ModelViewSet):
     queryset = Profesor.objects.all()
     serializer_class=ProfesorSerializer
+    filter_backends=[filters.SearchFilter]
+    search_fields=["correo"]
+    
+
+    @action(detail=False, methods=['post'])
+    def actualizarDatosProfesores(self, request, pk=None):
+        datosProfesores = request.data["profesores"]
+        print(datosProfesores)
+        profesores = Profesor.objects.all()
+        nombreProfesores = [ profesor.nombre for profesor in profesores]
+        for p in datosProfesores:
+            posicionProfesor = nombreProfesores.index(p["nombre"])
+            contrasena = generarContrasena()
+            print(f"{p["correo"]} || {profesores[posicionProfesor]} || {contrasena}")
+            profesores[posicionProfesor].correo = p["correo"]
+            profesores[posicionProfesor].contrasena = contrasena 
+            profesores[posicionProfesor].save()
+            
+
+        print(request.data)
+        
+        return Response([], status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'])
+    def autenticarProfesor(self, request, pk=None):
+        respuesta = {"nombre":"","correo":"","estadoSesion":1}
+        correoFormulario = request.GET["correo"]
+        contrasenaFormulario = request.GET["password"]
+        if correoFormulario!="" or contrasenaFormulario!="":
+            correosBD = [ p.correo for p in Profesor.objects.all()]
+            if correoFormulario in correosBD:
+                datosProfesor = Profesor.objects.get(correo=correoFormulario)
+                if contrasenaFormulario==datosProfesor.contrasena:
+                    respuesta["nombre"]=datosProfesor.nombre
+                    respuesta["correo"]=datosProfesor.correo
+                    respuesta["estadoSesion"]=0
+                else:
+                    respuesta["estadoSesion"]=2
+                
+        return Response(respuesta, status=status.HTTP_200_OK)
 
 class InscripcionViewSet(viewsets.ModelViewSet):
     queryset = Inscripcion.objects.all()

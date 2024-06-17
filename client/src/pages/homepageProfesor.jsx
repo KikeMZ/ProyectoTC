@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import MateriaCard from "../components/card"
+import { getProfesorByCorreo } from "../services/profesor.api";
 import { getClasesByProfesor } from '../services/clases.api.js';
 import { useLocation } from 'react-router-dom';
 import { NavContext } from "../layouts/layoutProfesor";
@@ -21,8 +22,10 @@ export default function HomeProfesor() {
   useEffect(() => {
     async function cargarclases() {
       try {
-        const res = await getClasesByProfesor(profesor); // Obtener la respuesta de getClasesByProfesor
-        const profesorMatches = res.data //res.data.filter(item => item.nombreProfesor === profesor); // Filtrar la lista directamente
+        const res = await getProfesorByCorreo(profesor);
+        console.log(res)
+        const resClases = await getClasesByProfesor(res.data[0].nombre); // Obtener la respuesta de getClasesByProfesor
+        const profesorMatches = resClases.data //res.data.filter(item => item.nombreProfesor === profesor); // Filtrar la lista directamente
         console.log(profesorMatches);
         setLista(profesorMatches); // Establecer la lista filtrada en el estado
       } catch (error) {

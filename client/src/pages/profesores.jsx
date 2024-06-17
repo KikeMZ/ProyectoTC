@@ -3,7 +3,7 @@ import { NavContext } from "../layouts/layoutProfesor";
 import ModalExtraerCorreos from "../components/modalExtraerCorreos";
 import { leerArchivoProfesores } from "../services/importacion";
 import { updateCalificacion } from "../services/calificacion.api"
-import { getAllProfesores } from "../services/profesor.api";
+import { getAllProfesores, actualizarDatosProfesores } from "../services/profesor.api";
 
 import axios from "axios";
 import * as XLSX from 'xlsx';
@@ -24,17 +24,27 @@ const Profesores = () => {
   const [datosExtraidos, setDatosExtraidos] = useState([]);
   const [mostrarDatosExtraidos, setMostrarDatosExtraidos] = useState(false)
   const [editarProfesores, setEditarProfesores] = useState(false);
- 
+
+  const actualizarProfesores = () => {
+   console.log("as")
+   let nombresProfesoresBD = profesores.map((profesor) => profesor.nombre);
+   let profesoresFiltrados = datosExtraidos.filter( (p) => nombresProfesoresBD.includes(p.nombre));
+   let JSONProfesores = {"profesores": profesoresFiltrados}
+   //console.log(profesoresFiltrados)
+   actualizarDatosProfesores(JSONProfesores).then((res) => console.log("Actualizacion"));
+  }
 
   const modificarEstadoArchivoProfesores = (archivoPDF) => setArchivoProfesores(archivoPDF);
 
-  const extraerDatosArchivoProfesores = () => {
+  const extraerDatosArchivoProfesores = async() => {
    if(archivoProfesores)
    {
-    leerArchivoProfesores(archivoProfesores, setDatosExtraidos);
+    await leerArchivoProfesores(archivoProfesores, setDatosExtraidos);
     setMostrarDatosExtraidos(true);
+
    }
   }
+
 
 
   useEffect(() => {
@@ -177,7 +187,7 @@ const Profesores = () => {
                         radius="large"
 
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mb-10 font-bold text-base"
-                        onClick={() => {}}
+                        onClick={actualizarProfesores}
                      >
                         <i className="pi pi-save" style={{fontSize:"18px",fontWeight:"bold"}}></i> Guardar cambios
                     </Button>
