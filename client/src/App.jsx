@@ -8,6 +8,7 @@ import LayoutAlumno from "./layouts/layoutAlumno";
 
 //importpages
 import Home from "./pages/homepage";
+import Profesores from "./pages/profesores";
 import Error404 from "./pages/error404";
 import Historico from "./pages/historico"
 import Alumnos from "./pages/alumnos";
@@ -25,6 +26,7 @@ export default function App() {
       <Route path="/" element={<Login/>}/>
       <Route path="/admin" element={<Layout/>}>
         <Route index element ={<Home/>}/>
+        <Route path="profesores" element={<Profesores/>}/>
       </Route>
       <Route path="/profesor" element={<LayoutProfesor/>}>
         <Route index element ={<HomeProfesor email=""/>}/>

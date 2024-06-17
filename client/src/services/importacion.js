@@ -5,24 +5,33 @@ import * as XLSX from "xlsx";
 import Papa from "papaparse";
 import toast from "react-hot-toast";
 
-export const manejarArchivo = (e, setArchivoEntrega) =>{
+export const manejarArchivo = (e, setArchivo) =>{
   let archivoSeleccionado = e.target.files[0];
 
   if (archivoSeleccionado) {
     let tipoArchivo = archivoSeleccionado.type;
     console.log(tipoArchivo);
-    if (tipoArchivo === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") { // Validar que sea un archivo PDF
+
+    if(tipoArchivo === "application/pdf")
+    {
+     let leerArchivo = new FileReader();
+     leerArchivo.readAsArrayBuffer(archivoSeleccionado);
+     leerArchivo.onload = (e) => {
+      setArchivo(e.target.result);
+     };
+    }
+    else if(tipoArchivo === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") { // Validar que sea un archivo PDF
       let leerArchivo = new FileReader();
       leerArchivo.readAsArrayBuffer(archivoSeleccionado);
       leerArchivo.onload = (e) => {
-        setArchivoEntrega({"datos":e.target.result,"tipo":1});
+        setArchivo({"datos":e.target.result,"tipo":1});
       };
     }
     else if(tipoArchivo === "text/csv")
     {
      Papa.parse(archivoSeleccionado, {
       complete: (res) => {
-       setArchivoEntrega({"datos":res,"tipo":2});
+       setArchivo({"datos":res,"tipo":2});
       }
      })
      //setArchivoCalificaciones()
@@ -86,8 +95,45 @@ export const manejarArchivo = (e, setArchivoEntrega) =>{
 /*const validarNombreEntrega = (contenidoArchivo) => {
   return contenidoArchivo.includes(entrega.nombre);
  }*/
- 
- //
+
+
+  const darFormatoNombre = (nombreProfesor) => {
+    let auxNombreNormalizado = nombreProfesor.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+    let nombreNormalizado = auxNombreNormalizado.toUpperCase();
+    console.log(nombreNormalizado);
+    return nombreNormalizado;
+   }
+  
+   const obtenerDatosProfesores = (contenidoPDF, setProfesores) => {
+    let contenidoBuscado = /[A-ZÁÉÍÓÚÑ][ \wÑÁÉÍÓÚñáéíóú@.|]+mx/g;
+    let listaDatosProfesores = contenidoPDF.match(contenidoBuscado);
+    let listaProfesores = []
+    //console.log(listaDatosProfesores); 
+    for(let datosProfesor of listaDatosProfesores)
+    {
+     let [nombreProfesor, correo] = datosProfesor.split("|");
+     console.log("Profesor:"+nombreProfesor+", Correo:"+correo)
+     let nombreProcesado = darFormatoNombre(nombreProfesor);
+     let profesor = {
+      "nombre": nombreProcesado,
+      "correo": correo,
+     }
+     listaProfesores.push(profesor);
+    }
+    setProfesores(listaProfesores);
+   }
+
+  
+  const esArchivoProfesores = (contenidoPDF) => {
+    let existeCampoNombre = contenidoPDF.search(/Nombre/g) != -1?true:false;
+    let existeCampoCorreo = contenidoPDF.search(/Correo/g) != -1?true:false;
+    
+    let esPDFProfesores = existeCampoNombre && existeCampoCorreo;
+    return esPDFProfesores;
+   }
+
+
+  //
  // -----------------------------------------------------------------------------
  // Funcion la cual permite validar si la estructura interna del Excel es valida.
  // ------------------------------------------------------------------------------
@@ -220,6 +266,66 @@ export const manejarArchivo = (e, setArchivoEntrega) =>{
   }
 
 
+export const leerArchivoProfesores = async (archivoProfesores, setProfesores) => {
+  if(archivoProfesores!==null)
+    { //Se comprueba si el PDF tiene datos.
+     let archivoVacio = false;
+     let contenidoPDF = ""; //Esta variable permitira almacenar el contenido completo del PDF.
+     let listaCriterios = []; //Permite almacenar cada uno de los criterios en formato JSON.
+ 
+     const task = pdfjsLib.getDocument(archivoProfesores); //Se obtiene la referencia al PDF
+     try
+     {
+       const pdf = await task.promise; // Se accede al PDF.
+ 
+       for(let j=1; j<=pdf.numPages; j++)
+       {
+       const page = await pdf.getPage(j); // Se accede a una de las paginas del PDF.
+       const contenidoPagina = await page.getTextContent(); // Se obtiene el contenido de la pagina, distribuyendo cada una 
+                                                            // de sus partes en un arreglo.
+       
+       if( contenidoPagina.items.length <= 1)
+       { //Se comprueba si el archivo PDF tiene contenido.
+        archivoVacio = true;
+       } 
+ 
+       contenidoPagina.items.forEach( function(item)
+       { //Se pasara por cada uno de los elementos del arreglo. 
+        let elementoString = item.str //Se convierte el elemento en un String.
+ 
+        if(item.hasEOL)
+         {
+          contenidoPDF = contenidoPDF + "#";
+         }
+         else if(item.height==0)
+         {
+          contenidoPDF = contenidoPDF + "|";
+         }
+         else
+         {
+          contenidoPDF = contenidoPDF + elementoString;
+         }
+  
+       });
+      }
+ 
+      //Se comprueba si el archivo subido tiene el formato que tiene la pagina de Secretaria Academica que almacena los datos de las profesores.
+      if(esArchivoProfesores) 
+      { 
+       obtenerDatosProfesores(contenidoPDF, setProfesores);
+       toast.success("¡Se han extraido los datos del PDF exitosamente!"); //Se indica que la extraccion se realizo de forma exitosa.
+      }
+      else
+      {//Si el formato no es valido, entonces se asigna un valor igual a 2 al estado llamado "resultadoExtraccion"
+       toast.error("¡La estructura del documento no es valida!");
+      }
+     } catch(e){
+       console.log("!!!Error al intentar cargar el PDF!!!:", e)
+     }
+   }
+  
+
+}
 
 
 

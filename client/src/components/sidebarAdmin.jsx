@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaChalkboardTeacher } from "react-icons/fa";
+import { IoIosSchool } from "react-icons/io";
 import { IoTimeOutline } from "react-icons/io5";
+
 
 // Componente de link para el sidebar
 function NavLink({ to, icon: Icon, text, active, onClick }) {
@@ -31,9 +33,17 @@ export default function Sidebar() {
         <NavLink
           to="/admin"
           icon={FaChalkboardTeacher}
-          text="Importar"
+          text="Clases"
           active={activeLink === "/admin"}
           onClick={() => handleLinkClick("/admin")}
+        />
+
+        <NavLink
+          to="/admin/profesores"
+          icon={IoIosSchool}
+          text="Profesores"
+          active={activeLink === "/admin/profesores"}
+          onClick={() => handleLinkClick("/admin/profesores")}
         />       
       </nav>
     </div>
