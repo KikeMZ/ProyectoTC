@@ -15,7 +15,7 @@ const obtenerNombreProfesor = async (correoProfesor) => {
 const correo = new URLSearchParams(location.search).get('email');
 let nombreProfesor = ""
 if(correo)
- nombreProfesor = await obtenerNombreProfesor(correo);
+ nombreProfesor = correo;
 console.log(nombreProfesor)
 
 export default function Header() {

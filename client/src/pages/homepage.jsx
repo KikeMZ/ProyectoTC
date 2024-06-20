@@ -44,17 +44,14 @@ export default function Home() {
    //console.log(nombreProfesores);
    let auxProfesores = new Set(nombreProfesores);
    let listaProfesoresEncontrados = [...auxProfesores];
-   console.log(listaProfesoresEncontrados);
-   let profesoresUnicos = listaProfesoresEncontrados.filter( (profesor) => !nombreProfesoresBD.includes(profesor) );
-   let profesoresCreados = []
-   for(let profesor of profesoresUnicos)
-   {
-    createProfesor({"nombre":profesor}).then( (res) => {
-     profesoresCreados.push({"nombre":res.data});
-    });
-   }
+   //console.log(listaProfesoresEncontrados);
+   let profesoresNoEncontrados = listaProfesoresEncontrados.filter( (profesor) => !nombreProfesoresBD.includes(profesor) );
+   console.log(profesoresNoEncontrados)
+   //let profesoresCreados = []
+   let promesas = profesoresNoEncontrados.map( profesor => createProfesor({"nombre":profesor}));
+   await Promise.all(promesas).then( res => {console.log("Profesores creados")});
 
-   console.log(profesoresUnicos);
+   //console.log(profesoresUnicos);
    
   }
 
@@ -127,6 +124,7 @@ export default function Home() {
       }
       setClases(nuevaLista);
       await registrarProfesores(nuevaLista);
+      console.log("Profesores registrados");
       await registrarClases(nuevaLista);
 
     /*  for (let i = 0; i < nuevaLista.length; i++) {
