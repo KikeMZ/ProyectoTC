@@ -121,6 +121,8 @@ export const manejarArchivo = (e, setArchivo) =>{
      listaProfesores.push(profesor);
     }
     setProfesores(listaProfesores);
+    console.log("Profesores:")
+    console.log(listaProfesores)
    }
 
   

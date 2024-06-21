@@ -27,15 +27,15 @@ const Profesores = () => {
   const [editarProfesores, setEditarProfesores] = useState(false);
 
   const actualizarProfesores = (tipoActualizacion) => {
-   console.log("as"+tipoActualizacion)
-   console.log("Extraccion:"+mostrarDatosExtraidos+"Edicion"+editarProfesores)
+   console.log("TIpo: "+tipoActualizacion)
+   console.log("Extraccion:"+mostrarDatosExtraidos+" | Edicion: "+editarProfesores)
    let JSONActualizacion = {}
    if(tipoActualizacion==1)
    {
     let nombresProfesoresBD = profesores.map((profesor) => profesor.nombre);
     let profesoresFiltrados = datosExtraidos.filter( (p) => nombresProfesoresBD.includes(p.nombre));
     JSONActualizacion = {"profesores": profesoresFiltrados,"tipoActualizacion":'1'}
-    //console.log(profesoresFiltrados)
+    console.log(profesoresFiltrados)
    }
    else
    {
@@ -58,6 +58,7 @@ const Profesores = () => {
    if(archivoProfesores)
    {
     await leerArchivoProfesores(archivoProfesores, setDatosExtraidos);
+    controlModal.onClose();
     setMostrarDatosExtraidos(true);
     setEditarProfesores(false);
 

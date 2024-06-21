@@ -73,6 +73,8 @@ class ProfesorViewSet(viewsets.ModelViewSet):
                 posicionProfesor = nombreProfesores.index(p["nombre"])
                 contrasena = generarContrasena()
                 profesores[posicionProfesor].contrasena = contrasena
+                profesores[posicionProfesor].correo = p["correo"]
+                profesores[posicionProfesor].save()
         else:
             identificadorProfesores = [ profesor.id for profesor in profesores]
             for p in datosProfesores:
@@ -81,12 +83,9 @@ class ProfesorViewSet(viewsets.ModelViewSet):
                 if profesores[posicionProfesor].correo=="":
                     contrasena = generarContrasena()
                     profesores[posicionProfesor].contrasena = contrasena
+                    profesores[posicionProfesor].correo = p["correo"]
+                    profesores[posicionProfesor].save()
                       
-        profesores[posicionProfesor].correo = p["correo"]
-        profesores[posicionProfesor].save()
-            
-
-        print(request.data)
         
         return Response([], status=status.HTTP_200_OK)
     
