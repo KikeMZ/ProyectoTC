@@ -147,6 +147,8 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
       if(datosAlumno)
       {
        let nota = (parseFloat(d.split(",")[posicionNota]) * 10.0) / notaMaxima; 
+       if(isNaN)
+        nota=0;
        let calificacion = {
         "nota": nota,
         "matricula": datosAlumno.matricula,

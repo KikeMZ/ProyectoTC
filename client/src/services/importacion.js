@@ -64,6 +64,7 @@ export const manejarArchivo = (e, setArchivo) =>{
       if(archivoCalificaciones.tipo == 1)
       {
        correo = d.split(",")[posicionIdentificador.correo];
+       console.log(d.split(","));
        datosAlumno = listaAlumnos.find( (alumno) => alumno.correo == correo)
       }
       else
@@ -76,7 +77,9 @@ export const manejarArchivo = (e, setArchivo) =>{
       }
       if(datosAlumno)
       {
-       let nota = (parseFloat(d.split(",")[posicionNota]) * 10.0) / notaMaxima; 
+       let nota = (parseFloat(d.split(",")[posicionNota]) * 10.0) / notaMaxima;
+       if(isNaN(nota))
+        nota=0; 
        let calificacion = {
         "nota": nota,
         "matricula": datosAlumno.matricula,
@@ -87,6 +90,7 @@ export const manejarArchivo = (e, setArchivo) =>{
       }
     }
     setCalificacionesExtraidas(calificacionesEncontradas);
+    console.log("Calificaciones:")
     console.log(calificacionesEncontradas);
 
    }
@@ -224,7 +228,8 @@ export const manejarArchivo = (e, setArchivo) =>{
        console.log(auxCalificaciones[1].split(","))
        auxCalificaciones.shift();
        auxCalificaciones.shift();
-       
+       console.log("Calificaciones extraidas:")
+       console.log(auxCalificaciones)
        let entregaExtraida = generarFormatoJSONEntrega(nombreEntrega, tipo, fecha)
        crearListaCalificaciones(archivoEntrega, setCalificacionesExtraidas,auxCalificaciones,posicionIdentificador,12,notaMaxima,nrc);
        console.log(entregaExtraida)
