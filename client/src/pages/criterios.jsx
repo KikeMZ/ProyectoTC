@@ -2,6 +2,7 @@ import React, { useContext, useState, useRef, useEffect } from "react";
 import { NavContext } from "../layouts/layoutProfesor";
 import { claseContext } from "../layouts/layoutProfesor";
 import CriterioModal from "../components/modalCriterios"
+import ModalBorrarCriterio from "../components/modalBorrarCriterio";
 import { Input, Card, CardBody, Button, useDisclosure } from "@nextui-org/react";
 import { getAllCriterios, crearCriterio } from '../services/criterios.api';
 import { getAllClaseCriterio, createClaseCriterio, getCriteriosByNRC, updateClaseCriterio, deleteClaseCriterio } from '../services/claseCriterio.api';
@@ -27,6 +28,7 @@ const Criterios = () => {
   const { showNav, shownav } = useContext(NavContext);
   const { dataClase } = useContext(claseContext)
   const controlModal = useDisclosure();
+  const controlModalBorrar = useDisclosure();
 
   const [ criterios, setCriterios ] = useState([]);
   const criteriosModificados = useRef([]);
@@ -34,6 +36,8 @@ const Criterios = () => {
   const [ existenCriterios, setExistenCriterios] = useState(false);
   const [ mostrarCriterios, setMostrarCriterios] = useState(false);
   const [ editarCriterios, setEditarCriterios] = useState(false);
+  const [ criterioBorrado, setCriterioBorrado ] = useState("");
+  const [ borrarCriterio, setBorrarCriterio ] = useState(false); 
   const [ maximo, setMaximo ] = useState(0);
   
   const [archivoPDF, setArchivoPDF] = useState(null);
@@ -161,11 +165,18 @@ const Criterios = () => {
   }
 
   const eliminarCriterio = (nombre) =>{
-   let criterio = criterios.find( (c) => c.nombre==nombre)
-   setCriteriosEliminados([...criteriosEliminados,criterio]);
-   console.log(criterios.filter( (c) => c.nombre!=nombre));
-   setCriterios(criterios.filter( (c) => c.nombre!=nombre));
-   setMaximo(maximo-criterio.ponderacion);
+   if(criterios.length>1)
+   {
+    let criterio = criterios.find( (c) => c.nombre==nombre)
+    setCriteriosEliminados([...criteriosEliminados,criterio]);
+    console.log(criterios.filter( (c) => c.nombre!=nombre));
+    setCriterios(criterios.filter( (c) => c.nombre!=nombre));
+    setMaximo(maximo-criterio.ponderacion);
+   }
+   else
+   {
+    toast.error("¡Accion no valida!, la clase debe tener al menos 2 criterios para poder utilizar la opcion de borrar.");
+   }
   }
 
   const guardarModificaciones = async () => {
@@ -174,10 +185,11 @@ const Criterios = () => {
    {
     if(criteriosEliminados.length>0)
     {
-     for(let criterio of criteriosEliminados)
-     {
-      deleteClaseCriterio(criterio.id).then(console.log);
-     }
+     //for(let criterio of criteriosEliminados)
+     //{
+     let promesas = criteriosEliminados.map( criterio => deleteClaseCriterio(criterio.id) );
+     await Promise.all(promesas);
+     //}
     }
 
     let criteriosActualizados = await crearCriteriosGenerales();
@@ -374,7 +386,7 @@ const Criterios = () => {
              (
               <div className="flex justify-between" style={{width:"100%"}} >
             
-              <Input  type="text" onChange={(e) => {modificarCriterio(item.nombre, e.target.value)}} startContent={<button onClick={ ()=> { eliminarCriterio(item.nombre)}} className="mx-4"><MdDelete size="40px"/></button>} placeholder={item.nombre} className={{input:["w65 shadow-xl","text-white/90 dark:text-white/90 font-thin"],          innerWrapper: "bg-transparent",
+              <Input  type="text" onChange={(e) => {modificarCriterio(item.nombre, e.target.value)}} startContent={<button onClick={ ()=> { setCriterioBorrado(item.nombre); controlModalBorrar.onOpen()}} className="mx-4"><MdDelete size="40px"/></button>} placeholder={item.nombre} className={{input:["w65 shadow-xl","text-white/90 dark:text-white/90 font-thin"],          innerWrapper: "bg-transparent",
           inputWrapper: [
             "shadow-xl",
             "bg-default-200/50",
@@ -434,6 +446,7 @@ const Criterios = () => {
     </div>
 
     <CriterioModal controlModal={controlModal} setCriterios={setCriterios} maximo={maximo} setMaximo={setMaximo}></CriterioModal>
+    <ModalBorrarCriterio controlModal={controlModalBorrar} criterioBorrado={criterioBorrado} eliminarCriterio={eliminarCriterio}/>
 
     </>
      )
