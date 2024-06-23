@@ -22,6 +22,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
   const [calificacionesExtraidas, setCalificacionesExtraidas] = useState([]);
   const [mostrarCalificacionesExtraidas, setMostrarCalificacionesExtraidas] = useState(false)
   const [editarCalificaciones, setEditarCalificaciones] = useState(false);
+  const [ guardarCalificaciones, setGuardarCalificaciones ] = useState(false);
  
   useEffect(() => {
 
@@ -33,18 +34,20 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
 
     obtenerCalificaciones();
     //console.log(getCalificacionesByEntrega(entrega.id)); 
-  }, [mostrarCalificacionesExtraidas])
+  }, [guardarCalificaciones])
 
   const modificarCalificacion = (id_calificacion, valor) =>{
     if(valor<=10)
     {
+     console.log("Valor:"+ valor)
      let auxCalificaciones = [...calificaciones];
      let posicionCalificacion = calificaciones.findIndex( (c) => c.id==id_calificacion)
      console.log(auxCalificaciones[posicionCalificacion]);
 
-     auxCalificaciones[posicionCalificacion].nota = parseFloat(valor);
+     auxCalificaciones[posicionCalificacion].nota = valor==""?0:parseFloat(valor);
      setCalificaciones(auxCalificaciones);
      setEditarCalificaciones(true);
+   //  setGuardarCalificaciones(true);
     }
   }
     
@@ -147,7 +150,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
       if(datosAlumno)
       {
        let nota = (parseFloat(d.split(",")[posicionNota]) * 10.0) / notaMaxima; 
-       if(isNaN)
+       if(isNaN(nota))
         nota=0;
        let calificacion = {
         "nota": nota,
@@ -158,6 +161,16 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
        console.log(calificacion)
       }
     }
+    if(calificacionesEncontradas.length==listaAlumnos.length)
+    {
+     setGuardarCalificaciones(true);
+    }
+    else
+    {
+      toast.error("¡Parece que hay un problema!, verifique que el archivo seleccionado contenga las calificaciones de todos los alumnos inscritos en esta clase.",{"duration":10000});
+    }
+     
+
     setCalificacionesExtraidas(calificacionesEncontradas);
     console.log(calificacionesEncontradas);
 
@@ -189,6 +202,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
     
      }
     }
+    setGuardarCalificaciones(false);
     toast.success("¡Se han actualizado las calificaciones exitosamente!");
    }
 
@@ -278,6 +292,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
        let contenidoArchivoCSV = Papa.unparse(archivoCalificaciones.datos)
        let archivoValido = validarEstructuraCalificaciones(contenidoArchivoCSV);
        let existeNombreEntrega = validarNombreEntrega(contenidoArchivoCSV);
+       
        if(!archivoValido)
        {
         setResultadoExtraccion(2);
@@ -296,9 +311,12 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
         let posicionNota = archivoCalificaciones.datos.data[0].findIndex( (columna) => columna==entrega.nombre);
         let notaMaxima = archivoCalificaciones.datos.data[2][posicionNota];
         //let fecha = archivoCalificaciones.datos.data[1][posicionNota];
-        let auxCalificaciones = Papa.unparse(archivoCalificaciones.datos, {newline:"#"}).split("#");
+        let auxCalificaciones = Papa.unparse(archivoCalificaciones.datos, {newline:"#"}).replace("�","Ñ").split("#");
+        console.log("Papaparse")
+        console.log(auxCalificaciones)
         crearListaCalificaciones(auxCalificaciones,posicionIdentificador, posicionNota,notaMaxima);
         setMostrarCalificacionesExtraidas(true);
+        toast.success("¡Se han extraido los datos exitosamente!");
    
        }
       }
@@ -317,7 +335,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
   return (
     <>
 
-     <Button onClick={ () => { if(editarCalificaciones || mostrarCalificacionesExtraidas) {setEditarCalificaciones(false);setMostrarCalificacionesExtraidas(false);} else {mostrarVistaEntregas()}}} variant="faded" radius="large" startContent={<IoIosArrowBack size="23px"/>} className="text-base px-4"> { (editarCalificaciones || mostrarCalificacionesExtraidas)?"Regresar a calificaciones":"Regresar a entregas"}</Button>
+     <Button onClick={ () => { if(editarCalificaciones || mostrarCalificacionesExtraidas) {setEditarCalificaciones(false);setMostrarCalificacionesExtraidas(false); setGuardarCalificaciones(false)} else {mostrarVistaEntregas()}}} variant="faded" radius="large" startContent={<IoIosArrowBack size="23px"/>} className="text-base px-4"> { (editarCalificaciones || mostrarCalificacionesExtraidas)?"Regresar a calificaciones":"Regresar a entregas"}</Button>
     <div className="flex">
 
     {
@@ -332,7 +350,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
                         radius="large"
 
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mr-3 mb-10 font-bold text-base"
-                        onClick={ () => {setEditarCalificaciones(true)}}
+                        onClick={ () => {setEditarCalificaciones(true); setGuardarCalificaciones(true);}}
                     >
                         <i className="pi pi-pencil" style={{fontSize:"18px",fontWeight:"bold"}}></i> Modificar calificaciones
                     </Button>
@@ -368,6 +386,8 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
 
                       
                       <Button
+
+                        isDisabled={guardarCalificaciones?false:true}
                         radius="large"
 
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mb-10 font-bold text-base"

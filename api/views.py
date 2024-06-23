@@ -134,11 +134,42 @@ class ClaseCriterioViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = ["id_clase__nrc"]
 
+    def destroy(self, request, *args, **kwargs):
+        mensajeRespuesta="¡Se ha eliminado el criterio correctamente!"
+        statusHTTP = status.HTTP_200_OK
+        criterio = self.get_object()
+        clase = criterio.id_clase
+        lista_criteriosClase = ClaseCriterio.objects.filter(id_clase=clase)
+        lista_entregas = Entrega.objects.filter(tipo=criterio.id)
+        criteriosClaseActualizados = [ c for c in lista_criteriosClase if c!=criterio]
+        print(criteriosClaseActualizados)
+        numeroCriteriosClase = len(lista_criteriosClase)
+        if numeroCriteriosClase>1:
+            criterioTemporal = criteriosClaseActualizados[0]
+            for entrega in lista_entregas:
+                entrega.tipo = criterioTemporal
+                entrega.save()
+            criterio.delete()
+        else:
+            mensajeRespuesta="¡Error al intentar borrar el criterio!, parece que no es posible borrar el criterio debido a que debe existir al menos otro criterio para poder borrarlo."
+            statusHTTP = status.HTTP_500_INTERNAL_SERVER_ERROR
+            
+        return Response({"message":mensajeRespuesta},status=statusHTTP)
+
 class EntregaViewSet(viewsets.ModelViewSet):
     queryset = Entrega.objects.all()  # Utiliza el queryset de Entrega en lugar de Clase2
     serializer_class = EntregaSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['tipo__id']  # Asegúrate de que 'nombre' esté definido en tu modelo Entrega
+
+    def destroy(self, request, *args, **kwargs):
+        entrega = self.get_object()
+        lista_calificaciones = Calificacion.objects.filter(id_entrega=entrega)
+        #print(lista_calificaciones)
+        for calificacion in lista_calificaciones:
+            calificacion.delete()
+        entrega.delete()
+        return Response({"message":"¡Se ha eliminado la entrega exitosamente!"})
 
     @action(detail=False, methods=['get'])
     def getEntregasByNRC(self, request, pk=None):
@@ -148,6 +179,12 @@ class EntregaViewSet(viewsets.ModelViewSet):
         lista_entregas = [ self.get_serializer(e).data for e in entregas if str(e.tipo.id_clase)==nrc ]
 
         return Response(lista_entregas,status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=["delete"])
+    def borrarEntrega(self, request, pk=None):
+        print(request.data)
+        id_entrega = 0
+        return Response([], status=status.HTTP_200_OK)
 
 class CalificacionViewSet(viewsets.ModelViewSet):
     queryset = Calificacion.objects.all()

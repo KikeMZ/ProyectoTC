@@ -52,7 +52,7 @@ export const manejarArchivo = (e, setArchivo) =>{
   // ---------------------------------------------------------------------------------------------------------
   //
 
-  const crearListaCalificaciones = async (archivoCalificaciones, setCalificacionesExtraidas, datosCalificaciones, posicionIdentificador, posicionNota, notaMaxima, nrc) => {
+  const crearListaCalificaciones = async (archivoCalificaciones, setCalificacionesExtraidas, setCalificacionesCompletas, datosCalificaciones, posicionIdentificador, posicionNota, notaMaxima, nrc) => {
     let calificacionesEncontradas = [];
     let correo = "";
     let inscripciones = await axios.get("http://127.0.0.1:8000/api/Inscripcion/?search="+nrc);
@@ -88,6 +88,14 @@ export const manejarArchivo = (e, setArchivo) =>{
        calificacionesEncontradas.push(calificacion);
        console.log(calificacion)
       }
+    }
+    if(calificacionesEncontradas.length==listaAlumnos.length)
+    {
+     setCalificacionesCompletas(true);
+    }
+    else
+    {
+     toast.error("¡Parece que hay un problema!, verifique que el archivo seleccionado contenga las calificaciones de todos los alumnos inscritos en esta clase.",{"duration":10000});
     }
     setCalificacionesExtraidas(calificacionesEncontradas);
     console.log("Calificaciones:")
@@ -191,7 +199,7 @@ export const manejarArchivo = (e, setArchivo) =>{
  //  Funcion que permite la extraccion de los datos del Excel
  // --------------------------------------------------------
  //
- export const leerArchivoEntrega = async (archivoEntrega,setMostrarEntregaExtraida, setEntregaExtraida,setCalificacionesExtraidas,tipo,nrc) =>{
+ export const leerArchivoEntrega = async (archivoEntrega, setMostrarEntregaExtraida, setEntregaExtraida, setCalificacionesExtraidas, setCalificacionesCompletas, tipo, nrc) =>{
    //e.preventDefault();
    console.log("l")
    if(archivoEntrega!=null)
@@ -231,7 +239,7 @@ export const manejarArchivo = (e, setArchivo) =>{
        console.log("Calificaciones extraidas:")
        console.log(auxCalificaciones)
        let entregaExtraida = generarFormatoJSONEntrega(nombreEntrega, tipo, fecha)
-       crearListaCalificaciones(archivoEntrega, setCalificacionesExtraidas,auxCalificaciones,posicionIdentificador,12,notaMaxima,nrc);
+       crearListaCalificaciones(archivoEntrega, setCalificacionesExtraidas, setCalificacionesCompletas,auxCalificaciones,posicionIdentificador,12,notaMaxima,nrc);
        console.log(entregaExtraida)
        setEntregaExtraida(entregaExtraida);
 

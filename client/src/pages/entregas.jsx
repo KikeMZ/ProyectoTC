@@ -44,6 +44,7 @@ const Entregas = () => {
   const [ mostrarEntregaExtraida, setMostrarEntregaExtraida ] = useState(false);
   const [ editarEntregaExtraida, setEditarEntregaExtraida ] = useState(false);  
   const [ editarEntregas, setEditarEntregas ] = useState(false);
+  const [ calificacionesCompletas, setCalificacionesCompletas ] = useState(false);
   
   
     
@@ -92,10 +93,11 @@ const Entregas = () => {
      if( archivoEntrega!=null && tipo!=null)
      {
       controlModalImportacion.onClose();
-      leerArchivoEntrega(archivoEntrega, setMostrarEntregaExtraida, setEntregaExtraida,setCalificacionesExtraidas, tipo, dataClase.nrc);
+      leerArchivoEntrega(archivoEntrega, setMostrarEntregaExtraida, setEntregaExtraida,setCalificacionesExtraidas, setCalificacionesCompletas, tipo, dataClase.nrc);
       //setMostrarEntregas(false);
       setMostrarEntregaExtraida(true);
       setEditarEntregaExtraida(true);
+      //console.log("Tamaño: "+calificacionesExtraidas.length)
      }
      else
      {
@@ -265,6 +267,7 @@ const Entregas = () => {
 
                       
                       <Button
+                        isDisabled={calificacionesCompletas?false:true}
                         radius="large"
 
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mb-1 font-bold text-base"
