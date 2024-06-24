@@ -18,6 +18,27 @@ def generarContrasena():
         word=word+letra
     return word
 
+def enviarCorreo(correoDestino:str):
+    remitente="sm.maldonado1799@gmail.com"
+    destinatario="pokemondile24@gmail.com"
+    mensaje="hola mundo"
+    email=EmailMessage()
+    email["from"]=remitente
+    email["to"]=destinatario
+    email["subject"]="correo prueba"
+    x=generarContrasena()
+    # email.set_content(mensaje)
+    # email.set_content(email.set_content("tu contraseña es:"+ mensaje))
+    email.set_content("tu contraseña es:" + x)
+    smtp=smtplib.SMTP("smtp.gmail.com",port=587)#puede llegar a variar
+    #smtp.ehlo()
+    smtp.starttls()
+    ##smtp.login(remitente,"Drafthhh-1")
+    smtp.login(remitente,"jywedbrhzkbbwjvg")
+    smtp.sendmail(remitente,destinatario,email.as_string())
+    smtp.quit()
+
+
 
 # Create your views here.
 
@@ -85,10 +106,18 @@ class ProfesorViewSet(viewsets.ModelViewSet):
                     profesores[posicionProfesor].contrasena = contrasena
                     profesores[posicionProfesor].correo = p["correo"]
                     profesores[posicionProfesor].save()
-                      
         
         return Response([], status=status.HTTP_200_OK)
     
+    @action(detail=True, methods=["post"])
+    def reiniciarContrasena(self, request, pk=None):
+        profesor = self.get_object()
+        contrasenaActualizada = generarContrasena()
+        profesor.contrasena = contrasenaActualizada
+        profesor.save()
+        #enviarCorreo("")
+        return Response({"mensaje":"¡Correo enviado exitosamente!"})
+
     @action(detail=False, methods=['get'])
     def autenticarProfesor(self, request, pk=None):
         respuesta = {"nombre":"","correo":"","estadoSesion":1}

@@ -34,3 +34,5 @@ export const actualizarDatosProfesores = (datosProfesores) => {return api.post("
 export const autenticarProfesor = (correo, password) => {
  return api.get("/autenticarProfesor/?correo="+correo+"&password="+password)
 }
+
+export const resetPassword = (id_profesor) => api.post(`/${id_profesor}/reiniciarContrasena/`);

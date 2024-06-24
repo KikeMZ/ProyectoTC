@@ -3,7 +3,7 @@ import { NavContext } from "../layouts/layoutProfesor";
 import { claseContext } from "../layouts/layoutProfesor";
 import CriterioModal from "../components/modalCriterios"
 import ModalBorrarCriterio from "../components/modalBorrarCriterio";
-import { Input, Card, CardBody, Button, useDisclosure } from "@nextui-org/react";
+import { Input, Card, CardBody, Button, Tooltip, useDisclosure } from "@nextui-org/react";
 import { getAllCriterios, crearCriterio } from '../services/criterios.api';
 import { getAllClaseCriterio, createClaseCriterio, getCriteriosByNRC, updateClaseCriterio, deleteClaseCriterio } from '../services/claseCriterio.api';
 import toast from 'react-hot-toast';
@@ -386,7 +386,7 @@ const Criterios = () => {
              (
               <div className="flex justify-between" style={{width:"100%"}} >
             
-              <Input  type="text" onChange={(e) => {modificarCriterio(item.nombre, e.target.value)}} startContent={<button onClick={ ()=> { setCriterioBorrado(item.nombre); controlModalBorrar.onOpen()}} className="mx-4"><MdDelete size="40px"/></button>} placeholder={item.nombre} className={{input:["w65 shadow-xl","text-white/90 dark:text-white/90 font-thin"],          innerWrapper: "bg-transparent",
+              <Input classNames={{input:"text-xl"}} type="text" onChange={(e) => {modificarCriterio(item.nombre, e.target.value)}} startContent={  <button onClick={ ()=> { setCriterioBorrado(item.nombre); controlModalBorrar.onOpen()}} className="mx-4" title="Borrar Criterio"> <MdDelete size="40px"/> </button>  } placeholder={item.nombre} className={{input:["w65 shadow-xl","text-white/90 dark:text-white/90 font-thin"],          innerWrapper: "bg-transparent",
           inputWrapper: [
             "shadow-xl",
             "bg-default-200/50",
@@ -400,7 +400,7 @@ const Criterios = () => {
             "!cursor-text",
           ],
 }}/>
-              <Input type="number" maxLength={3} max={100 - maximo + item.ponderacion} min={0} onChange={ (e) => {modificarCriterio(item.nombre, e.target.value)}} endContent="%" value={item.ponderacion}></Input>
+              <Input classNames={{input:"text-xl font-medium text-right"}} type="number" maxLength={3} max={100 - maximo + item.ponderacion} min={0} onChange={ (e) => {modificarCriterio(item.nombre, e.target.value)}} endContent="%" value={item.ponderacion}></Input>
               
               </div>
               )

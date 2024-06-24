@@ -48,6 +48,15 @@ const Entregas = () => {
   
   
     
+    
+    const ordenAlfabetico = (entregaA, entregaB) => {
+     if(entregaA.nombre < entregaB.nombre)
+      return -1;
+     else if(entregaA.nombre > entregaB.nombre)
+      return 1;
+     else
+      return 0;
+    }
 
     useEffect(() => {
 
@@ -55,7 +64,7 @@ const Entregas = () => {
          let listaEntregas = await getEntregasByNRC(dataClase.nrc);
          if(listaEntregas.data.length>0)
          {
-          setEntregas(listaEntregas.data);
+          setEntregas(listaEntregas.data.sort(ordenAlfabetico));
           setMostrarEntregas(true);
          }
         }

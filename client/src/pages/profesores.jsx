@@ -1,22 +1,27 @@
 import React, { useContext, useState, useEffect } from "react";
 import { NavContext } from "../layouts/layoutProfesor";
 import ModalExtraerCorreos from "../components/modalExtraerCorreos";
+import ModalReiniciarContrasena from "../components/modalReiniciarContrasena";
 import { leerArchivoProfesores } from "../services/importacion";
 import { updateCalificacion } from "../services/calificacion.api"
-import { getAllProfesores, actualizarDatosProfesores } from "../services/profesor.api";
+import { getAllProfesores, actualizarDatosProfesores, resetPassword } from "../services/profesor.api";
 
 import axios from "axios";
 import * as XLSX from 'xlsx';
 import Papa from 'papaparse';
-import { Input, Card, CardBody, Button, useDisclosure } from "@nextui-org/react";
+import { Input, Card, CardBody, Button, Tooltip, useDisclosure } from "@nextui-org/react";
 import { IoIosSchool } from 'react-icons/io';
 import { FiEdit2 } from 'react-icons/fi'
 import { IoIosArrowBack } from 'react-icons/io';
+
+import { MdLockReset, MdDelete} from 'react-icons/md';
+
 import toast from 'react-hot-toast';
 
 const Profesores = () => {
 
   const controlModal = useDisclosure();
+  const controlModalContrasena = useDisclosure();
 
 
   const [archivoProfesores, setArchivoProfesores] = useState();
@@ -25,6 +30,23 @@ const Profesores = () => {
   const [datosExtraidos, setDatosExtraidos] = useState([]);
   const [mostrarDatosExtraidos, setMostrarDatosExtraidos] = useState(false)
   const [editarProfesores, setEditarProfesores] = useState(false);
+  const [profesorSeleccionado, setProfesorSeleccionado] = useState(null);
+
+  const reiniciarContrasena = (id_profesor) => {
+   resetPassword(id_profesor).then((res)=> {
+    toast.success("¡La contraseña se ha reiniciado exitosamente!")
+   })
+  }
+
+  const ordenAlfabetico = (profesorA, profesorB) => {
+   if(profesorA.nombre < profesorB.nombre)
+    return -1;
+   else if(profesorA.nombre > profesorB.nombre)
+    return 1;
+   else
+    return 0;
+
+  }
 
   const actualizarProfesores = (tipoActualizacion) => {
    console.log("TIpo: "+tipoActualizacion)
@@ -104,11 +126,12 @@ const Profesores = () => {
 
 
 
+
   useEffect(() => {
 
     const obtenerListaProfesores = async () => {
      let res = await getAllProfesores();
-     setProfesores(res.data);
+     setProfesores(res.data.sort(ordenAlfabetico));
      console.log(res)
     }
 
@@ -296,8 +319,15 @@ const Profesores = () => {
       <table style={{width:"100%", borderCollapse:"collapse", border:"3px solid white"}}>
        <thead>
         <tr style={{border:"3px solid white"}}>
-          <th className="text-2xl py-3">Nombre</th>
-          <th className="text-2xl py-3">Correo</th>
+          <th className="text-2xl py-3 text-start pl-3">Nombre</th>
+          <th className="text-2xl py-3 text-start">Correo</th>
+          {
+           editarProfesores && (
+            <>
+             <th className="text-2xl py-3"> Acciones</th>
+            </>
+           )
+          }
         </tr>
        </thead>
        <tbody>
@@ -312,18 +342,26 @@ const Profesores = () => {
       (
       <>
         <td className="py-2 px-2">
-         <Input classNames={{input: ["text-xl font-semibold text-start"]}}  type="text" onChange={ (e) => {modificarProfesor(profesor.id, e.target.value, 1)}} value={profesor.nombre} ></Input>
+         <Input classNames={{input: ["text-base font-semibold text-start"]}}  type="text" onChange={ (e) => {modificarProfesor(profesor.id, e.target.value, 1)}} value={profesor.nombre} ></Input>
         </td>
         <td className="py-2 px-2">
-         <Input classNames={{input: ["text-xl font-semibold text-start"]}}  type="text" onChange={ (e) => {modificarProfesor(profesor.id, e.target.value, 2)}} value={profesor.correo} ></Input>
+         <Input classNames={{input: ["text-base font-semibold text-start"]}}  type="text" onChange={ (e) => {modificarProfesor(profesor.id, e.target.value, 2)}} value={profesor.correo} ></Input>
+        </td>
+
+        <td>
+         <Tooltip className="text-black font-semibold" content="Reiniciar Contraseña">
+          <button onClick={ () => { setProfesorSeleccionado(profesor); controlModalContrasena.onOpen();}} >
+           <MdLockReset size="40px"/>
+          </button>
+         </Tooltip>
         </td>
       </>
       )
       :
       (
        <>
-     <td className="text-xl py-3"> {profesor.nombre} </td>
-     <td className="text-xl py-3"> {profesor.correo!=""?profesor.correo:"Vacio"} </td>
+     <td className="text-xl py-3 text-start px-2"> {profesor.nombre} </td>
+     <td className="text-xl py-3 text-start"> {profesor.correo!=""?profesor.correo:"Vacio"} </td>
         
        </>
       )
@@ -340,6 +378,7 @@ const Profesores = () => {
    }
 
    <ModalExtraerCorreos controlModal={controlModal}  extraerDatosArchivoProfesores={extraerDatosArchivoProfesores} setArchivoProfesores={modificarEstadoArchivoProfesores}></ModalExtraerCorreos>
+   <ModalReiniciarContrasena controlModal={controlModalContrasena} usuario={profesorSeleccionado} reiniciarContrasena={reiniciarContrasena} />
    </>
   )
 }

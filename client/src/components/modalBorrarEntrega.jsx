@@ -8,13 +8,12 @@ import { createEntrega } from "../services/entrega.api"
 import { createCalificacion} from "../services/calificacion.api"
 
 import {Select, SelectSection, SelectItem} from "@nextui-org/react";
-import { MdDelete } from "react-icons/md"
 import { RiErrorWarningFill } from "react-icons/ri";
 
 
 
 
-export default function ModalBorrarCriterio({ controlModal, criterioBorrado, eliminarCriterio}) {
+export default function ModalBorrarCriterio({ controlModal, entregaBorrada, eliminarEntrega}) {
 
 
   return (  
@@ -23,14 +22,13 @@ export default function ModalBorrarCriterio({ controlModal, criterioBorrado, eli
      {
       (onClose) => (
        <>
-       <ModalHeader className="bg-gradient-to-tr from-primary-100 to-primary-200 text-2xl text-white font-bold">
-       <MdDelete size="30px" className="mr-3"/>
+       <ModalHeader className="bg-gradient-to-tr from-primary-100 to-primary-200 text-xl text-white font-bold">
+       <RiErrorWarningFill size="31px" className="mr-3"/>
 
-        Borrar criterio
+        Borrar entrega?
        </ModalHeader>
        <ModalBody className="gap-1 text-black">
-       <h2 className="text-xl font-semibold">¿Quieres borrar el criterio: {criterioBorrado}?</h2>
-       <h3 className="text-base">Esta accion aun se puede revertir mientras no se pulse el boton guardar cambios.</h3> 
+       <h2>Al eliminar la entrega, se borraran todas las calificaciones asociadas a esta entrega.</h2> 
 
 
        </ModalBody>
@@ -40,9 +38,9 @@ export default function ModalBorrarCriterio({ controlModal, criterioBorrado, eli
                         radius="large"
 
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-2 ml-3 mb-10 font-bold text-base"
-                        onClick={() => {eliminarCriterio(criterioBorrado); onClose()}}
+                        onClick={() => {eliminarEntrega(entregaBorrada); onClose()}}
                     >
-                        <i className="pi pi-trash" style={{fontSize:"18px",fontWeight:"bold"}}></i> Borrar criterio
+                        <i className="pi pi-trash" style={{fontSize:"18px",fontWeight:"bold"}}></i> Borrar entrega
                     </Button>
 
 
