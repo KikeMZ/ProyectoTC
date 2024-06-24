@@ -8,6 +8,8 @@ import { createEntrega } from "../services/entrega.api"
 import { createCalificacion} from "../services/calificacion.api"
 
 import {Select, SelectSection, SelectItem} from "@nextui-org/react";
+
+import { MdDelete } from "react-icons/md";
 import { RiErrorWarningFill } from "react-icons/ri";
 
 
@@ -22,13 +24,14 @@ export default function ModalBorrarCriterio({ controlModal, entregaBorrada, elim
      {
       (onClose) => (
        <>
-       <ModalHeader className="bg-gradient-to-tr from-primary-100 to-primary-200 text-xl text-white font-bold">
-       <RiErrorWarningFill size="31px" className="mr-3"/>
+       <ModalHeader className="bg-gradient-to-tr from-primary-100 to-primary-200 text-2xl text-white font-bold">
+       <MdDelete  size="31px" className="mr-3"/>
 
-        Borrar entrega?
+        Borrar entrega
        </ModalHeader>
        <ModalBody className="gap-1 text-black">
-       <h2>Al eliminar la entrega, se borraran todas las calificaciones asociadas a esta entrega.</h2> 
+       <h3 className="text-xl font-semibold"> ¿Quieres borrar la entrega: {entregaBorrada.nombre}?</h3>
+       <h2 className="text-base"> Al eliminar la entrega, se borraran todas las calificaciones asociadas a esta entrega.</h2> 
 
 
        </ModalBody>

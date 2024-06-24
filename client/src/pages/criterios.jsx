@@ -19,10 +19,6 @@ const criteriosPredeterminados = [
 ];
 
 
-
-
-
-
 const Criterios = () => {
 
   const { showNav, shownav } = useContext(NavContext);
@@ -317,7 +313,7 @@ const Criterios = () => {
 
     cargarCriterios();
     showNav();
-  }, [])
+  }, [editarCriterios])
 
   useEffect(()=>{},[criterios])
 

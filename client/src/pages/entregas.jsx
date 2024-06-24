@@ -5,9 +5,11 @@ import Calificaciones from "./calificaciones";
 import RegistroCalificaciones from "./registroCalificaciones";
 import ModalEntregas from "../components/modalEntregas";
 import ModalImportarEntrega from "../components/modalImportarEntrega";
+import ModalBorrarEntrega from "../components/modalBorrarEntrega";
+
 import { manejarArchivo, leerArchivoEntrega } from "../services/importacion"
 import { obtenerListaAlumnos } from "../services/inscripcion.api";
-import { createEntrega, getEntregasByNRC } from "../services/entrega.api"
+import { createEntrega, getEntregasByNRC, deleteEntrega } from "../services/entrega.api"
 import { getCriteriosByNRC } from "../services/claseCriterio.api";
 import { createCalificacion } from "../services/calificacion.api"
 
@@ -19,7 +21,7 @@ import { FiEdit2 } from 'react-icons/fi';
 import { IoIosArrowBack } from 'react-icons/io'
 import { GrNext } from "react-icons/gr";
 import { RiFileList3Line } from "react-icons/ri";
-
+import { MdDelete } from "react-icons/md"
 
 
 
@@ -30,12 +32,14 @@ const Entregas = () => {
   const { dataClase } = useContext(claseContext);
   const controlModal = useDisclosure();
   const controlModalImportacion = useDisclosure();
+  const controlModalBorrar = useDisclosure();
   const controlModalRegistro = useDisclosure();
   
   const [ archivoEntrega, setArchivoEntrega ] = useState(null);
   const [ entregas, setEntregas ] = useState([]);
   const [ entregaExtraida, setEntregaExtraida ] = useState(null)
   const [ entregaSeleccionada, setEntregaSeleccionada ] = useState(null);
+  const [ respuestaDelete, setRespuestaDelete ] = useState(null);
   const [ calificacionesExtraidas, setCalificacionesExtraidas ] = useState(null);
 
   const [ mostrarEntregas, setMostrarEntregas ] = useState(false);
@@ -45,7 +49,8 @@ const Entregas = () => {
   const [ editarEntregaExtraida, setEditarEntregaExtraida ] = useState(false);  
   const [ editarEntregas, setEditarEntregas ] = useState(false);
   const [ calificacionesCompletas, setCalificacionesCompletas ] = useState(false);
-  
+
+  //var operacionDelete = false;
   
     
     
@@ -72,9 +77,17 @@ const Entregas = () => {
         cargarEntregas();
 
         showNav();
-    }, [])
+    }, [respuestaDelete])
     
     console.log(shownav)
+
+    const eliminarEntrega = () => {
+     deleteEntrega(entregaSeleccionada.id).then( (res) => {
+      toast.success("¡Se ha eliminado la entrega y sus calificaciones exitosamente!");
+      setRespuestaDelete(res);   
+     })
+     
+    }
 
     const modificarEstadoArchivo = (archivoEntrega) => setArchivoEntrega(archivoEntrega)
 
@@ -234,7 +247,8 @@ const Entregas = () => {
        </div>
       {
        entregas.map( (entrega, index) => (
-        <Button onClick={ () => editarEntregas?mostrarCardModificarEntrega(entrega.id):mostrarCalificacionesEntrega(entrega.id)} className="flex bg-white justify-between w-full mb-4 py-11" key={index} endContent={ editarEntregas?<p className="text-base mr-2"> Editar</p>:<GrNext className="text-xl"/> }>
+        <div key={index} className="flex">
+        <Button onClick={ () => editarEntregas?mostrarCardModificarEntrega(entrega.id):mostrarCalificacionesEntrega(entrega.id)} className="flex bg-white justify-between w-full mb-4 py-11" endContent={ editarEntregas?<p className="text-base mr-2"> Editar</p>:<GrNext className="text-xl"/> }>
          <div >
          <p className="text-2xl font-medium ml-4" style={{width:'0px'}}>
          {
@@ -254,6 +268,17 @@ const Entregas = () => {
          </p>
          </div>
         </Button>
+
+        {
+         editarEntregas && (
+         <Button isIconOnly className="mt-6 ml-3" variant="faded" onClick={() => {setEntregaSeleccionada(entrega); controlModalBorrar.onOpen() }}>
+          <MdDelete size="36px"/>
+        
+         </Button>
+         )
+        }
+
+        </div>
        )
       )
       }
@@ -328,6 +353,7 @@ const Entregas = () => {
     }
       <ModalEntregas controlModal={controlModal} modoEdicion={editarEntregas} setEntregas={setEntregas} setMostrarEntregas={setMostrarEntregas} nrc={dataClase.nrc} entrega={entregaSeleccionada} ></ModalEntregas>
       <ModalImportarEntrega controlModal={controlModalImportacion} modoEdicion={editarEntregaExtraida} entrega={entregaExtraida} setEntregaExtraida={setEntregaExtraida} setCalificacionesExtraidas={setCalificacionesExtraidas} manejarArchivo={manejarArchivo} setArchivoEntrega={modificarEstadoArchivo} extraerDatosArchivoEntrega={extraerDatosArchivoEntrega} nrc={dataClase.nrc}/>
+      <ModalBorrarEntrega controlModal={controlModalBorrar} entregaBorrada={entregaSeleccionada} eliminarEntrega={eliminarEntrega} />
       <RegistroCalificaciones controlModal={controlModalRegistro} entregasExistentes={entregas}/>
     </>
     ):

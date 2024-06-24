@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { NavContext } from "../layouts/layoutProfesor";
 import * as XLSX from 'xlsx';
 import Table from "../components/table";
+import ErrorCarga from "../components/errorCarga";
 import { Button } from "@nextui-org/react";
 import toast from "react-hot-toast";
 import { obtenerListaAlumnos, crearListaInscripcion } from "../services/inscripcion.api"
@@ -20,19 +21,25 @@ export default function Alumnos() {
     const { showNav } = useContext(NavContext);
     const [datosImportados, setDatosImportados] = useState([]); 
     const [matriculas, setMatriculas] = useState([]); 
+    const [cargando, setCargando] = useState(true);
+    const [cargaCorrecta, setCargaCorrecta] = useState(true);
 
-    
-    useEffect(() => {
-        async function cargaralumnos() {
-            try {
-                const data = await obtenerListaAlumnos(nrc); // Espera a que se resuelva la promesa y obtén los datos
-                setDatosImportados(data); // Asigna los datos al estado
-            } catch (error) {
-                console.error('Error al cargar los alumnos:', error);
-            }
+    const cargarAlumnos = async () => {
+        try {
+            const data = await obtenerListaAlumnos(nrc); // Espera a que se resuelva la promesa y obtén los datos
+            setDatosImportados(data); // Asigna los datos al estado
+            setCargando(false);
+           //throw new Error("EA");
+        } catch (error) {
+            setCargando(false)
+            setCargaCorrecta(false);
+            console.error('Error al cargar los alumnos:', error);
         }
-        cargaralumnos();
+    }
+
+    useEffect(() => {
         showNav();
+        cargarAlumnos();
     }, [mostrarTablas])
 
 
@@ -258,7 +265,16 @@ export default function Alumnos() {
 
     return (
         <div className="flex flex-col items-center justify-start min-h-full">
-            {(!mostrarTablas && datosImportados.length === 0) &&  (
+
+            { cargando?
+              (<>
+               <h2 className="text-3xl font-bold mt-10 pt-4">Cargando clases</h2>
+               <i className="pi pi-sync pi-spin mt-6 text-3xl"></i>
+              </>)
+              :
+            (
+            <>
+            {(!mostrarTablas && datosImportados.length === 0 && cargaCorrecta) &&  (
                 <div className="flex flex-col items-center justify-center">
                     <h1 className="text-center text-3xl font-bold mb-8">Parece que aun no ha importado a los alumnos de esta clase</h1>
                     <form className="mb-4">
@@ -275,7 +291,7 @@ export default function Alumnos() {
                     </Button>
                 </div>
             )}
-            {(mostrarTablas && datosImportados.length === 0) && (
+            {(mostrarTablas && datosImportados.length === 0 && cargaCorrecta) && (
             <>
                 <div className="w-full mb-12">
                 <h2 className="text-3xl font-semibold ml-2 mt-5 mb-6">Datos extraidos del archivo</h2>
@@ -297,7 +313,7 @@ export default function Alumnos() {
                 </div>
             </>
             )}
-            {datosImportados.length !== 0 &&(
+            {(datosImportados.length !== 0 && cargaCorrecta) &&(
 
                 <div className="w-full">
        <h2 className="text-3xl font-semibold ml-3 mt-5">Lista de Alumnos</h2>
@@ -305,6 +321,13 @@ export default function Alumnos() {
                     <Table data={detallesAlumnos} columns={columns} esVistaExtraccion={false}></Table>
                 </div>
             )}
+         </>
+         )
+        }
+            {
+             ( !cargaCorrecta && !cargando) && (<ErrorCarga mensajeError="Parece que ha ocurrido un problema al intentar cargar la lista de alumnos." reintentarCarga={cargarAlumnos}/>)
+            }
+
         </div>
     )
 }
