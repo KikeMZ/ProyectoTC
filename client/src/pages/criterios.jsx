@@ -1,6 +1,9 @@
 import React, { useContext, useState, useRef, useEffect } from "react";
 import { NavContext } from "../layouts/layoutProfesor";
 import { claseContext } from "../layouts/layoutProfesor";
+import { atom, useAtom } from "jotai";
+import { alumnosAtom } from "./alumnos";
+
 import CriterioModal from "../components/modalCriterios"
 import ModalBorrarCriterio from "../components/modalBorrarCriterio";
 import ErrorCarga from "../components/errorCarga";
@@ -12,6 +15,8 @@ import { getAllClaseCriterio, createClaseCriterio, getCriteriosByNRC, updateClas
 import toast from 'react-hot-toast';
 import 'primeicons/primeicons.css';
 import { MdDelete } from 'react-icons/md';
+
+export const criteriosAtom = atom(false);
 
 const criteriosPredeterminados = [
   {"nombre": "Tareas", "ponderacion": 20},
@@ -28,6 +33,11 @@ const Criterios = () => {
   const { dataClase } = useContext(claseContext)
   const controlModal = useDisclosure();
   const controlModalBorrar = useDisclosure();
+
+  const [ existenCriterios2, setExistenCriterios2 ] = useAtom(criteriosAtom);
+  const [ existenAlumnos, setExistenAlumnos ] = useAtom(alumnosAtom);
+
+  console.log("Atomo:"+existenAlumnos)
 
   const [ criterios, setCriterios ] = useState([]);
   const criteriosModificados = useRef([]);
@@ -331,8 +341,13 @@ const Criterios = () => {
         setExistenCriterios(true); 
         setMostrarCriterios(true);
         setMaximo(100);
-        setCargando(false);
        }
+       else
+       {
+        setExistenCriterios(false);
+        setExistenCriterios(false);
+       }
+       setCargando(false);
       } catch(e)
       {
        setCargando(false);

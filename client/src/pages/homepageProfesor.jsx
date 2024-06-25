@@ -15,7 +15,7 @@ export default function HomeProfesor() {
   const { dontshowNav } = useContext(NavContext); 
   const {limpiarDatos} = useContext(claseContext);
   const {dataProfesor} = useContext(profesorContext);
-  const profesor = dataProfesor.toUpperCase();
+  const profesor = dataProfesor?.toUpperCase();
 
 
 
@@ -25,7 +25,7 @@ export default function HomeProfesor() {
         const res = await getProfesorByCorreo(profesor);
         console.log("Respuesta Sesions:")
         console.log(res)
-        const resClases = await getClasesByProfesor(await res.data[0].nombre); // Obtener la respuesta de getClasesByProfesor
+        const resClases = await getClasesByProfesor(await res.data[0]?.nombre); // Obtener la respuesta de getClasesByProfesor
         const profesorMatches = resClases.data //res.data.filter(item => item.nombreProfesor === profesor); // Filtrar la lista directamente
         console.log(profesorMatches);
         setLista(profesorMatches); // Establecer la lista filtrada en el estado

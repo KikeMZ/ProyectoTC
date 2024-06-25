@@ -76,6 +76,8 @@ const Entregas = () => {
         setMostrarEntregas(true);
         toast.success("Seccion de entregas",{icon:<i className="pi pi-info-circle text-2xl text-yellow-400 font-semibold"/>, duration:1500})        
        }
+       else
+        setMostrarEntregas(false);
        setCargando(false);
 
       } catch(e){
@@ -149,28 +151,38 @@ const Entregas = () => {
      {
       setEntregas( (listaEntregas) => [...listaEntregas, res.data]);
 
-      for(let alumno of listaAlumnos)
-        {
-         let nota = 0;
-         let posicionCalificacion = calificacionesExtraidas.findIndex((c) => c.matricula==alumno.alumno_detail.matricula)
-         console.log(alumno)
-         if(posicionCalificacion!=-1)
-         {
-          console.log("In if")
-          nota = calificacionesExtraidas[posicionCalificacion].nota
-         }
-         let calificacion = {
-          "nota": nota,
-          "matricula": alumno.alumno_detail.matricula,
-          "id_entrega": res.data.id
-         }
+      //for(let alumno of listaAlumnos)
+      //  {
+
+         let promesas = listaAlumnos.map( alumno => {
+          let nota = 0;
+          let posicionCalificacion = calificacionesExtraidas.findIndex((c) => c.matricula==alumno.alumno_detail.matricula)
+          //console.log(alumno)
+          if(posicionCalificacion!=-1)
+          {
+           //console.log("In if")
+           nota = calificacionesExtraidas[posicionCalificacion].nota
+          }
+          let calificacion = {
+           "nota": nota,
+           "matricula": alumno.alumno_detail.matricula,
+           "id_entrega": res.data.id
+          }
     
-         console.log(calificacion);
-         createCalificacion(calificacion).then(console.log);
+          //console.log(calificacion);
+          return createCalificacion(calificacion);
+         }
+         )
+
+       // }
+
+        Promise.all(promesas).then( res2 => {
+         setEditarEntregaExtraida(false);
+         setMostrarEntregaExtraida(false);
+         setMostrarEntregas(true);
+         toast.success("¡Se ha creado la entrega exitosamente!")
         }
-        setEditarEntregaExtraida(false);
-        setMostrarEntregaExtraida(false);
-        toast.success("¡Se ha creado la entrega exitosamente!")
+        )
        
     }
      )
@@ -201,19 +213,28 @@ const Entregas = () => {
      (
       <>
     {
-     (!mostrarEntregas)?
+     (!mostrarEntregas && !mostrarEntregaExtraida)?
      (
       <div className="flex flex-col items-center justify-start min-h-full">
       <div className="flex flex-col items-center justify-center">
-          <h1 className="text-center text-3xl font-bold mt-6 mb-4">Parece que aun no hay ninguna entrega para esta clase.</h1>
+          <h1 className="text-center text-3xl font-bold mt-6 mb-6">Parece que aun no hay ninguna entrega para esta clase.</h1>
+          <h2 className="text-2xl font-medium">Comience con alguna de las siguientes opciones:</h2>
+          <div>
           <Button
               radius="large"
-              className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-2 mr-3 mb-10 font-bold text-base"
+              className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-8 mr-3 mb-10 font-bold text-base"
               onClick={controlModal.onOpen}
           >
               <i className="pi pi-plus" style={{fontSize:"16px",fontWeight:"bold"}}></i> Crear entrega
           </Button>
 
+           <Button
+              radius="large"
+              className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-8 mr-3 mb-2 font-bold text-base"
+              onClick={controlModalImportacion.onOpen} >
+              <i className="pi pi-file-import" style={{fontSize:"20px",fontWeight:"semibold"}}></i> Importar entrega
+           </Button>
+          </div>
 
 
       </div>

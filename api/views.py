@@ -138,7 +138,7 @@ class ProfesorViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def autenticarProfesor(self, request, pk=None):
-        respuesta = {"id":"","nombre":"","correo":"","token":"","estadoSesion":1}
+        respuesta = {"id":"","nombre":"","correo":"","token":"","estadoSesion":1} # Campos vacios
         correoFormulario = request.GET["correo"]
         contrasenaFormulario = request.GET["password"]
         if correoFormulario!="" or contrasenaFormulario!="":
@@ -151,12 +151,12 @@ class ProfesorViewSet(viewsets.ModelViewSet):
                     respuesta["nombre"]=profesor.nombre
                     respuesta["correo"]=profesor.correo
                     respuesta["token"]= token
-                    respuesta["estadoSesion"]=0
+                    respuesta["estadoSesion"]=0 # Datos correctos
                     profesor.token=token
                     profesor.save()
                     
                 else:
-                    respuesta["estadoSesion"]=2
+                    respuesta["estadoSesion"]=2 #Contraseña incorrecta
         print(respuesta)
         return Response(respuesta, status=status.HTTP_200_OK)
 

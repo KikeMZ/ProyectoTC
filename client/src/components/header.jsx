@@ -51,8 +51,10 @@ export default function Header() {
                         </DropdownTrigger>
                         <DropdownMenu aria-label="User Actions" variant="flat">
                             <DropdownItem key="logout" color="danger">
-                            <Link to="/">
+                            <Link >
+                             <button onClick={ () => { window.localStorage.removeItem("sesionUsuarioApp");window.location.href="/"}}>
                                 Cerrar sesión
+                             </button>
                             </Link>
                             </DropdownItem>
                         </DropdownMenu>

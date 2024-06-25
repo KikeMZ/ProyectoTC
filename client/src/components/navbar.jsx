@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAtom } from "jotai";
+import { alumnosAtom } from "../pages/alumnos";
+import { criteriosAtom } from "../pages/criterios";
+
 import { obtenerListaAlumnos } from "../services/inscripcion.api";
 import { getCriteriosByNRC } from "../services/claseCriterio.api";
 
@@ -25,6 +29,9 @@ export const Nav = ({clase}) => {
   const [mostrarEntregas, setMostrarEntregas] = useState(false);
   const [mostrarAsistencia, setMostrarAsistencia] = useState(false);
 
+  const [ existenAlumnos, setExistenAlumnos ] = useAtom(alumnosAtom);
+  const [ existenCriterios, setExistenCriterios ] = useAtom(criteriosAtom);
+
   console.log(clase);
 
   const handleLinkClick = (link) => {
@@ -32,7 +39,7 @@ export const Nav = ({clase}) => {
   };
 
   useEffect( () => {
-   const existenAlumnos = async () => {
+   const existenAlumnos2 = async () => {
     let auxExistenAlumnos = false; 
     let res = await obtenerListaAlumnos(clase.nrc)
     if(res.length>0)
@@ -41,23 +48,26 @@ export const Nav = ({clase}) => {
     
    }
    
-   const existenCriterios = async () => {
+   const existenCriterios2 = async () => {
     let auxExistenCriterios = false;
     let res = await getCriteriosByNRC(clase.nrc);
+    console.log("Criterios")
     console.log(res.data);
     if(res.data.length>0)
      auxExistenCriterios = true;
     return auxExistenCriterios;
    }
    
-   existenAlumnos().then( (resExistenAlumnos) => {
+   existenAlumnos2().then( (resExistenAlumnos) => {
     if(resExistenAlumnos==true)
     {
-     setMostrarAsistencia(true);
-     existenCriterios().then( (resExistenCriterios) => {
+     setExistenAlumnos(true);
+     existenCriterios2().then( (resExistenCriterios) => {
       console.log("Alumnos:"+resExistenAlumnos+", Criterios:"+resExistenCriterios)
-      if(resExistenCriterios==true && resExistenAlumnos==true)
-       setMostrarEntregas(true)
+      if(resExistenCriterios==true)
+       setExistenCriterios(true)
+      else
+       setExistenCriterios(false)
      })
     }
    });
@@ -74,7 +84,7 @@ export const Nav = ({clase}) => {
         />
 
         {
-       //  mostrarEntregas &&
+         existenAlumnos && existenCriterios &&
 
          (
         <NavLink
@@ -85,15 +95,21 @@ export const Nav = ({clase}) => {
         />
          ) 
         }
+
+        {
+         existenAlumnos &&
+        (
         <NavLink
           to="/profesor/criterios"
           text="Criterios"
           active={activeLink === "/profesor/criterios"}
           onClick={() => handleLinkClick("/profesor/criterios")}
         />
+        )
+        }
 
         {
-        // mostrarAsistencia &&
+         existenAlumnos && existenCriterios &&
 
          (
          <NavLink

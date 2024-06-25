@@ -3,6 +3,7 @@ import { Input, Button } from "@nextui-org/react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { autenticarProfesor } from "../services/profesor.api";
+import toast from "react-hot-toast";
 
 export default function LoginCard() {
   const [email, setEmail] = useState(""); // Estado para almacenar el valor del email
@@ -30,7 +31,12 @@ export default function LoginCard() {
     if(res.data.estadoSesion==0)
     {
      window.localStorage.setItem("sesionUsuarioApp", JSON.stringify(res.data));
-     navigate("/profesor?nombre="+res.data.nombre+"&email="+res.data.correo);
+     window.location.href = "/profesor?nombre="+res.data.nombre+"&email="+res.data.correo;
+    }
+    else if(res.data.estadoSesion==1)
+    {
+     toast.error("¡Debe llenar todos los campos para iniciar sesion!");
+     //console.log("g")
     }
 
    })

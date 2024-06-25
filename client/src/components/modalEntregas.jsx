@@ -74,8 +74,10 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
    createEntrega(entrega).then( (res) => {
     setEntregas( (listaEntregas) => [...listaEntregas, res.data]);
     setMostrarEntregas(true);
-    for(let alumno of listaAlumnos)
-    {
+    //for(let alumno of listaAlumnos)
+    //{
+
+     let promesas = listaAlumnos.map( alumno => {
      let calificacion = {
       "nota": 0,
       "matricula": alumno.alumno_detail.matricula,
@@ -85,7 +87,13 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
      console.log(calificacion);
      createCalificacion(calificacion).then(console.log);
     }
-    toast.success("¡Se ha creado la entrega exitosamente!")
+    )
+
+    Promise.all(promesas).then( res =>{
+      toast.success("¡Se ha creado la entrega exitosamente!")
+     }
+    )
+   // }
    }
    )
 

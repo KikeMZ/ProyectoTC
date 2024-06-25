@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { NavContext } from "../layouts/layoutProfesor";
+import { atom, useAtom } from "jotai";
 import * as XLSX from 'xlsx';
 import Table from "../components/table";
 import ErrorCarga from "../components/errorCarga";
@@ -10,12 +11,16 @@ import { getAllAlumnos, createAlumno } from "../services/alumnos.api";
 import { claseContext } from "../layouts/layoutProfesor";
 
 
+export const alumnosAtom = atom(false);
 
 export default function Alumnos() {
 
     const { dataClase } = useContext(claseContext)
     const nrc = dataClase.nrc
     console.log("NRC: "+nrc)
+
+    const [ existenAlumnos, setExistenAlumnos ] = useAtom(alumnosAtom);
+
     //Estados
     const [mostrarTablas, setMostrarTablas] = useState(false);
     const { showNav } = useContext(NavContext);
@@ -29,11 +34,19 @@ export default function Alumnos() {
         try {
             const data = await obtenerListaAlumnos(nrc); // Espera a que se resuelva la promesa y obtén los datos
             const inscripcionPendiente = data.find( inscripcion => inscripcion.estado=="PENDIENTE");
-            console.log(data)
-            if(!inscripcionPendiente)
+            console.log(inscripcionPendiente)
+            if(inscripcionPendiente==undefined && data.length>0)
+            {
              setDatosImportados(data); // Asigna los datos al estado
+             setExistenAlumnos(true);
+             console.log("Atomo true")
+            }
             else
+            {
+             setExistenAlumnos(false);
+             console.log("Atomo false")
              setDatosImportados([])
+            }
             setCargando(false);
             //toast.success("Seccion de alumnos",{icon:<i className="pi pi-info-circle text-2xl text-yellow-400 font-semibold"/>, duration:1500})
             //throw new Error("EA");
