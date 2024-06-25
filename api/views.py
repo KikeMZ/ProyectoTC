@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .serializer import ProgrammerSerializer,AlumnoSerializer,Clase2Serializer, ProfesorSerializer, InscripcionSerializer,EntregaSerializer,CriterioSerializer, ClaseCriterioSerializer, CalificacionSerializer
-from .models import Programmer,Alumno,Clase2, Profesor, Inscripcion,Entrega,Criterio, ClaseCriterio, Calificacion
+from .serializer import ProgrammerSerializer,AlumnoSerializer, PeriodoSerializer,Clase2Serializer, ProfesorSerializer, InscripcionSerializer,EntregaSerializer,CriterioSerializer, ClaseCriterioSerializer, CalificacionSerializer
+from .models import Programmer,Alumno, Periodo,Clase2, Profesor, Inscripcion,Entrega,Criterio, ClaseCriterio, Calificacion
 from rest_framework import filters, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -10,13 +10,19 @@ from email.message import EmailMessage
 import random
 import string
 
-def generarContrasena():
-    Characters=string.ascii_letters + "1234567890_-/?¿@$%"
+def generarCodigo(tamano:int):
+    Characters=string.ascii_letters + "1234567890."
     word=""
-    for i in range (10):
+    for i in range (tamano):
         letra=random.choice(Characters)
         word=word+letra
     return word
+
+def generarToken():
+    return generarCodigo(50)
+
+def generarContrasena():
+    return generarCodigo(10)
 
 def enviarCorreo(correoDestino:str):
     remitente="sm.maldonado1799@gmail.com"
@@ -57,6 +63,9 @@ class AlumnoViewSet(viewsets.ModelViewSet):
             j.delete()
         return Response(status=status.HTTP_200_OK)
 
+class PeriodoViewSet(viewsets.ModelViewSet):
+    queryset = Periodo.objects.all()
+    serializer_class = PeriodoSerializer
 
 class Clase2ViewSet(viewsets.ModelViewSet):
     queryset = Clase2.objects.all()
@@ -117,23 +126,38 @@ class ProfesorViewSet(viewsets.ModelViewSet):
         profesor.save()
         #enviarCorreo("")
         return Response({"mensaje":"¡Correo enviado exitosamente!"})
+    
+    @action(detail=True, methods=['post'])
+    def verificarEstadoSesion(self, request, pk=None):
+        token_cliente = request.data["token"]
+        profesor = self.get_object()
+        if token_cliente!=profesor.token:
+            return Response({"message":"¡El token que tiene el cliente no es igual al que tiene el servidor.","estadoSesion":1}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        return Response({"message":"Sesion activa","estadoSesion":0}, status=status.HTTP_200_OK)
+
 
     @action(detail=False, methods=['get'])
     def autenticarProfesor(self, request, pk=None):
-        respuesta = {"nombre":"","correo":"","estadoSesion":1}
+        respuesta = {"id":"","nombre":"","correo":"","token":"","estadoSesion":1}
         correoFormulario = request.GET["correo"]
         contrasenaFormulario = request.GET["password"]
         if correoFormulario!="" or contrasenaFormulario!="":
             correosBD = [ p.correo for p in Profesor.objects.all()]
             if correoFormulario in correosBD:
-                datosProfesor = Profesor.objects.get(correo=correoFormulario)
-                if contrasenaFormulario==datosProfesor.contrasena:
-                    respuesta["nombre"]=datosProfesor.nombre
-                    respuesta["correo"]=datosProfesor.correo
+                profesor = Profesor.objects.get(correo=correoFormulario)
+                if contrasenaFormulario==profesor.contrasena:
+                    token = generarToken()
+                    respuesta["id"]=profesor.id
+                    respuesta["nombre"]=profesor.nombre
+                    respuesta["correo"]=profesor.correo
+                    respuesta["token"]= token
                     respuesta["estadoSesion"]=0
+                    profesor.token=token
+                    profesor.save()
+                    
                 else:
                     respuesta["estadoSesion"]=2
-                
+        print(respuesta)
         return Response(respuesta, status=status.HTTP_200_OK)
 
 class InscripcionViewSet(viewsets.ModelViewSet):
@@ -142,14 +166,16 @@ class InscripcionViewSet(viewsets.ModelViewSet):
     filter_backends=[filters.SearchFilter] #Se indica que se permitira la filtracion de los datos basado en el dato que se pase mediante el metodo GET    
     search_fields=['clase__nrc','alumno__matricula'] #Se indicaran los campos en los cuales se buscara el valor indicado como parametro al momento de llamar al metodo GET
 
-    @action(detail=False, methods=['get'])
-    def prueba(self, request, pk=None):
-        lista_alumnos = []
-        inscripciones = Inscripcion.objects.all()
-        for inscripcion in inscripciones:
-            lista_alumnos.append(inscripcion.alumno.__dict__)
-        print(lista_alumnos)
-        return Response(lista_alumnos,status=status.HTTP_200_OK)
+    @action(detail=False, methods=['post'])
+    def activarInscripciones(self, request, pk=None):
+        lista_inscripciones = []
+        nrc_POST = request.data["nrc"]
+        print("T") 
+        lista_inscripciones = Inscripcion.objects.filter(clase=nrc_POST)
+        for inscripcion in lista_inscripciones:
+            inscripcion.estado = "ACTIVA"
+            inscripcion.save()
+        return Response([],status=status.HTTP_200_OK)
     
 class CriterioViewSet(viewsets.ModelViewSet):
     queryset = Criterio.objects.all()

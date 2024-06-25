@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Programmer, Alumno,Clase2, Profesor, Inscripcion, Entrega, Criterio, ClaseCriterio, Calificacion
+from .models import Programmer, Alumno, Periodo, Clase2, Profesor, Inscripcion, Entrega, Criterio, ClaseCriterio, Calificacion
 
 
 class ProgrammerSerializer(serializers.ModelSerializer):
@@ -23,6 +23,11 @@ class ProfesorSerializer(serializers.ModelSerializer):
         model=Profesor
         fields= '__all__'
 
+class PeriodoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Profesor
+        fields= '__all__'
+
 class Clase2Serializer(serializers.ModelSerializer):
     profesor_detail = ProfesorSerializer(source="id_profesor", read_only=True)
 
@@ -38,7 +43,7 @@ class InscripcionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Inscripcion
-        fields = ('id', 'clase', 'alumno', 'clase_detail', 'alumno_detail')
+        fields = ('id', 'clase', 'alumno','estado', 'clase_detail', 'alumno_detail')
         extra_kwargs = {
             'clase': {'write_only': True},
             'alumno': {'write_only': True}
@@ -54,7 +59,7 @@ class ClaseCriterioSerializer(serializers.ModelSerializer):
     criterio_detail = CriterioSerializer(source='id_criterio', read_only=True)
     class Meta:
         model=ClaseCriterio
-        fields=('id','id_clase','id_criterio','ponderacion','clase_detail','criterio_detail')
+        fields=('id','id_clase','id_criterio','nombre','ponderacion','clase_detail','criterio_detail')
 
 class EntregaSerializer(serializers.ModelSerializer):
     claseCriterio_detail = ClaseCriterioSerializer(source='tipo', read_only=True)

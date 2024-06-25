@@ -5,7 +5,7 @@ import Header from "../components/header"
 import Toast from "../components/toast"
 import { Nav } from "../components/navbar"
 import { useState, createContext } from "react"
-import { autenticarProfesor } from "../services/profesor.api"
+import { revisarEstadoSesion } from "../services/profesor.api"
 
 
 export const NavContext = createContext();
@@ -16,7 +16,7 @@ export default function LayoutProfesor() {
     const location = useLocation();
     const navigate = useNavigate();
     const profesor = new URLSearchParams(location.search).get('email');
-    const contrasena = new URLSearchParams(location.search).get('password');
+    const nombre = new URLSearchParams(location.search).get('nombre');
 
     //Estados de la NavBar
     const [shownav, setshownav] = useState(false);
@@ -44,13 +44,19 @@ export default function LayoutProfesor() {
 
     useEffect(() => {
      async function autenticacion () {
-      let res = await autenticarProfesor(profesor,contrasena);
-      if(res.data.estadoSesion==0)
-       setDataProfesor(res.data.nombre)
-      else if(res.data.estadoSesion==1)
-       navigate("/?estado=1");
+      let sesionUsuarioApp = window.localStorage.getItem("sesionUsuarioApp");
+      if(sesionUsuarioApp)
+      {
+       let profesor = JSON.parse(sesionUsuarioApp);
+       let res = await revisarEstadoSesion(profesor.id,profesor.token);
+       console.log("Layout")
+       console.log(res)
+       if(res.data.estadoSesion!=0)
+        navigate("/");
+       // setDataProfesor(res.data.nombre)
+      }
       else
-       navigate("/?estado=2");
+       navigate("/");
      }
 
      autenticacion();

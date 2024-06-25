@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import { Input, Button } from "@nextui-org/react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+import { autenticarProfesor } from "../services/profesor.api";
 
 export default function LoginCard() {
   const [email, setEmail] = useState(""); // Estado para almacenar el valor del email
   const [contrasena, setContrasena] = useState("");
+
+  const navigate = useNavigate();
 
 
   const limpiarTexto = (texto) => {
@@ -19,6 +23,18 @@ export default function LoginCard() {
   const handleContrasenaChange = (e) => {
     setContrasena(e.target.value); // Actualizar el estado del email cuando cambia el valor del campo de entrada
   };
+
+  const verificarDatosLogin = () => {
+   autenticarProfesor(email, contrasena).then( (res) =>{
+    console.log(res)
+    if(res.data.estadoSesion==0)
+    {
+     window.localStorage.setItem("sesionUsuarioApp", JSON.stringify(res.data));
+     navigate("/profesor?nombre="+res.data.nombre+"&email="+res.data.correo);
+    }
+
+   })
+  }
 
   
   return (
@@ -44,11 +60,9 @@ export default function LoginCard() {
             Admin
           </Button>
         </Link>
-        <Link to={`/profesor?email=${ limpiarTexto(email.includes("@")?email:email.toUpperCase())}&password=${contrasena}`}>
-          <Button  variant="solid" className="bg-gray-300">
+          <Button onClick={verificarDatosLogin} variant="solid" className="bg-gray-300">
             Profesor
           </Button>
-        </Link>
       </div>
     </div>
   );

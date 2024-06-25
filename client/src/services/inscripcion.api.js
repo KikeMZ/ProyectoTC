@@ -30,6 +30,7 @@ import axios from 'axios';
         let inscripcion = {
             "clase": nrc,
             "alumno": matricula,
+            "estado": "PENDIENTE"
         };
         console.log("Inscripcion: "+matricula+", "+nrc+","+inscripcion);
         // Retorna la promesa de la solicitud POST
@@ -60,6 +61,9 @@ import axios from 'axios';
     return response.data;
 }
 
+  // ------------------
+  // --- Update ---
+  // ------------------
 
 
   // Update (Duda)
@@ -67,4 +71,5 @@ import axios from 'axios';
 
   }
 
+  export const activarInscripciones = (nrc) => axios.post(import.meta.env.VITE_BACKEND_URL+"Inscripcion/activarInscripciones/", {"clase":"","alumno":"","estado":"", "nrc":nrc});
  

@@ -12,11 +12,11 @@ const obtenerNombreProfesor = async (correoProfesor) => {
  return nombre;
 } 
 
+const nombreProfesor = new URLSearchParams(location.search).get('nombre');
 const correo = new URLSearchParams(location.search).get('email');
-let nombreProfesor = ""
-if(correo)
- nombreProfesor = correo;
-console.log(nombreProfesor)
+//if(correo)
+// nombreProfesor = correo;
+//console.log(nombreProfesor)
 
 export default function Header() {
   const {dataClase} = useContext(claseContext)

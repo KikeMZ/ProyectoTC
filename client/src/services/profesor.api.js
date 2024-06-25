@@ -24,12 +24,19 @@ export const getProfesor = (id) => {
 }
 
 export const getProfesorByCorreo = (correo) => {
+  console.log("Llamada desde axios")
+  console.log(correo)
   return api.get("/?search="+correo)
 }
 
 export const updateProfesor = (id, profesor) => api.put(`/${id}/`, profesor);
 
 export const actualizarDatosProfesores = (datosProfesores) => {return api.post("/actualizarDatosProfesores/", datosProfesores)};
+
+export const revisarEstadoSesion = (id_profesor, token) => {
+ return api.post("/"+id_profesor+"/verificarEstadoSesion/",{"token":token})
+
+}
 
 export const autenticarProfesor = (correo, password) => {
  return api.get("/autenticarProfesor/?correo="+correo+"&password="+password)

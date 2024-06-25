@@ -5,7 +5,7 @@ import Table from "../components/table";
 import ErrorCarga from "../components/errorCarga";
 import { Button } from "@nextui-org/react";
 import toast from "react-hot-toast";
-import { obtenerListaAlumnos, crearListaInscripcion } from "../services/inscripcion.api"
+import { obtenerListaAlumnos, crearListaInscripcion, activarInscripciones } from "../services/inscripcion.api"
 import { getAllAlumnos, createAlumno } from "../services/alumnos.api";
 import { claseContext } from "../layouts/layoutProfesor";
 
@@ -23,17 +23,25 @@ export default function Alumnos() {
     const [matriculas, setMatriculas] = useState([]); 
     const [cargando, setCargando] = useState(true);
     const [cargaCorrecta, setCargaCorrecta] = useState(true);
+    const [registroCorrecto, setRegistroCorrecto] = useState(true);
 
     const cargarAlumnos = async () => {
         try {
             const data = await obtenerListaAlumnos(nrc); // Espera a que se resuelva la promesa y obtén los datos
-            setDatosImportados(data); // Asigna los datos al estado
+            const inscripcionPendiente = data.find( inscripcion => inscripcion.estado=="PENDIENTE");
+            console.log(data)
+            if(!inscripcionPendiente)
+             setDatosImportados(data); // Asigna los datos al estado
+            else
+             setDatosImportados([])
             setCargando(false);
-           //throw new Error("EA");
+            //toast.success("Seccion de alumnos",{icon:<i className="pi pi-info-circle text-2xl text-yellow-400 font-semibold"/>, duration:1500})
+            //throw new Error("EA");
         } catch (error) {
             setCargando(false)
             setCargaCorrecta(false);
             console.error('Error al cargar los alumnos:', error);
+            toast.error("¡Se ha presentado un problema al intentar cargar la lista de alumnos!")
         }
     }
 
@@ -144,6 +152,7 @@ export default function Alumnos() {
                 "nombre": nombre,
                 "apellidos": apellidos,
                 "correo": listaCorreos[indice],
+                "contrasena":""
             };
             return registroAlumno; //Se agrega el objeto generado al arreglo llamado "listaAlumnos";
         });
@@ -194,7 +203,7 @@ export default function Alumnos() {
             const excelValido = validarEstructuraExcel(XLSX.utils.sheet_to_txt(worksheet)); //Se verifica si la estructura del Excel es valida.
             if (!excelValido) { //Si el Excel no tiene una estructura valida, entonces se asigna un valor igual 2 al estado llamado "resultadoExtraccion".
                 setResultadoExtraccion(2);
-                toast.error(mensajesImportacionExcel[resultadoExtraccion])
+                toast.error(mensajesImportacionExcel[2])
             }
             else {//Si el Excel tiene una estructura valida, entonces comienza el proceso de extraccion.
                 let datosAlumnos = await XLSX.utils.sheet_to_json(worksheet); // Se obtiene un arreglo con cada una de las filas de la segundo hoja del archivo Excel
@@ -211,7 +220,7 @@ export default function Alumnos() {
         }
         else { //Si el usuario aun no ha seleccionado algun archivo, se asignara un valor igual a 4 al estado "resultadoExtraccion".
             setResultadoExtraccion(4);
-            toast.error(mensajesImportacionExcel[resultadoExtraccion])
+            toast.error(mensajesImportacionExcel[4])
         }
 
     }
@@ -229,26 +238,31 @@ export default function Alumnos() {
     const registrarInscripcion = async () => {
         try {
              let respuestaAlumno = await registrarAlumnos()
-             console.log(respuestaAlumno)
+             //throw new Error("Prueba");
+            // console.log(respuestaAlumno)
           //  {
             //console.log(res)
             let listaMatriculas = alumnos.map( (alumno) => (alumno.matricula));
             setMatriculas(listaMatriculas);
-            console.log(listaMatriculas);
-            console.log("Creacion de las inscripciones");
+            //console.log(listaMatriculas);
+            //console.log("Creacion de las inscripciones");
 
             let responses = await crearListaInscripcion(listaMatriculas, nrc);
             responses.forEach(response => {
-                console.log('Inscripción registrada:', response.data);
+                //console.log('Inscripción registrada:', response.data);
             });
             console.log("Finaliza la creacion de inscripciones");
+            await activarInscripciones(nrc);
             setMostrarTablas(false);
             //setDatosImportados(alumnos);
             toast.success("¡Se han registrado a los alumnos exitosamente!")
+            setRegistroCorrecto(true);
           //  }
         // );
         } catch (error) {
             console.error('Error al registrar la inscripción:', error);
+            toast.error("¡Se ha presentado un problema durante el proceso de registro!, vuelva a presionar el boton para reintentarlo.")
+            setRegistroCorrecto(false);
         }
     };
     
@@ -306,7 +320,8 @@ export default function Alumnos() {
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-2 mr-3 mb-11 font-bold text-base"
                         onClick={registrarInscripcion}
                     >
-                        Registrar alumnos
+                        { registroCorrecto?"Registrar alumnos":"Reintentar registrar"}
+
                     </Button>
                     </div>
 

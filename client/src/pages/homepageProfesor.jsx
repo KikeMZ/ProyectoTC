@@ -23,8 +23,9 @@ export default function HomeProfesor() {
     async function cargarclases() {
       try {
         const res = await getProfesorByCorreo(profesor);
+        console.log("Respuesta Sesions:")
         console.log(res)
-        const resClases = await getClasesByProfesor(res.data[0].nombre); // Obtener la respuesta de getClasesByProfesor
+        const resClases = await getClasesByProfesor(await res.data[0].nombre); // Obtener la respuesta de getClasesByProfesor
         const profesorMatches = resClases.data //res.data.filter(item => item.nombreProfesor === profesor); // Filtrar la lista directamente
         console.log(profesorMatches);
         setLista(profesorMatches); // Establecer la lista filtrada en el estado

@@ -3,7 +3,10 @@ import { NavContext } from "../layouts/layoutProfesor";
 import { claseContext } from "../layouts/layoutProfesor";
 import CriterioModal from "../components/modalCriterios"
 import ModalBorrarCriterio from "../components/modalBorrarCriterio";
+import ErrorCarga from "../components/errorCarga";
 import { Input, Card, CardBody, Button, Tooltip, useDisclosure } from "@nextui-org/react";
+
+
 import { getAllCriterios, crearCriterio } from '../services/criterios.api';
 import { getAllClaseCriterio, createClaseCriterio, getCriteriosByNRC, updateClaseCriterio, deleteClaseCriterio } from '../services/claseCriterio.api';
 import toast from 'react-hot-toast';
@@ -37,23 +40,31 @@ const Criterios = () => {
   const [ maximo, setMaximo ] = useState(0);
   
   const [archivoPDF, setArchivoPDF] = useState(null);
+  const [cargando, setCargando] = useState(true);
+  const [cargaCorrecta, setCargaCorrecta] = useState(true);
 
 
   const crearCriteriosGenerales = async () => {
-   let nombresCriteriosBD = [];
-   let criteriosUnicos = []
-   let criteriosBD = [];
+   let nombresCriteriosBD = []; //Almacena los nombres de todos los criterios generales existentes en la base de datos
+   let criteriosUnicos = [] //Permite almacenar aquellos criterios que no se encuentran en la base de datos
+   let criteriosBD = []; //Almacena los criterios existentes en la base de datos.
    let criteriosActualizados = [];
-   let res = await getAllCriterios();
+   let res = await getAllCriterios(); //Se obtienen todos los criterios de la tabla Criterio.
    console.log("Inicio"+res.data);
    criteriosBD = res.data;
    nombresCriteriosBD = res.data.map( (c) => c.nombre);
    let nombresCriterios = criterios.map( (c) => c.nombre)
-   criteriosUnicos = criterios.filter( (c) => !nombresCriteriosBD.includes(c.nombre));
+   criteriosUnicos = criterios.filter( (c) => !nombresCriteriosBD.includes(c.nombre) && c.id==-1);
    let criteriosExistentes = [];
+
+   //Se comprueba que criterios ya existen en la base de datos y se almacenan sus datos.
    for(let criterio of criterios)
    {
-    let criterioExistente = criteriosBD.find( (c) => c.nombre == (criterio.nombre));
+    let criterioExistente = undefined;
+    if(criterio.id !=-1)
+     criterioExistente = criterio;
+    else
+     criterioExistente = criteriosBD.find( (c) => c.nombre == (criterio.nombre));
     console.log(criterioExistente)
     if(criterioExistente)
     {
@@ -64,13 +75,14 @@ const Criterios = () => {
         "existente":true
        
        }
-
        criteriosExistentes.push(auxCriterioAgregado);
     
     }
    }
    criteriosActualizados = criteriosExistentes;
    console.log(criteriosUnicos + ":" + criterios)
+
+   //Se crean aquellos criterios que no estan en la base de datos.
      if(criteriosUnicos.length>0)
      {
       for( let criterio of criteriosUnicos)
@@ -110,6 +122,7 @@ const Criterios = () => {
       let claseCriterio = {
        "id_clase": dataClase.nrc,
        "id_criterio": criterio.id,
+       "nombre": criterio.nombre,
        "ponderacion": criterio.ponderacion
       }
       createClaseCriterio(claseCriterio).then(console.log);
@@ -197,6 +210,7 @@ const Criterios = () => {
       let claseCriterio = {
         "id_clase": dataClase.nrc,
         "id_criterio": criterio.id,
+        "nombre": criterio.nombre,
         "ponderacion": criterio.ponderacion
       }
 
@@ -227,6 +241,9 @@ const Criterios = () => {
    }
 
   }
+
+
+
   //
   // ----------------------------------------------------
   // --- Estados de la variable 'resultadoExtraccion' ---
@@ -280,36 +297,39 @@ const Criterios = () => {
       }
     }
     
-
+    const cargarCriterios = async() =>{
+      try{
+       let listaCriterios = await getCriteriosByNRC(dataClase.nrc);
+       console.log("r"+listaCriterios.data.length)
+       if(listaCriterios.data.length>0)
+       {
+        console.log("r"+listaCriterios.data.length)
+        let criteriosClase = listaCriterios.data.map( (c) => {
+         let auxCriterio = {
+         "id": c.id,
+         "nombre": c.nombre,
+         "ponderacion": c.ponderacion
+         }
+         return auxCriterio;
+        }
+        )
+        setCriterios(criteriosClase);
+        setExistenCriterios(true); 
+        setMostrarCriterios(true);
+        setMaximo(100);
+        setCargando(false);
+       }
+      } catch(e)
+      {
+       setCargando(false);
+       setCargaCorrecta(false);
+       console.log(e);
+      }
+     }
+ 
   
   useEffect( () => {
 
-    const cargarCriterios = async() =>{
-     try{
-      let listaCriterios = await getCriteriosByNRC(dataClase.nrc);
-      console.log("r"+listaCriterios.data.length)
-      if(listaCriterios.data.length>0)
-      {
-       console.log("r"+listaCriterios.data.length)
-       let criteriosClase = listaCriterios.data.map( (c) => {
-        let auxCriterio = {
-        "id": c.id,
-        "nombre": c.criterio_detail.nombre,
-        "ponderacion": c.ponderacion
-        }
-        return auxCriterio;
-       }
-       )
-       setCriterios(criteriosClase);
-       setExistenCriterios(true); 
-       setMostrarCriterios(true);
-       setMaximo(100);
-      }
-     } catch(e)
-     {
-      console.log(e);
-     }
-    }
 
     cargarCriterios();
     showNav();
@@ -321,7 +341,18 @@ const Criterios = () => {
 
   return (
     <div>
-            {(!mostrarCriterios) &&  (
+
+     {
+      !cargaCorrecta?
+      (
+       <ErrorCarga mensajeError="Parece que ha ocurrido un problema al intentar cargar los criterios" reintentarCarga={cargarCriterios}/>
+      )
+      :
+      (
+      <>
+            {
+            
+            (!mostrarCriterios) &&  (
             <div className="flex flex-col items-center justify-start min-h-full">
               <div className="flex flex-col items-center justify-center">
                     <h1 className="text-center text-3xl font-bold mt-6 mb-4">Parece que aun no hay ningun criterios de evaluacion para esta clase.</h1>
@@ -342,7 +373,8 @@ const Criterios = () => {
         
                 </div>
                 </div>
-            )}
+            )
+    }
 
     {
 
@@ -382,7 +414,7 @@ const Criterios = () => {
              (
               <div className="flex justify-between" style={{width:"100%"}} >
             
-              <Input classNames={{input:"text-xl"}} type="text" onChange={(e) => {modificarCriterio(item.nombre, e.target.value)}} startContent={  <button onClick={ ()=> { setCriterioBorrado(item.nombre); controlModalBorrar.onOpen()}} className="mx-4" title="Borrar Criterio"> <MdDelete size="40px"/> </button>  } placeholder={item.nombre} className={{input:["w65 shadow-xl","text-white/90 dark:text-white/90 font-thin"],          innerWrapper: "bg-transparent",
+              <Input classNames={{input:"text-xl"}} type="text" onChange={(e) => {modificarCriterio(item.nombre, e.target.value)}} startContent={  <button onClick={ ()=> { setCriterioBorrado(item.nombre); controlModalBorrar.onOpen()}} className="mx-4" title="Borrar Criterio"> <MdDelete size="40px"/> </button>  } value={item.nombre} className={{input:["w65 shadow-xl","text-white/90 dark:text-white/90 font-thin"],          innerWrapper: "bg-transparent",
           inputWrapper: [
             "shadow-xl",
             "bg-default-200/50",
@@ -446,6 +478,10 @@ const Criterios = () => {
 
     </>
      )
+    }
+    </>
+      
+    )
     }
     </div>
   )

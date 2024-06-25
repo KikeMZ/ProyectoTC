@@ -3,6 +3,7 @@ import { NavContext } from "../layouts/layoutProfesor";
 import { claseContext } from "../layouts/layoutProfesor";
 import Calificaciones from "./calificaciones";
 import RegistroCalificaciones from "./registroCalificaciones";
+import ErrorCarga from "../components/errorCarga";
 import ModalEntregas from "../components/modalEntregas";
 import ModalImportarEntrega from "../components/modalImportarEntrega";
 import ModalBorrarEntrega from "../components/modalBorrarEntrega";
@@ -41,6 +42,8 @@ const Entregas = () => {
   const [ entregaSeleccionada, setEntregaSeleccionada ] = useState(null);
   const [ respuestaDelete, setRespuestaDelete ] = useState(null);
   const [ calificacionesExtraidas, setCalificacionesExtraidas ] = useState(null);
+  const [ cargando, setCargando ] = useState(true);
+  const [ cargaCorrecta, setCargaCorrecta ] = useState(true)
 
   const [ mostrarEntregas, setMostrarEntregas ] = useState(false);
   const [ mostrarCalificaciones, setMostrarCalificaciones ] = useState(false);
@@ -63,20 +66,32 @@ const Entregas = () => {
       return 0;
     }
 
+    const cargarEntregas = async () => {
+      try
+      {
+       let listaEntregas = await getEntregasByNRC(dataClase.nrc);
+       if(listaEntregas.data.length>0)
+       {
+        setEntregas(listaEntregas.data.sort(ordenAlfabetico));
+        setMostrarEntregas(true);
+        toast.success("Seccion de entregas",{icon:<i className="pi pi-info-circle text-2xl text-yellow-400 font-semibold"/>, duration:1500})        
+       }
+       setCargando(false);
+
+      } catch(e){
+        setCargando(false);
+        setCargaCorrecta(false);
+        toast.error("¡Se ha presentado un problema al intentar cargar la lista de entregas!")
+      }
+     }
+
+    
     useEffect(() => {
 
-        const cargarEntregas = async () => {
-         let listaEntregas = await getEntregasByNRC(dataClase.nrc);
-         if(listaEntregas.data.length>0)
-         {
-          setEntregas(listaEntregas.data.sort(ordenAlfabetico));
-          setMostrarEntregas(true);
-         }
-        }
+        showNav();
 
         cargarEntregas();
 
-        showNav();
     }, [respuestaDelete])
     
     console.log(shownav)
@@ -171,7 +186,22 @@ const Entregas = () => {
      (
      <>
     {
-     !mostrarEntregas?
+     !cargaCorrecta?
+     (
+      <ErrorCarga mensajeError="Parece que ha ocurrido un problema al intentar cargar la lista de entregas" reintentarCarga={cargarEntregas}/>
+     )
+     :
+     cargando?
+     (<div className="flex flex-col items-center justify-center">
+       <h2 className="text-3xl font-bold mt-10 pt-4">Cargando entregas</h2>
+       <i className="pi pi-sync pi-spin mt-6 text-3xl"></i>
+      </div>
+     )
+     :
+     (
+      <>
+    {
+     (!mostrarEntregas)?
      (
       <div className="flex flex-col items-center justify-start min-h-full">
       <div className="flex flex-col items-center justify-center">
@@ -351,10 +381,16 @@ const Entregas = () => {
       </>
      )
     }
+
+    
       <ModalEntregas controlModal={controlModal} modoEdicion={editarEntregas} setEntregas={setEntregas} setMostrarEntregas={setMostrarEntregas} nrc={dataClase.nrc} entrega={entregaSeleccionada} ></ModalEntregas>
       <ModalImportarEntrega controlModal={controlModalImportacion} modoEdicion={editarEntregaExtraida} entrega={entregaExtraida} setEntregaExtraida={setEntregaExtraida} setCalificacionesExtraidas={setCalificacionesExtraidas} manejarArchivo={manejarArchivo} setArchivoEntrega={modificarEstadoArchivo} extraerDatosArchivoEntrega={extraerDatosArchivoEntrega} nrc={dataClase.nrc}/>
       <ModalBorrarEntrega controlModal={controlModalBorrar} entregaBorrada={entregaSeleccionada} eliminarEntrega={eliminarEntrega} />
       <RegistroCalificaciones controlModal={controlModalRegistro} entregasExistentes={entregas}/>
+    </>
+    )
+    }
+
     </>
     ):
     (

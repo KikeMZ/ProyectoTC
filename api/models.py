@@ -14,6 +14,7 @@ class Alumno(models.Model):
     nombre=models.CharField(max_length=100)
     apellidos=models.CharField(max_length=100)
     correo=models.CharField(max_length=100)
+    contrasena=models.CharField(max_length=100, blank=True)
 
     def __str__(self):
         return str(self.matricula )
@@ -30,9 +31,17 @@ class Profesor(models.Model):
     nombre=models.CharField(max_length=250)
     correo=models.CharField(max_length=100, blank=True)
     contrasena=models.CharField(max_length=100, blank=True)
+    token=models.CharField(max_length=50, blank=True)
 
     def __str__(self):
         return self.nombre
+
+class Periodo(models.Model):
+    nombre=models.CharField(max_length=100)
+    plan=models.CharField(max_length=50)
+    estado=models.CharField(max_length=50, choices={"ACTIVO":"ACTIVO","FINALIZADO":"FINALIZADO"})
+    fecha_inicio=models.DateField()
+    fecha_finalizacion=models.DateField()
 
 
 class Clase2(models.Model):
@@ -42,12 +51,14 @@ class Clase2(models.Model):
     nombreMateria=models.CharField(max_length=250)
     id_profesor=models.ForeignKey(Profesor, on_delete=models.DO_NOTHING, default=0)
 
+
     def __str__(self):
         return str(self.nrc)
 
 class Inscripcion(models.Model):
     clase = models.ForeignKey(Clase2, on_delete=models.DO_NOTHING, null=True)
     alumno = models.ForeignKey(Alumno, on_delete=models.DO_NOTHING, null=True)
+    estado = models.CharField(max_length=50, choices={"ACTIVA":"ACTIVA", "PENDIENTE":"PENDIENTE", "BAJA":"BAJA"})
 
 class Criterio(models.Model):
     id_criterio = models.AutoField(primary_key=True)
@@ -59,6 +70,7 @@ class Criterio(models.Model):
 class ClaseCriterio(models.Model):
     id_clase = models.ForeignKey(Clase2, on_delete=models.DO_NOTHING, default=0, db_constraint=False)
     id_criterio = models.ForeignKey(Criterio, on_delete=models.DO_NOTHING, default=0, db_constraint=False)
+    nombre = models.CharField(max_length=250)
     ponderacion = models.FloatField()
 
 class Entrega(models.Model):
