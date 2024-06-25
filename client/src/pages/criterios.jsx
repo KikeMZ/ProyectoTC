@@ -85,22 +85,29 @@ const Criterios = () => {
    //Se crean aquellos criterios que no estan en la base de datos.
      if(criteriosUnicos.length>0)
      {
-      for( let criterio of criteriosUnicos)
-      {
-       console.log("c"+criterio.nombre);
-       let res2 = await crearCriterio({"nombre":criterio.nombre})
+     // for( let criterio of criteriosUnicos)
+     // {
+      let promesas = criteriosUnicos.map( (criterio) => {
+       //console.log("c"+criterio.nombre);
+       return crearCriterio({"nombre":criterio.nombre})
+      })
+
+      let respuestas = await Promise.all(promesas);
+      respuestas.forEach( respuesta => {
+
+        let criterio = criteriosUnicos.find( c => c.nombre == respuesta.nombre)
         let auxCriterioAgregado = {
-         "id": res2.data.id_criterio,
-         "nombre": criterio.nombre,
+         "id": respuesta.data.id_criterio,
+         "nombre": respuesta.nombre,
          "ponderacion": criterio.ponderacion,
-         "existente":false
-        
+         "existente":false    
         }
         criteriosActualizados.push( auxCriterioAgregado);
       }
-     }
+      ) 
+     // }
 
-     
+     }
 //   }).finally( () => {
     console.log("Salida:"+ criteriosActualizados);
    
@@ -112,22 +119,25 @@ const Criterios = () => {
    if(maximo==100)
    {
      let criteriosActualizados = await crearCriteriosGenerales();
-
-
      console.log("DD:"+criteriosActualizados)
  //    crearCriteriosGenerales().then( (res) => console.log("R:"+ res));
  //    console.log("CA:"+ criteriosActualizados)
-     for( let criterio of criteriosActualizados)
-     {
-      let claseCriterio = {
-       "id_clase": dataClase.nrc,
-       "id_criterio": criterio.id,
-       "nombre": criterio.nombre,
-       "ponderacion": criterio.ponderacion
+    // for( let criterio of criteriosActualizados)
+    // {
+      let promesas = criteriosActualizados.map( criterio => {
+      
+       let claseCriterio = {
+        "id_clase": dataClase.nrc,
+        "id_criterio": criterio.id,
+        "nombre": criterio.nombre,
+        "ponderacion": criterio.ponderacion
+       }
+       return createClaseCriterio(claseCriterio);
       }
-      createClaseCriterio(claseCriterio).then(console.log);
+     )
 
-    }
+     await Promise.all(promesas);
+    //}
 
     setEditarCriterios(false);
     setExistenCriterios(true);
@@ -205,8 +215,9 @@ const Criterios = () => {
 
     console.log(criteriosActualizados)
 
-    for(let criterio of criteriosActualizados)
-    {
+   // for(let criterio of criteriosActualizados)
+   // {
+      let promesas = criteriosActualizados.map( criterio => {
       let claseCriterio = {
         "id_clase": dataClase.nrc,
         "id_criterio": criterio.id,
@@ -214,17 +225,20 @@ const Criterios = () => {
         "ponderacion": criterio.ponderacion
       }
 
-      if(!criterio.existente || (criterios.find( (c)=> c.nombre == criterio.nombre).id == -1) )
-      {
-       createClaseCriterio(claseCriterio).then(console.log);
+       if(!criterio.existente || (criterios.find( (c)=> c.nombre == criterio.nombre).id == -1) )
+       {
+        return createClaseCriterio(claseCriterio);
+       }
+       else
+       {
+        let auxCriterio = criterios.find( (c) => c.nombre == criterio.nombre);
+        console.log("Else")
+        return updateClaseCriterio(auxCriterio.id, claseCriterio);
+       }
       }
-      else
-      {
-       let auxCriterio = criterios.find( (c) => c.nombre == criterio.nombre);
-       console.log("Else")
-       updateClaseCriterio(auxCriterio.id, claseCriterio).then(console.log)
-      }
-    }
+     )
+     await Promise.all(promesas)
+   // }
 
     if(criterios.find( (c) => c.id==-1))
      setCriterios(criteriosActualizados)
