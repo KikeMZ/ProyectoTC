@@ -63,21 +63,21 @@ export const manejarArchivo = (e, setArchivo) =>{
      let datosAlumno;
       if(archivoCalificaciones.tipo == 1)
       {
-       correo = d.split(",")[posicionIdentificador.correo];
-       console.log(d.split(","));
+       correo = d.split(">")[posicionIdentificador.correo];
+       console.log(d.split(">"));
        datosAlumno = listaAlumnos.find( (alumno) => alumno.correo == correo)
       }
       else
       {
        
-       let identificador = d.split(",")[posicionIdentificador.apellidos] + d.split(",")[posicionIdentificador.nombre]
+       let identificador = d.split(">")[posicionIdentificador.apellidos] + d.split(">")[posicionIdentificador.nombre]
        console.log("Apellidos:"+posicionIdentificador.apellidos+", Nombre:"+posicionIdentificador.nombre);
        datosAlumno = listaAlumnos.find( (alumno) => (alumno.apellidos + alumno.nombre) == identificador)
        
       }
       if(datosAlumno)
       {
-       let nota = (parseFloat(d.split(",")[posicionNota]) * 10.0) / notaMaxima;
+       let nota = (parseFloat(d.split(">")[posicionNota]) * 10.0) / notaMaxima;
        if(isNaN(nota))
         nota=0; 
        let calificacion = {
@@ -210,7 +210,7 @@ export const manejarArchivo = (e, setArchivo) =>{
       const worksheetName =  workbook.SheetNames[0];
       const worksheet =  workbook.Sheets[worksheetName];
       console.log(worksheet);
-      console.log(XLSX.utils.sheet_to_csv(worksheet))
+      console.log(XLSX.utils.sheet_to_csv(worksheet, {RS:"&&", FS:">"}))
       const excelValido = validarEstructuraCalificaciones(XLSX.utils.sheet_to_csv(worksheet));
       //const existeNombreEntrega = validarNombreEntrega(XLSX.utils.sheet_to_txt(worksheet));
       if(!excelValido)
@@ -219,8 +219,9 @@ export const manejarArchivo = (e, setArchivo) =>{
       }
       else
       {
-       let datosCalificaciones =  XLSX.utils.sheet_to_csv(worksheet, {RS:"#"});
-       let auxCalificaciones = datosCalificaciones.split("#").filter( (fila) => fila.search(/[\d\w]/g)!= -1);
+       let datosCalificaciones =  XLSX.utils.sheet_to_csv(worksheet, {RS:"&&", FS:">"});
+      // console.log(datosCalificaciones)
+       let auxCalificaciones = datosCalificaciones.split("&&").filter( (fila) => fila.search(/[\d\w]/g)!= -1);
        auxCalificaciones.shift();
        let posicionIdentificador = {
         "correo":6
@@ -229,13 +230,13 @@ export const manejarArchivo = (e, setArchivo) =>{
        let posicionNota = 12;
        let posicionNotaMaxima = 13;
        let posicionFecha = 8;
-       let nombreEntrega = auxCalificaciones[1].split(",")[posicionNombreEntrega];
-       let fecha = auxCalificaciones[1].split(",")[posicionFecha];
-       let notaMaxima = auxCalificaciones[1].split(",")[13];
+       let nombreEntrega = auxCalificaciones[1].split(">")[posicionNombreEntrega];
+       let fecha = auxCalificaciones[1].split(">")[posicionFecha];
+       let notaMaxima = auxCalificaciones[1].split(">")[13];
 
-       console.log(auxCalificaciones[1].split(","))
+       console.log(auxCalificaciones[1].split(">"))
        auxCalificaciones.shift();
-       auxCalificaciones.shift();
+       //auxCalificaciones.shift();
        console.log("Calificaciones extraidas:")
        console.log(auxCalificaciones)
        let entregaExtraida = generarFormatoJSONEntrega(nombreEntrega, tipo, fecha)

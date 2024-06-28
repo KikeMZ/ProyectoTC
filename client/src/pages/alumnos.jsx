@@ -154,7 +154,7 @@ export default function Alumnos() {
     //  Esta funcion permite crear un arreglo de objetos con los datos que se almacenaran en la base de datos.
     // ---------------------------------------------------------------------------------------------------------
     //
-    const crearJSON_Alumnos = (datosAlumnos, listaCorreos) => {
+    const crearJSON_Alumnos = (datosAlumnos) => {
         let listaAlumnos;
         //Se recorre el arreglo con los datos extraidos del Excel, con el proposito de obtener aquellos datos
         //que se enviaran a la API.
@@ -164,7 +164,7 @@ export default function Alumnos() {
                 "matricula": alumno.ID,
                 "nombre": nombre,
                 "apellidos": apellidos,
-                "correo": listaCorreos[indice],
+                "correo": alumno.Correo,
                 "contrasena":""
             };
             return registroAlumno; //Se agrega el objeto generado al arreglo llamado "listaAlumnos";
@@ -186,9 +186,10 @@ export default function Alumnos() {
     //  -------------------------------------------------------------------
     //
     const validarEstructuraExcel = (contenidoExcel) => {
+        console.log(contenidoExcel)
         const campoNombre = /[A-Z]+\s\w+,\s[A-Z\s\.]+/g; //Patron que se utilizara para verificar si el Excel contiene el campo Nombre.
         const campoMatricula = /\d{9}/g; //Patron que se utilizara para verificar si el Excel contiene el campo Matricula.
-        const campoCorreo = /\w+\.\w+@alumno.buap.mx /g; //Patron que se utilizara para verificar si existe el campo Correo.
+        const campoCorreo = /\w+\.\w+@alumno.buap.mx/g; //Patron que se utilizara para verificar si existe el campo Correo.
         let existeNombre = false; //Indica si existe el campo Nombre.
         let existeMatricula = false; //Indica si existe el campo Matricula
         let existeCorreo = false; //Permite conocer si existe el campo Correo dentro del Excel.
@@ -196,6 +197,7 @@ export default function Alumnos() {
         existeNombre = contenidoExcel.search(campoNombre) != -1 ? true : false; //Se busca si existe el campo Nombre.
         existeMatricula = contenidoExcel.search(campoMatricula) != -1 ? true : false; //Se busca si existe el campo Matricula.
         existeCorreo = contenidoExcel.search(campoCorreo) != -1 ? true : false; // Se busca si existe el campo Correo dentro del Excel.
+        console.log("Nombre:"+existeNombre+"Matricula:"+existeMatricula+"Correo:"+existeCorreo)
 
         esValido = existeNombre && existeMatricula && existeCorreo; //Se verifica si existen los 3 campos necesarios para poder leer el Excel
         return esValido;
@@ -211,7 +213,7 @@ export default function Alumnos() {
         e.preventDefault();
         if (archivoExcel != null) { //Se verifica si el usuario ha seleccionado el archivo Excel.
             const workbook = await XLSX.read(archivoExcel, { type: 'buffer' }); //Se obtiene la referencia al archivo Excel
-            const worksheetName = await workbook.SheetNames[1]; //Se obtiene el nombre de la segunda hoja del Excel, la cual es aquella que contiene los datos de los alumnos.
+            const worksheetName = await workbook.SheetNames[0]; //Se obtiene el nombre de la segunda hoja del Excel, la cual es aquella que contiene los datos de los alumnos.
             const worksheet = await workbook.Sheets[worksheetName]; //Se obtiene la referencia a la segunda hoja de Excel mediante su nombre.
             const excelValido = validarEstructuraExcel(XLSX.utils.sheet_to_txt(worksheet)); //Se verifica si la estructura del Excel es valida.
             if (!excelValido) { //Si el Excel no tiene una estructura valida, entonces se asigna un valor igual 2 al estado llamado "resultadoExtraccion".
@@ -220,10 +222,14 @@ export default function Alumnos() {
             }
             else {//Si el Excel tiene una estructura valida, entonces comienza el proceso de extraccion.
                 let datosAlumnos = await XLSX.utils.sheet_to_json(worksheet); // Se obtiene un arreglo con cada una de las filas de la segundo hoja del archivo Excel
-                datosAlumnos.shift(); //Se elimina el primer elemento del arreglo, debido a que contiene informacion de los encabezados de la tabla.
-                let correosAlumnos = datosAlumnos.pop()["Número de"]; //Se extrae el ultimo elemento del arreglo, el cual contiene los correos de los estudiantes.
-                const listaCorreos = obtenerCorreos(correosAlumnos).map((correo) => correo.trim()); //Se procesa el String con los correos, obteniendo una arreglo con los correos de los alumnos.
-                const listaAlumnos = crearJSON_Alumnos(datosAlumnos, listaCorreos); //Se procesa el arreglo con los datos de los alumnos, obteniendo otro arreglo con los datos mas relevantes de los alumnos
+                console.log("JSON")
+                console.log(datosAlumnos)
+               // datosAlumnos.shift(); //Se elimina el primer elemento del arreglo, debido a que contiene informacion de los encabezados de la tabla.
+               // let correosAlumnos = datosAlumnos.pop()["Número de"]; //Se extrae el ultimo elemento del arreglo, el cual contiene los correos de los estudiantes.
+               // const listaCorreos = obtenerCorreos(correosAlumnos).map((correo) => correo.trim()); //Se procesa el String con los correos, obteniendo una arreglo con los correos de los alumnos.
+                const listaAlumnos = crearJSON_Alumnos(datosAlumnos)// , listaCorreos); //Se procesa el arreglo con los datos de los alumnos, obteniendo otro arreglo con los datos mas relevantes de los alumnos
+               // console.log(correosAlumnos)
+                console.log("Lista final")
                 console.log(listaAlumnos);
                 setAlumnos(listaAlumnos); //Se guarda el arreglo obtenido en el estado "listaAlumnos";
                 setResultadoExtraccion(0); //Se indica que el proceso de extraccion se realizo correctamente.
@@ -303,7 +309,7 @@ export default function Alumnos() {
             <>
             {(!mostrarTablas && datosImportados.length === 0 && cargaCorrecta) &&  (
                 <div className="flex flex-col items-center justify-center">
-                    <h1 className="text-center text-3xl font-bold mb-8">Parece que aun no ha importado a los alumnos de esta clase</h1>
+                    <h1 className="text-center text-3xl font-bold mb-8">Parece que aún no ha importado a los alumnos de esta clase</h1>
                     <form className="mb-4">
                         <label htmlFor="cargar">Seleccione su archivo: </label>
 
@@ -321,12 +327,14 @@ export default function Alumnos() {
             {(mostrarTablas && datosImportados.length === 0 && cargaCorrecta) && (
             <>
                 <div className="w-full mb-12">
-                <h2 className="text-3xl font-semibold ml-2 mt-5 mb-6">Datos extraidos del archivo</h2>
+                <h2 className="text-3xl font-semibold ml-2 mt-5 mb-2">Datos extraidos del archivo</h2>
+                <hr className="mb-4"/>
                     <Table data={alumnos} columns={columns} esVistaExtraccion={true}></Table>
                     <div className="mt-3">
-                     <span className="text-xl font-semibold  ml-2">Numero de alumnos:</span>
+                     <span className="text-xl font-semibold  ml-2">Número de alumnos encontrados:</span>
                      <span className="text-xl "> {alumnos.length}</span>
                     </div>
+                    <hr className="mt-2 mb-4"/>
                     <div className="flex justify-end">
                     <Button
                         radius="large"

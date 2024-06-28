@@ -49,7 +49,7 @@ export default function ModalImportarEntrega({ controlModal, modoEdicion, entreg
         Importar entrega
        </ModalHeader>
        <ModalBody className="gap-1 text-black">
-        
+       <h2 className="font-semibold "><i className="pi pi-info-circle mr-1 text-2xl"/> Nota: Esta opcion unicamente esta disponible para los archivos de Teams.</h2>
        <label htmlFor="cargar" className="text-xl font-semibold my-2">Seleccione su archivo: </label>
        
        <input type="file" accept=".xlsx,text/csv" id="cargar" name="archivo" onChange={ (e) => {manejarArchivo(e, setArchivoEntrega)} } />

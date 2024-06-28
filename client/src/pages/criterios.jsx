@@ -34,7 +34,7 @@ const Criterios = () => {
   const controlModal = useDisclosure();
   const controlModalBorrar = useDisclosure();
 
-  const [ existenCriterios2, setExistenCriterios2 ] = useAtom(criteriosAtom);
+  const [ existenCriteriosAtom, setExistenCriteriosAtom ] = useAtom(criteriosAtom);
   const [ existenAlumnos, setExistenAlumnos ] = useAtom(alumnosAtom);
 
   console.log("Atomo:"+existenAlumnos)
@@ -151,6 +151,7 @@ const Criterios = () => {
 
     setEditarCriterios(false);
     setExistenCriterios(true);
+    setExistenCriteriosAtom(true);
     toast.success("¡Se han guardado los criterios correctamente!")
    }
    else
@@ -338,14 +339,15 @@ const Criterios = () => {
         }
         )
         setCriterios(criteriosClase);
-        setExistenCriterios(true); 
+        setExistenCriterios(true);
+        setExistenCriteriosAtom(true); 
         setMostrarCriterios(true);
         setMaximo(100);
        }
        else
        {
         setExistenCriterios(false);
-        setExistenCriterios(false);
+        setExistenCriteriosAtom(false);
        }
        setCargando(false);
       } catch(e)

@@ -68,7 +68,8 @@ class EntregaSerializer(serializers.ModelSerializer):
         fields = ('id', 'nombre', 'tipo', 'fecha','claseCriterio_detail')
 
 class CalificacionSerializer(serializers.ModelSerializer):
+    alumno_detail = AlumnoSerializer(source="matricula", read_only=True)
     entrega_detail = EntregaSerializer(source="id_entrega", read_only=True)
     class Meta:
         model=Calificacion
-        fields= ('id', 'nota', 'matricula', 'id_entrega', 'entrega_detail')
+        fields= ('id', 'nota', 'matricula', 'id_entrega', 'alumno_detail', 'entrega_detail')

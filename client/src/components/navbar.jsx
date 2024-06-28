@@ -13,7 +13,7 @@ function NavLink({ to, text, active, onClick }) {
   return (
     <Link
       to={to}
-      className={`flex-grow items-center justify-center px-2 py-1 rounded-full hover:bg-secondary-100 ${active ? "bg-primary-100" : ""}`}
+      className={`flex-grow text-center items-center justify-center px-2 py-1 rounded-full hover:bg-secondary-100 ${active ? "bg-primary-100" : ""}`}
       style={{ marginBottom: "8px", marginRight: "8px" }}
       onClick={onClick}
     >
@@ -81,6 +81,7 @@ export const Nav = ({clase}) => {
           text="Alumnos"
           active={activeLink === "/profesor/alumnos"}
           onClick={() => handleLinkClick("/profesor/alumnos")}
+
         />
 
         {

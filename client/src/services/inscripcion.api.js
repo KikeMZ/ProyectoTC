@@ -25,14 +25,14 @@ import axios from 'axios';
 
   // 2. Crear varios registros para el modelo Inscripcion pasando la lista de alumnos y el nrc de la materia
   export const crearListaInscripcion = async (matriculas, nrc) => {
-    console.log("In")
+    //console.log("In")
     let promesas = matriculas.map(matricula => {
         let inscripcion = {
             "clase": nrc,
             "alumno": matricula,
             "estado": "PENDIENTE"
         };
-        console.log("Inscripcion: "+matricula+", "+nrc+","+inscripcion);
+       // console.log("Inscripcion: "+matricula+", "+nrc+","+inscripcion);
         // Retorna la promesa de la solicitud POST
         return axios.post(import.meta.env.VITE_BACKEND_URL+"Inscripcion/", inscripcion);
 

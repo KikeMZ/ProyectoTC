@@ -46,7 +46,7 @@ export default function LoginCard() {
   return (
     <div className="bg-secondary-100 px-10 py-14 rounded-3xl">
       <h1 className="text-6xl font-semibold">Bienvenido</h1>
-      <p className="font-medium text-lg text-gray-300 my-8">Ingrese sus datos</p>
+      <p className="font-medium text-lg text-gray-300 my-8">Ingrese sus datos:</p>
       <div className="mt-4 ">
         <Input
           type="email"
@@ -60,14 +60,9 @@ export default function LoginCard() {
       <div className="mt-4">
         <Input onChange={handleContrasenaChange} type="password" label="Contraseña" variant="bordered" color="primary" />
       </div>
-      <div className="flex justify-between items-center pt-8">
-        <Link to="/admin">
-          <Button variant="solid" className="bg-gray-300">
-            Admin
-          </Button>
-        </Link>
-          <Button onClick={verificarDatosLogin} variant="solid" className="bg-gray-300">
-            Profesor
+      <div className="flex justify-end items-center pt-8">
+          <Button onClick={verificarDatosLogin} variant="fade" className="bg-gray-200 text-black text-base font-semibold">
+            Iniciar sesion
           </Button>
       </div>
     </div>

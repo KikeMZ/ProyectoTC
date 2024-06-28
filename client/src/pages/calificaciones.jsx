@@ -24,11 +24,23 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
   const [editarCalificaciones, setEditarCalificaciones] = useState(false);
   const [ guardarCalificaciones, setGuardarCalificaciones ] = useState(false);
  
+  const ordenAlfabetico = (alumnoA, alumnoB) => {
+   let nombreAlumnoA = alumnoA.alumno_detail.apellidos + " " + alumnoA.alumno_detail.nombre;
+   let nombreAlumnoB = alumnoB.alumno_detail.apellidos + " " + alumnoB.alumno_detail.nombre;
+   if( nombreAlumnoA < nombreAlumnoB)
+    return -1;
+   else if( nombreAlumnoA > nombreAlumnoB)
+    return 1;
+   else
+    return 0;
+
+  } 
+
   useEffect(() => {
 
     const obtenerCalificaciones = async () => {
      let res = await getCalificacionesByEntrega(entrega.id);
-     setCalificaciones(res.data);
+     setCalificaciones(res.data.sort(ordenAlfabetico));
      console.log(res)
     }
 
@@ -134,26 +146,29 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
     for(let d of datosCalificaciones)
     {
      let datosAlumno;
+     console.log(d)
       if(archivoCalificaciones.tipo == 1)
       {
-       correo = d.split(",")[posicionIdentificador.correo];
+       correo = d.split(">")[posicionIdentificador.correo];
        datosAlumno = listaAlumnos.find( (alumno) => alumno.correo == correo)
       }
       else
       {
        
-       let identificador = d.split(",")[posicionIdentificador.apellidos] + d.split(",")[posicionIdentificador.nombre]
+       let identificador = d.split(">")[posicionIdentificador.apellidos] + d.split(">")[posicionIdentificador.nombre]
        console.log("Apellidos:"+posicionIdentificador.apellidos+", Nombre:"+posicionIdentificador.nombre);
        datosAlumno = listaAlumnos.find( (alumno) => (alumno.apellidos + alumno.nombre) == identificador)
        
       }
       if(datosAlumno)
       {
-       let nota = (parseFloat(d.split(",")[posicionNota]) * 10.0) / notaMaxima; 
+       let nota = (parseFloat(d.split(">")[posicionNota]) * 10.0) / notaMaxima;
+       console.log(datosAlumno.nombre) 
        if(isNaN(nota))
         nota=0;
        let calificacion = {
         "nota": nota,
+        "nombre": datosAlumno.apellidos + " " +datosAlumno.nombre,
         "matricula": datosAlumno.matricula,
         "id_entrega": entrega.id
        };
@@ -256,7 +271,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
        const worksheetName =  workbook.SheetNames[0];
        const worksheet =  workbook.Sheets[worksheetName];
        console.log(worksheet);
-       console.log(XLSX.utils.sheet_to_csv(worksheet))
+       console.log(XLSX.utils.sheet_to_csv(worksheet, {RS:"#"}))
        const excelValido = validarEstructuraCalificaciones(XLSX.utils.sheet_to_csv(worksheet));
        const existeNombreEntrega = validarNombreEntrega(XLSX.utils.sheet_to_txt(worksheet));
        if(!excelValido)
@@ -269,17 +284,17 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
        }
        else
        {
-        let datosCalificaciones =  XLSX.utils.sheet_to_csv(worksheet, {RS:"#"});
-        let auxCalificaciones = datosCalificaciones.split("#").filter( (fila) => fila.search(/[\d\w]/g)!= -1);
+        let datosCalificaciones =  XLSX.utils.sheet_to_csv(worksheet, {RS:"&&", FS:">"});
+        let auxCalificaciones = datosCalificaciones.split("&&").filter( (fila) => fila.search(/[\d\w]/g)!= -1);
         auxCalificaciones.shift();
         let posicionIdentificador = {
          "correo":6
         };
         let posicionNota = 12;
         let posicionNotaMaxima = 13;
-        let notaMaxima = auxCalificaciones[1].split(",")[13];
+        let notaMaxima = auxCalificaciones[1].split(">")[13];
         auxCalificaciones.shift();
-        auxCalificaciones.shift();
+        //auxCalificaciones.shift();
         crearListaCalificaciones(auxCalificaciones,posicionIdentificador,12,notaMaxima);
         setMostrarCalificacionesExtraidas(true);
 
@@ -414,6 +429,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
       <table style={{width:"100%"}}>
       <thead>
         <tr>
+          <th className="text-xl text-start pl-3">Nombre</th>
           <th className="text-xl py-3">Matricula</th>
           <th className="text-xl py-3">Nota</th>
         </tr>
@@ -423,6 +439,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
 
       calificacionesExtraidas.map( (calificacion, index) => (
       <tr key={index} style={{border:"2px solid"}}>
+       <td className="text-xl text-start py-3 pl-3"> {calificacion.nombre} </td>
        <td className="text-xl text-center py-3"> {calificacion.matricula} </td>
        <td className="text-xl text-center py-3"> {calificacion.nota}</td>      
       </tr>
@@ -441,7 +458,8 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
       <>
       <table style={{width:"100%", borderCollapse:"collapse", border:"3px solid white"}}>
        <thead>
-        <tr style={{border:"3px solid white"}}>
+        <tr className="text-left" style={{border:"3px solid white"}}>
+          <th className="text-2xl py-3 pl-3">Nombre</th>
           <th className="text-2xl py-3">Matricula</th>
           <th className="text-2xl py-3">Nota</th>
           <th className="text-2xl py-3">Nota redondeada</th>
@@ -452,7 +470,8 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
     {
      calificaciones?.map( (calificacion, index) => (
       
-    <tr key={calificacion.id} className="text-center" style={{border:"3px solid grey"}}>
+    <tr key={calificacion.id} className="text-start" style={{border:"3px solid grey"}}>
+     <td className="text-xl py-3 pl-3"> {calificacion.alumno_detail.apellidos + " "+ calificacion.alumno_detail.nombre} </td>
      <td className="text-xl py-3"> {calificacion.matricula} </td>
       
      { editarCalificaciones?
@@ -465,9 +484,8 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
       :
       (
        <>
-     <td className="text-xl py-3"> {calificacion.nota} </td>
-       <td className="text-xl py-3"> {Math.round(calificacion.nota)} </td>
-        
+        <td className="text-xl py-3"> {calificacion.nota} </td>
+        <td className="text-xl py-3"> {Math.round(calificacion.nota)} </td>  
        </>
       )
      }
