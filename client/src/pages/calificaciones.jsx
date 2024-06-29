@@ -40,8 +40,9 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
 
     const obtenerCalificaciones = async () => {
      let res = await getCalificacionesByEntrega(entrega.id);
+     //console.log(res)
      setCalificaciones(res.data.sort(ordenAlfabetico));
-     console.log(res)
+    // console.log(res)
     }
 
     obtenerCalificaciones();
@@ -54,7 +55,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
      console.log("Valor:"+ valor)
      let auxCalificaciones = [...calificaciones];
      let posicionCalificacion = calificaciones.findIndex( (c) => c.id==id_calificacion)
-     console.log(auxCalificaciones[posicionCalificacion]);
+    // console.log(auxCalificaciones[posicionCalificacion]);
 
      auxCalificaciones[posicionCalificacion].nota = valor==""?0:parseFloat(valor);
      setCalificaciones(auxCalificaciones);
@@ -146,7 +147,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
     for(let d of datosCalificaciones)
     {
      let datosAlumno;
-     console.log(d)
+    // console.log(d)
       if(archivoCalificaciones.tipo == 1)
       {
        correo = d.split(">")[posicionIdentificador.correo];
@@ -156,14 +157,14 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
       {
        
        let identificador = d.split(">")[posicionIdentificador.apellidos] + d.split(">")[posicionIdentificador.nombre]
-       console.log("Apellidos:"+posicionIdentificador.apellidos+", Nombre:"+posicionIdentificador.nombre);
+      // console.log("Apellidos:"+posicionIdentificador.apellidos+", Nombre:"+posicionIdentificador.nombre);
        datosAlumno = listaAlumnos.find( (alumno) => (alumno.apellidos + alumno.nombre) == identificador)
        
       }
       if(datosAlumno)
       {
        let nota = (parseFloat(d.split(">")[posicionNota]) * 10.0) / notaMaxima;
-       console.log(datosAlumno.nombre) 
+      // console.log(datosAlumno.nombre) 
        if(isNaN(nota))
         nota=0;
        let calificacion = {
@@ -173,7 +174,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
         "id_entrega": entrega.id
        };
        calificacionesEncontradas.push(calificacion);
-       console.log(calificacion)
+     //  console.log(calificacion)
       }
     }
     if(calificacionesEncontradas.length==listaAlumnos.length)
@@ -194,29 +195,32 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
 
    
    const actualizarCalificaciones = async () => {
+    let promesas;
 
     if(mostrarCalificacionesExtraidas)
     {
-     for(let calificacion of calificacionesExtraidas )
-     {
-      let datosCalificacion = calificaciones.find( (c) => c.matricula == calificacion.matricula);
-      console.log("Datos calificaciones encontradas:")
-      console.log(datosCalificacion)
-      console.log(await updateCalificacion(datosCalificacion.id, calificacion));
-      setMostrarCalificacionesExtraidas(false);
-      setEditarCalificaciones(false);
-      
-     }
+    // for(let calificacion of calificacionesExtraidas )
+    // {
+      promesas = calificacionesExtraidas.map( calificacion => {
+        let datosCalificacion = calificaciones.find( (c) => c.matricula == calificacion.matricula);
+       // console.log("Datos calificaciones encontradas:")
+       // console.log(datosCalificacion)
+        return updateCalificacion(datosCalificacion.id, calificacion);
+       }
+      );
+     //}
     }
     else
     {
-     for(let calificacion of calificaciones)
-     {
-      console.log(await updateCalificacion(calificacion.id, calificacion));
-      setEditarCalificaciones(false);
-    
-     }
+     //for(let calificacion of calificaciones)
+     //{
+     promesas = calificaciones.map( calificacion => updateCalificacion(calificacion.id, calificacion));
+     //}
     }
+
+    await Promise.all(promesas);
+    setMostrarCalificacionesExtraidas(false);
+    setEditarCalificaciones(false);
     setGuardarCalificaciones(false);
     toast.success("¡Se han actualizado las calificaciones exitosamente!");
    }

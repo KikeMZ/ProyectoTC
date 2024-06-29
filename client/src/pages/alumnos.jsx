@@ -212,6 +212,7 @@ export default function Alumnos() {
     const leerExcel = async (e) => {
         e.preventDefault();
         if (archivoExcel != null) { //Se verifica si el usuario ha seleccionado el archivo Excel.
+            let toastExportacion = toast.loading("Extrayendo los datos del Excel..."); 
             const workbook = await XLSX.read(archivoExcel, { type: 'buffer' }); //Se obtiene la referencia al archivo Excel
             const worksheetName = await workbook.SheetNames[0]; //Se obtiene el nombre de la segunda hoja del Excel, la cual es aquella que contiene los datos de los alumnos.
             const worksheet = await workbook.Sheets[worksheetName]; //Se obtiene la referencia a la segunda hoja de Excel mediante su nombre.
@@ -233,6 +234,7 @@ export default function Alumnos() {
                 console.log(listaAlumnos);
                 setAlumnos(listaAlumnos); //Se guarda el arreglo obtenido en el estado "listaAlumnos";
                 setResultadoExtraccion(0); //Se indica que el proceso de extraccion se realizo correctamente.
+                toast.dismiss(toastExportacion)
                 toast.success("¡Se han extraido los datos del Excel exitosamente!")
                 setMostrarTablas(true)
             }
@@ -255,6 +257,7 @@ export default function Alumnos() {
     }
 
     const registrarInscripcion = async () => {
+        let toastRegistro = toast.loading("Registrando a los alumnos...");
         try {
              let respuestaAlumno = await registrarAlumnos()
              //throw new Error("Prueba");
@@ -274,6 +277,7 @@ export default function Alumnos() {
             await activarInscripciones(nrc);
             setMostrarTablas(false);
             //setDatosImportados(alumnos);
+            toast.dismiss(toastRegistro);
             toast.success("¡Se han registrado a los alumnos exitosamente!")
             setRegistroCorrecto(true);
           //  }

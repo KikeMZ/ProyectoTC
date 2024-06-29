@@ -61,10 +61,12 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
   }
 
   const cargarEntregas = async () => {
-    let listaEntregas = await getEntregasByNRC(dataClase.nrc);
-    if(listaEntregas.data.length>0)
+    let respuesta = await getEntregasByNRC(dataClase.nrc);
+    if(respuesta.data.length>0)
     {
-     return listaEntregas.data;
+     let listaEntregas = respuesta.data.filter( entrega => entrega.estado=="REGISTRADA")
+     //console.log(listaEntregas)
+     return listaEntregas;
     }
     else
     {
@@ -98,7 +100,7 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
      let auxCalificaciones = listaCalificaciones.filter( (calificacion) => calificacion.matricula == alumno.matricula)
      calificacionesPorAlumno[alumno.matricula] = auxCalificaciones;
     }
-    console.log(calificacionesPorAlumno)
+   // console.log(calificacionesPorAlumno)
     return calificacionesPorAlumno;
    }
 
@@ -151,7 +153,7 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
      }
      alumno["calificacionesPorTipo"] = calificacionesAlumno;
     } 
-    console.log(auxAlumnos)
+   // console.log(auxAlumnos)
     return auxAlumnos;
    }
 
@@ -179,13 +181,13 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
       else
        calificacionCriterio = 0;
       calificacionAlumno += calificacionCriterio;
-      console.log("Alumno:"+alumno.nombre+", Suma:"+ parseFloat(calificacionAlumno))
+    //  console.log("Alumno:"+alumno.nombre+", Suma:"+ parseFloat(calificacionAlumno))
      }
-     console.log("Calificacion Parcial:")
-     console.log(calificacionAlumno)
+    // console.log("Calificacion Parcial:")
+    // console.log(calificacionAlumno)
      alumno["calificacion"] = calificacionAlumno / 10;      
     }
-    console.log(auxAlumnos)
+   // console.log(auxAlumnos)
    }
 
     const obtenerNombresCamposTabla = (listaEntregas) => {
@@ -194,13 +196,13 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
      for(let entrega of listaEntregas)
      {
       auxNombresCampos = entrega.map( (e) => e.nombre).toSorted();
-      console.log(auxNombresCampos)
+     // console.log(auxNombresCampos)
       if(auxNombresCampos.length>0)
        nombresCampos.push(...auxNombresCampos);
       else
        nombresCampos.push("N/A"); 
      }
-     console.log(nombresCampos);
+    // console.log(nombresCampos);
      return nombresCampos;
     }
 
@@ -209,15 +211,16 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
      let listaEntregas = await cargarEntregas();
      let listaCriterios = await cargarCriterios();
      let listaCalificaciones = await cargarCalificaciones();
+     let listaCalificacionesFiltradas = listaCalificaciones.filter( c => c.entrega_detail.estado == "REGISTRADA")
 
      let entregasPorTipo = ordenarEntregasPorTipo(listaEntregas, listaCriterios);
      let nombreCampos = obtenerNombresCamposTabla(entregasPorTipo);
      nombreCampos.push("Calificacion")
      nombreCampos.push("Final")
      nombreCampos.push("Acta");
-     let calificacionesPorAlumno = ordenarCalificacionesPorAlumno(listaCalificaciones, listaAlumnos);
-     console.log("Calificaciones por alumno:")
-     console.log(calificacionesPorAlumno);
+     let calificacionesPorAlumno = ordenarCalificacionesPorAlumno(listaCalificacionesFiltradas, listaAlumnos);
+     //console.log("Calificaciones por alumno:")
+     //console.log(calificacionesPorAlumno);
      listaAlumnos = filtrarCalificacionesAlumnosPorTipo(calificacionesPorAlumno, listaAlumnos, listaCriterios)
      obtenerCalificacionesParciales(listaAlumnos, listaCriterios);
      setEntregas(entregasPorTipo)
@@ -230,7 +233,7 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
     useEffect(() => {
 
 
-        console.log(dataClase.nrc);
+        //console.log(dataClase.nrc);
 
         cargarDatosTabla();
 

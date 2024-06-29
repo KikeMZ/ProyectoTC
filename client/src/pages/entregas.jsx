@@ -10,9 +10,9 @@ import ModalBorrarEntrega from "../components/modalBorrarEntrega";
 
 import { manejarArchivo, leerArchivoEntrega } from "../services/importacion"
 import { obtenerListaAlumnos } from "../services/inscripcion.api";
-import { createEntrega, getEntregasByNRC, deleteEntrega } from "../services/entrega.api"
+import { createEntrega, getEntregasByNRC, updateEntrega, deleteEntrega } from "../services/entrega.api"
 import { getCriteriosByNRC } from "../services/claseCriterio.api";
-import { createCalificacion } from "../services/calificacion.api"
+import { createCalificacion, getCalificacionesByEntrega, updateCalificacion } from "../services/calificacion.api"
 
 
 import { Link } from "react-router-dom";
@@ -38,6 +38,7 @@ const Entregas = () => {
   
   const [ archivoEntrega, setArchivoEntrega ] = useState(null);
   const [ entregas, setEntregas ] = useState([]);
+  const [ entregasNoRegistradasBD, setEntregasNoRegistradasBD] = useState([])
   const [ entregaExtraida, setEntregaExtraida ] = useState(null)
   const [ entregaSeleccionada, setEntregaSeleccionada ] = useState(null);
   const [ respuestaDelete, setRespuestaDelete ] = useState(null);
@@ -72,8 +73,17 @@ const Entregas = () => {
        let listaEntregas = await getEntregasByNRC(dataClase.nrc);
        if(listaEntregas.data.length>0)
        {
-        setEntregas(listaEntregas.data.sort(ordenAlfabetico));
-        setMostrarEntregas(true);
+        let entregasActivas = listaEntregas.data.filter( (entrega) => entrega.estado=="REGISTRADA");
+        let entregasPendientes = listaEntregas.data.filter( (entrega) => entrega.estado=="PENDIENTE");
+        setEntregasNoRegistradasBD(entregasPendientes);
+        if(entregasActivas.length>0)
+        {
+         setEntregas(entregasActivas.sort(ordenAlfabetico));
+         setMostrarEntregas(true);
+        }
+        else
+         setMostrarEntregas(false);
+        
         toast.success("Seccion de entregas",{icon:<i className="pi pi-info-circle text-2xl text-yellow-400 font-semibold"/>, duration:1500})        
        }
        else
@@ -123,7 +133,7 @@ const Entregas = () => {
      let entrega = entregas.find( (e) => e.id == id_entrega);   
      setEntregaSeleccionada(entrega);
      setMostrarCalificaciones(true);
-     console.log("Entrega: " + entrega + ", "+ mostrarCalificaciones);
+     //console.log("Entrega: " + entrega + ", "+ mostrarCalificaciones);
     }  
 
 
@@ -144,12 +154,87 @@ const Entregas = () => {
      }
     }
 
+
+    const crearCalificaciones = async (listaAlumnos, entregaCreada) => {
+
+      setEntregas( (listaEntregas) => [...listaEntregas, entregaCreada]);
+      let calificacionesBD = await getCalificacionesByEntrega(entregaCreada.id);
+
+
+      //for(let alumno of listaAlumnos)
+      //  {
+
+         let promesas = listaAlumnos.map( alumno => {
+            let nota = 0;
+            let posicionCalificacion = calificacionesExtraidas.findIndex((c) => c.matricula==alumno.alumno_detail.matricula)
+
+            //console.log(alumno)
+            if(posicionCalificacion!=-1)
+            {
+             //console.log("In if")
+             nota = calificacionesExtraidas[posicionCalificacion].nota
+            }
+            let calificacion = {
+             "nota": nota,
+             "matricula": alumno.alumno_detail.matricula,
+             "id_entrega": entregaCreada.id
+            }
+            
+            let calificacionEncontradaBD = calificacionesBD.find( c => c.matricula==calificacion.matricula );
+            if(calificacionEncontradaBD)
+            {
+             return updateCalificacion(calificacionEncontradaBD.id, calificacion)
+            } 
+            else
+            {
+            //console.log(calificacion);
+             return createCalificacion(calificacion);
+            }
+           }
+           )
+  
+         // }
+  
+         Promise.all(promesas).then( res2 => {
+          let entregaActualizada = {
+           "nombre": entregaCreada.nombre,
+           "tipo": entregaCreada.tipo,
+           "fecha": entregaCreada.fecha,
+           "estado": "REGISTRADA"
+          }
+            updateEntrega(entregaCreada.id, entregaActualizada).then( res3 => {
+             setEditarEntregaExtraida(false);
+             setMostrarEntregaExtraida(false);
+             setMostrarEntregas(true);
+             toast.success("¡Se ha creado la entrega exitosamente!")
+            }
+           )
+          }
+          )
+         
+  
+  
+    }
+
     const crearEntrega = async () => {
 
+
+    try{
+
      let listaAlumnos = await obtenerListaAlumnos(dataClase.nrc);
-     createEntrega(entregaExtraida).then(res =>
+     let entregaEncontradaBD;
+     if(entregasNoRegistradasBD.length>0)
+      entregaEncontradaBD = entregasNoRegistradasBD.find( e => e.nombre==entregaExtraida)
+     
+     if(entregaEncontradaBD != undefined)
      {
-      setEntregas( (listaEntregas) => [...listaEntregas, res.data]);
+      crearCalificaciones(listaAlumnos, entregaEncontradaBD)
+     }
+     else
+     {
+      createEntrega(entregaExtraida).then(res =>
+      {
+       setEntregas( (listaEntregas) => [...listaEntregas, res.data]);
 
       //for(let alumno of listaAlumnos)
       //  {
@@ -177,16 +262,31 @@ const Entregas = () => {
        // }
 
         Promise.all(promesas).then( res2 => {
-         setEditarEntregaExtraida(false);
-         setMostrarEntregaExtraida(false);
-         setMostrarEntregas(true);
-         toast.success("¡Se ha creado la entrega exitosamente!")
+         let entregaActualizada = {
+          "nombre": res.data.nombre,
+          "tipo": res.data.tipo,
+          "fecha": res.data.fecha,
+          "estado": "REGISTRADA"
+         }
+         updateEntrega(res.data.id, entregaActualizada).then( res3 => {
+           setEditarEntregaExtraida(false);
+           setMostrarEntregaExtraida(false);
+           setMostrarEntregas(true);
+           toast.success("¡Se ha creado la entrega exitosamente!")
+          }
+         )
         }
         )
        
     }
      )
 
+     
+     }
+
+    }catch(e){
+     toast.error("¡Parece que ha ocurrido un problema al crear la entrega!, vuelva a pulsar el boton para reintentarlo")
+    }
     }
   
   return (

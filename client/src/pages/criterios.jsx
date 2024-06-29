@@ -128,6 +128,8 @@ const Criterios = () => {
   const crearListaCriterios = async () => {
    if(maximo==100)
    {
+    let toastRegistro = toast.loading("Registrando los criterios...")
+    try{
      let criteriosActualizados = await crearCriteriosGenerales();
      console.log("DD:"+criteriosActualizados)
  //    crearCriteriosGenerales().then( (res) => console.log("R:"+ res));
@@ -152,7 +154,11 @@ const Criterios = () => {
     setEditarCriterios(false);
     setExistenCriterios(true);
     setExistenCriteriosAtom(true);
+    toast.dismiss(toastRegistro);
     toast.success("¡Se han guardado los criterios correctamente!")
+    }catch(e){
+     toast.error("¡Ha ocurrido un problema al intentar crear los criterios!, vuelva a pulsar el boton para reintentarlo.")
+    }
    }
    else
    {
@@ -213,6 +219,7 @@ const Criterios = () => {
    console.log(criteriosEliminados.length);
    if(maximo==100)
    {
+    let toastGuardar = toast.loading("Guardando cambios...");
     if(criteriosEliminados.length>0)
     {
      //for(let criterio of criteriosEliminados)
@@ -256,6 +263,7 @@ const Criterios = () => {
 
     setEditarCriterios(false);
     setExistenCriterios(true);
+    toast.dismiss(toastGuardar);
     toast.success("¡Se han guardado los criterios correctamente!")
     
    }

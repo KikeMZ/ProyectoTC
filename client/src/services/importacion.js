@@ -190,6 +190,7 @@ export const manejarArchivo = (e, setArchivo) =>{
    "nombre": nombreEntrega,
    "tipo": tipo,
    "fecha": transformarFechaFormatoDjango(fecha),
+   "estado":"PENDIENTE"
   }
 
   return entregaJSON;
@@ -202,6 +203,7 @@ export const manejarArchivo = (e, setArchivo) =>{
  export const leerArchivoEntrega = async (archivoEntrega, setMostrarEntregaExtraida, setEntregaExtraida, setCalificacionesExtraidas, setCalificacionesCompletas, tipo, nrc) =>{
    //e.preventDefault();
    console.log("l")
+   let toastExtraccion = toast.loading("Extrayendo los datos del Excel...");
    if(archivoEntrega!=null)
    { //Se verifica si el usuario ha seleccionado el archivo Excel.
      if(archivoEntrega.tipo == 1)
@@ -245,6 +247,7 @@ export const manejarArchivo = (e, setArchivo) =>{
        setEntregaExtraida(entregaExtraida);
 
        setMostrarEntregaExtraida(true);
+       toast.dismiss(toastExtraccion)
        toast.success("¡Se han extraido los datos exitosamente!");
        //setResultadoExtraccion(0); //Se indica que el proceso de extraccion se realizo correctamente.
       }

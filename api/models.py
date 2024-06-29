@@ -58,7 +58,7 @@ class Clase2(models.Model):
 class Inscripcion(models.Model):
     clase = models.ForeignKey(Clase2, on_delete=models.DO_NOTHING, null=True)
     alumno = models.ForeignKey(Alumno, on_delete=models.DO_NOTHING, null=True)
-    estado = models.CharField(max_length=50, choices={"ACTIVA":"ACTIVA", "PENDIENTE":"PENDIENTE", "BAJA":"BAJA"})
+    estado = models.CharField(max_length=50, choices=[("ACTIVA","ACTIVA"), ("PENDIENTE","PENDIENTE"), ("BAJA","BAJA")])
 
 class Criterio(models.Model):
     id_criterio = models.AutoField(primary_key=True)
@@ -77,6 +77,7 @@ class Entrega(models.Model):
     nombre = models.CharField(max_length=250)
     tipo = models.ForeignKey(ClaseCriterio, on_delete=models.DO_NOTHING, default=1)  # Aquí estableces el valor predeterminado
     fecha = models.DateField()
+    estado = models.CharField(max_length=50, choices=[("REGISTRADA","REGISTRADA"),("PENDIENTE","PENDIENTE")])
 
 class Calificacion(models.Model):
     nota=models.FloatField()

@@ -40,7 +40,8 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
     let entregaActualizada = {
      "nombre": nombreEntrega,
      "tipo": tipo,
-     "fecha": fecha.year + "-" + fecha.month + "-" + fecha.day
+     "fecha": fecha.year + "-" + fecha.month + "-" + fecha.day,
+     "estado":"REGISTRADA"
     }
 
     updateEntrega(entrega.id,entregaActualizada).then( (res) => {
@@ -69,7 +70,8 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
    let entrega = {
     "nombre": nombreEntrega,
     "tipo": tipo,
-    "fecha": fecha.year +"-"+ fecha.month +"-"+ fecha.day
+    "fecha": fecha.year +"-"+ fecha.month +"-"+ fecha.day,
+    "estado": "PENDIENTE"
    }
    createEntrega(entrega).then( (res) => {
     setEntregas( (listaEntregas) => [...listaEntregas, res.data]);
@@ -85,12 +87,17 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
      }
 
      console.log(calificacion);
-     createCalificacion(calificacion).then(console.log);
+     return createCalificacion(calificacion);
     }
     )
 
-    Promise.all(promesas).then( res =>{
-      toast.success("¡Se ha creado la entrega exitosamente!")
+    Promise.all(promesas).then( res2 =>{
+      let entregaActualizada = res.data;
+      entregaActualizada.estado = "REGISTRADA";
+      updateEntrega(res.data.id, entregaActualizada ).then( res3 => {
+        toast.success("¡Se ha creado la entrega exitosamente!")
+       }
+      )
      }
     )
    // }

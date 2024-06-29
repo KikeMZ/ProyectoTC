@@ -50,14 +50,14 @@ import axios from 'axios';
   export const obtenerInscripciones = () => {
     axios.get(import.meta.env.VITE_BACKEND_URL+"Inscripcion/").then( res => 
     {
-     console.log(res.data);
+    // console.log(res.data);
     });      
   }
   
   // 2. Obtener todos los registros cuyo nrc sea igual al de la clase buscada.
   export const obtenerListaAlumnos = async (nrc) => {
     const response = await axios.get(import.meta.env.VITE_BACKEND_URL+"Inscripcion/?search="+nrc);
-    console.log(response.data);
+   // console.log(response.data);
     return response.data;
 }
 
