@@ -20,6 +20,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
   const [archivoCalificaciones, setArchivoCalificaciones] = useState({"datos":"", "tipo":0});
   const [calificaciones, setCalificaciones] = useState(null);
   const [calificacionesExtraidas, setCalificacionesExtraidas] = useState([]);
+  const [calificacionesCargadas, setCalificacionesCargadas] = useState(false);
   const [mostrarCalificacionesExtraidas, setMostrarCalificacionesExtraidas] = useState(false)
   const [editarCalificaciones, setEditarCalificaciones] = useState(false);
   const [ guardarCalificaciones, setGuardarCalificaciones ] = useState(false);
@@ -36,13 +37,33 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
 
   } 
 
+  const ordenAlfabeticoB = (alumnoA, alumnoB) => {
+    //let nombreAlumnoA = alumnoA.alumno_detail.apellidos + " " + alumnoA.alumno_detail.nombre;
+    //let nombreAlumnoB = alumnoB.alumno_detail.apellidos + " " + alumnoB.alumno_detail.nombre;
+    if( alumnoA.nombre < alumnoB.nombre)
+     return -1;
+    else if( alumnoA.nombre > alumnoB.nombre)
+     return 1;
+    else
+     return 0;
+ 
+   } 
+   
   useEffect(() => {
 
     const obtenerCalificaciones = async () => {
-     let res = await getCalificacionesByEntrega(entrega.id);
-     //console.log(res)
-     setCalificaciones(res.data.sort(ordenAlfabetico));
-    // console.log(res)
+     try{
+      let toastCargando = toast.loading("Cargando calificaciones...");
+      let res = await getCalificacionesByEntrega(entrega.id);
+      //console.log(res)
+      setCalificaciones(res.data.sort(ordenAlfabetico));
+      toast.dismiss(toastCargando);
+      toast.success("¡Calificaciones obtenidas correctamente!");
+      setCalificacionesCargadas(true)
+     // console.log(res)
+     }catch(e){
+      toast.error("¡Ha ocurrido un problema al intentar cargar las calificaciones!, intente volver a la seccion mas tarde.")
+     }
     }
 
     obtenerCalificaciones();
@@ -183,11 +204,11 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
     }
     else
     {
-      toast.error("¡Parece que hay un problema!, verifique que el archivo seleccionado contenga las calificaciones de todos los alumnos inscritos en esta clase.",{"duration":10000});
+      toast.error("¡Parece que hay un problema!, verifique que el archivo seleccionado contenga las calificaciones de todos los alumnos inscritos en esta clase.",{"duration":8000});
     }
      
 
-    setCalificacionesExtraidas(calificacionesEncontradas);
+    setCalificacionesExtraidas(calificacionesEncontradas.sort(ordenAlfabeticoB));
     console.log(calificacionesEncontradas);
 
    }
@@ -195,7 +216,10 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
 
    
    const actualizarCalificaciones = async () => {
+
+    try{
     let promesas;
+    let toastActualizar = toast.loading("Guardando cambios...");
 
     if(mostrarCalificacionesExtraidas)
     {
@@ -219,10 +243,14 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
     }
 
     await Promise.all(promesas);
+    toast.dismiss(toastActualizar);
+    toast.success("¡Se han actualizado las calificaciones exitosamente!");
     setMostrarCalificacionesExtraidas(false);
     setEditarCalificaciones(false);
     setGuardarCalificaciones(false);
-    toast.success("¡Se han actualizado las calificaciones exitosamente!");
+    }catch(e){
+     toast.error("¡Ha ocurrido un problema al intentar actualizar las calificaciones!, vuelva a pulsar el boton para reintarlo.")
+    }
    }
 
   const validarNombreEntrega = (contenidoArchivo) => {
@@ -288,18 +316,26 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
        }
        else
        {
+        let archivoEditado = false;
         let datosCalificaciones =  XLSX.utils.sheet_to_csv(worksheet, {RS:"&&", FS:">"});
         let auxCalificaciones = datosCalificaciones.split("&&").filter( (fila) => fila.search(/[\d\w]/g)!= -1);
+        if(auxCalificaciones[0].toString().includes("Datos de")==true)
+        {
+         archivoEditado = true;
+        }
         auxCalificaciones.shift();
         let posicionIdentificador = {
-         "correo":6
+         "correo": archivoEditado?6:3
         };
-        let posicionNota = 12;
-        let posicionNotaMaxima = 13;
-        let notaMaxima = auxCalificaciones[1].split(">")[13];
-        auxCalificaciones.shift();
+        let posicionNota = archivoEditado?12:9;
+        let posicionNotaMaxima = archivoEditado?13:10;
+        let notaMaxima = auxCalificaciones[1].split(">")[posicionNotaMaxima];
+        if(archivoEditado)
+        {
+         auxCalificaciones.shift();
+        }
         //auxCalificaciones.shift();
-        crearListaCalificaciones(auxCalificaciones,posicionIdentificador,12,notaMaxima);
+        crearListaCalificaciones(auxCalificaciones,posicionIdentificador,posicionNota,notaMaxima);
         setMostrarCalificacionesExtraidas(true);
 
         toast.success("¡Se han extraido los datos exitosamente!");
@@ -366,6 +402,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
        </div>
        <div className="flex w-2/4 justify-end">
                     <Button
+                        isDisabled={!calificacionesCargadas}
                         radius="large"
 
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mr-3 mb-10 font-bold text-base"
@@ -375,6 +412,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
                     </Button>
 
                     <Button
+                        isDisabled={!calificacionesCargadas}
                         radius="large"
 
                         className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-0 mb-10 font-bold text-base"
@@ -433,19 +471,19 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
       <table style={{width:"100%"}}>
       <thead>
         <tr>
-          <th className="text-xl text-start pl-3">Nombre</th>
-          <th className="text-xl py-3">Matricula</th>
-          <th className="text-xl py-3">Nota</th>
+          <th className="text-2xl text-start pl-3">Nombre</th>
+          <th className="text-2xl py-3">Matricula</th>
+          <th className="text-2xl py-3">Nota</th>
         </tr>
       </thead>
       <tbody>
       {
 
       calificacionesExtraidas.map( (calificacion, index) => (
-      <tr key={index} style={{border:"2px solid"}}>
+      <tr key={index} style={{border:"2px solid"}} className="hover:bg-blue-800">
        <td className="text-xl text-start py-3 pl-3"> {calificacion.nombre} </td>
        <td className="text-xl text-center py-3"> {calificacion.matricula} </td>
-       <td className="text-xl text-center py-3"> {calificacion.nota}</td>      
+       <td className="text-xl font-semibold text-center py-3"> {calificacion.nota}</td>      
       </tr>
       ))
       
@@ -474,7 +512,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
     {
      calificaciones?.map( (calificacion, index) => (
       
-    <tr key={calificacion.id} className="text-start" style={{border:"3px solid grey"}}>
+    <tr key={calificacion.id} className="text-start hover:bg-blue-800" style={{border:"3px solid grey"}}>
      <td className="text-xl py-3 pl-3"> {calificacion.alumno_detail.apellidos + " "+ calificacion.alumno_detail.nombre} </td>
      <td className="text-xl py-3"> {calificacion.matricula} </td>
       

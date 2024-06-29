@@ -356,7 +356,7 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
       <tbody>
       {
        alumnos.map( (alumno, index) => (
-       <tr key={index}>
+       <tr key={index} className="hover:bg-blue-800">
         <td className="p-2" style={{border:"1px solid white"}}>{alumno.apellidos +" "+ alumno.nombre +" "}</td>
         <td className="p-2" style={{border:"1px solid white"}}>{alumno.matricula}</td>
         {

@@ -157,6 +157,9 @@ const Entregas = () => {
 
     const crearCalificaciones = async (listaAlumnos, entregaCreada) => {
 
+      try{
+      let toastCreacion = toast.loading("Registrando la entrega...")
+
       setEntregas( (listaEntregas) => [...listaEntregas, entregaCreada]);
       let calificacionesBD = await getCalificacionesByEntrega(entregaCreada.id);
 
@@ -206,6 +209,7 @@ const Entregas = () => {
              setEditarEntregaExtraida(false);
              setMostrarEntregaExtraida(false);
              setMostrarEntregas(true);
+             toast.dismiss(toastCreacion);
              toast.success("¡Se ha creado la entrega exitosamente!")
             }
            )
@@ -213,12 +217,14 @@ const Entregas = () => {
           )
          
   
-  
+     }catch(e){
+      toast.error("¡Ha ocurrido un problema al intentar crear la entrega!, vuelva a pulsar el boton para reintentarlo")
+     }
     }
 
     const crearEntrega = async () => {
 
-
+    let toastCreacion = toast.loading("Creando entrega...")
     try{
 
      let listaAlumnos = await obtenerListaAlumnos(dataClase.nrc);
@@ -272,6 +278,7 @@ const Entregas = () => {
            setEditarEntregaExtraida(false);
            setMostrarEntregaExtraida(false);
            setMostrarEntregas(true);
+           toast.dismiss(toastCreacion)
            toast.success("¡Se ha creado la entrega exitosamente!")
           }
          )

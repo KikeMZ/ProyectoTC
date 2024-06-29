@@ -221,28 +221,34 @@ export const manejarArchivo = (e, setArchivo) =>{
       }
       else
       {
+       let archivoEditado = false;
        let datosCalificaciones =  XLSX.utils.sheet_to_csv(worksheet, {RS:"&&", FS:">"});
       // console.log(datosCalificaciones)
        let auxCalificaciones = datosCalificaciones.split("&&").filter( (fila) => fila.search(/[\d\w]/g)!= -1);
+       if(auxCalificaciones[0].toString().includes("Datos de") == true)
+       {
+        archivoEditado = true;
+       }
        auxCalificaciones.shift();
        let posicionIdentificador = {
-        "correo":6
+        "correo": archivoEditado?6:3
        };
-       let posicionNombreEntrega = 7;
-       let posicionNota = 12;
-       let posicionNotaMaxima = 13;
-       let posicionFecha = 8;
+       let posicionNombreEntrega = archivoEditado?7:4;
+       let posicionNota = archivoEditado?12:9;
+       let posicionNotaMaxima = archivoEditado?13:10;
+       let posicionFecha = archivoEditado?8:5;
        let nombreEntrega = auxCalificaciones[1].split(">")[posicionNombreEntrega];
        let fecha = auxCalificaciones[1].split(">")[posicionFecha];
-       let notaMaxima = auxCalificaciones[1].split(">")[13];
+       let notaMaxima = auxCalificaciones[1].split(">")[posicionNotaMaxima];
 
        console.log(auxCalificaciones[1].split(">"))
-       auxCalificaciones.shift();
+       if(archivoEditado)
+        auxCalificaciones.shift();
        //auxCalificaciones.shift();
        console.log("Calificaciones extraidas:")
        console.log(auxCalificaciones)
        let entregaExtraida = generarFormatoJSONEntrega(nombreEntrega, tipo, fecha)
-       crearListaCalificaciones(archivoEntrega, setCalificacionesExtraidas, setCalificacionesCompletas,auxCalificaciones,posicionIdentificador,12,notaMaxima,nrc);
+       crearListaCalificaciones(archivoEntrega, setCalificacionesExtraidas, setCalificacionesCompletas,auxCalificaciones,posicionIdentificador,posicionNota,notaMaxima,nrc);
        console.log(entregaExtraida)
        setEntregaExtraida(entregaExtraida);
 

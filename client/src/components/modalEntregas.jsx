@@ -35,8 +35,8 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
   const actualizarEntrega =  (onClose) => 
   {
    if(nombreEntrega!="")
-   { 
-    onClose();
+   {
+    let toastActualizar = toast.loading("Guardando los cambios...") 
     let entregaActualizada = {
      "nombre": nombreEntrega,
      "tipo": tipo,
@@ -47,8 +47,12 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
     updateEntrega(entrega.id,entregaActualizada).then( (res) => {
      console.log(res)
      setEntregas( (listaEntregas) => actualizarListaEntregas(listaEntregas, res.data) );
+     onClose();
+     toast.dismiss(toastActualizar);
      toast.success("¡Se ha actualizado la entrega exitosamente!")
-    } );
+    } ).catch( e =>{
+     toast.error("¡Ha ocurrido un problema al intentar actualizar la entrega!, vuelva a pulsar el boton para reintentarlo.")
+    });
    }
   }
 
@@ -61,8 +65,10 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
 
    }
    else
-   {   
-    onClose();
+   {
+    try{
+       
+    let toastCreacion = toast.loading("Registrando la entrega...")
     let criterio = criterios.find( (c) => c.id==tipo);
     let listaAlumnos = await obtenerListaAlumnos(nrc);
 
@@ -95,17 +101,28 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
       let entregaActualizada = res.data;
       entregaActualizada.estado = "REGISTRADA";
       updateEntrega(res.data.id, entregaActualizada ).then( res3 => {
+        onClose();
+        toast.dismiss(toastCreacion)
         toast.success("¡Se ha creado la entrega exitosamente!")
        }
-      )
+      ).catch( e =>{
+       toast.error("¡Ha ocurrido un problema al intentar crear la entrega!, vuelva a pulsar el boton para reintentarlo");
+      })
      }
     )
    // }
    }
-   )
+  ).catch( e =>{
+    toast.error("¡Ha ocurrido un problema al intentar crear la entrega!, vuelva a pulsar el boton para reintentarlo");
+   })
 
    //setMaximo( (maximo) => maximo + ponderacion);
+  }catch(e){
+    toast.error("¡Ha ocurrido un problema al intentar crear la entrega!, vuelva a pulsar el boton para reintentarlo");
+  }
    }
+  
+  
   
   }
 

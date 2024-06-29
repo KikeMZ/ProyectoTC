@@ -305,7 +305,7 @@ export default function Alumnos() {
 
             { cargando?
               (<>
-               <h2 className="text-3xl font-bold mt-10 pt-4">Cargando clases</h2>
+               <h2 className="text-3xl font-bold mt-10 pt-4">Cargando alumnos</h2>
                <i className="pi pi-sync pi-spin mt-6 text-3xl"></i>
               </>)
               :
