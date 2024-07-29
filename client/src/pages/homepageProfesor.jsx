@@ -6,7 +6,9 @@ import { useLocation } from 'react-router-dom';
 import { NavContext } from "../layouts/layoutProfesor";
 import { claseContext } from "../layouts/layoutProfesor";
 import { profesorContext } from '../layouts/layoutProfesor';
-
+import { useAtom } from "jotai";
+import { alumnosAtom } from "./alumnos";
+import { criteriosAtom } from "./criterios"
 
 
 export default function HomeProfesor() {
@@ -17,6 +19,8 @@ export default function HomeProfesor() {
   const {dataProfesor} = useContext(profesorContext);
   const profesor = dataProfesor?.toUpperCase();
 
+  const [ existenAlumnos, setExistenAlumnos ] = useAtom(alumnosAtom);
+  const [ existenCriterios, setExistenCriterios ] = useAtom(criteriosAtom);
 
 
   useEffect(() => {
@@ -28,6 +32,8 @@ export default function HomeProfesor() {
         const resClases = await getClasesByProfesor(await res.data[0]?.nombre); // Obtener la respuesta de getClasesByProfesor
         const profesorMatches = resClases.data //res.data.filter(item => item.nombreProfesor === profesor); // Filtrar la lista directamente
         console.log(profesorMatches);
+        setExistenAlumnos(false);
+        setExistenCriterios(false); 
         setLista(profesorMatches); // Establecer la lista filtrada en el estado
       } catch (error) {
         console.error('Error al cargar las clases:', error);

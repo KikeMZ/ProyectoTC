@@ -157,7 +157,7 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
     return auxAlumnos;
    }
 
-   const obtenerCalificacionActa = (calificacion) => Math.round(calificacion)>=6?Math.round(calificacion):5;
+   const obtenerCalificacionActa = (calificacion) => Math.round(Number(calificacion.toFixed(2)))>=6?Math.round(calificacion):5;
 
    const obtenerCalificacionFinal = (calificacion) => Math.round(calificacion);
 
@@ -242,6 +242,22 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
     
     console.log(shownav)
 
+    const generarEstiloColumnasExcel = () => {
+     let estiloColumnas = [{wch:40},{wch:15}];
+     let numeroCaracteres=0;
+     for(let campo of camposTabla)
+     {
+      if(campo!="Alumno" && campo!="Matricula")
+      {
+       numeroCaracteres = campo.length+5;
+       estiloColumnas.push({wch:numeroCaracteres});
+      }
+     }
+     estiloColumnas.push({wch:15},{wch:15},{wch:15});
+     console.log(estiloColumnas)
+     return estiloColumnas;
+    }
+
     const generarListaFinalArreglo = () => {     
       let listaFinalArreglo = []
       listaFinalArreglo = alumnos.map( (alumno, indice) => [alumno.apellidos+" "+alumno.nombre,alumno.matricula, obtenerCalificacionActa(alumno.calificacion)]);
@@ -260,6 +276,8 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
      return listaFinalJSON;
     }
 
+    
+
     const exportarListaFinalPDF = () => {
      const pdf = new jsPDF();
      const tituloPDF = "Lista de Calificaciones Finales\n"
@@ -275,8 +293,19 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
       head: [["Nombre del Alumno","Matricula","Calificacion"]],
       body: datosTabla
      })
-     pdf.save("Calificaciones finales.pdf")
+     pdf.save(dataClase.nrc+" - Calificaciones finales.pdf")
     } 
+
+    const exportarConcentradoCalificaciones = () => {
+     let tabla = document.getElementById("tablaCalificaciones");
+     let workbook = XLSX.utils.book_new();
+     let worksheet = XLSX.utils.table_to_sheet(tabla, {raw:true});
+     XLSX.utils.book_append_sheet(workbook, worksheet, "Concentrado de calificaciones");
+     worksheet["!cols"] = generarEstiloColumnasExcel();
+     worksheet["!rows"] = [{hpt:25},{hpt:35},{hpt:35}]
+     console.log(worksheet)
+     XLSX.writeFile(workbook, dataClase.nrc+" - Concentrado de calificaciones.xlsx")
+    }
 
     const exportarListaFinalExcel = () => {
      let listaFinalJSON = generarListaFinalJSON();
@@ -286,8 +315,12 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
      console.log(worksheet)
      XLSX.utils.book_append_sheet(workbook, worksheet, "Lista final");
      worksheet["!cols"]  = [{wch:40},{wch:15},{wch:15}];
-     XLSX.writeFile(workbook,"Calificaciones finales.xlsx");
+     XLSX.writeFile(workbook,dataClase.nrc+" - Calificaciones finales.xlsx");
     }
+
+
+
+
 
   return (
     <>
@@ -308,22 +341,23 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
 
       <Dropdown>
        <DropdownTrigger>
-        <Button  variant="faded" radius="large" startContent={<MdDownload size="23px"/>} className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-4 mr-3 mb-2 font-bold text-base">Descargar lista final</Button>
+        <Button  variant="faded" radius="large" startContent={<MdDownload size="23px"/>} className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-4 mr-3 mb-2 font-bold text-base">Exportar calificaciones</Button>
        </DropdownTrigger>
        <DropdownMenu aria-label="Acciones estaticas" variant="faded">
-        <DropdownItem key="excel" onPress={exportarListaFinalExcel} className="text-black">Formato Excel</DropdownItem>
-        <DropdownItem key="pdf" onPress={exportarListaFinalPDF} className="text-black">Formato PDF</DropdownItem>
+        <DropdownItem key="excelConcentrador" onPress={exportarConcentradoCalificaciones} className="text-black">Concentrado de calificaciones</DropdownItem>
+        <DropdownItem key="excel" onPress={exportarListaFinalExcel} className="text-black">Lista final {"("}Formato Excel{")"}</DropdownItem>
+        <DropdownItem key="pdf" onPress={exportarListaFinalPDF} className="text-black">Lista final {"(Formato PDF)"}</DropdownItem>
        </DropdownMenu>
       </Dropdown>
       </div>
-      <table className="border-separate border-spacing-0 " >
+      <table id="tablaCalificaciones" className="border-separate border-spacing-0 " >
       <thead className="sticky top-0 bg-black mt-0 ">
        <tr>
         <th className="bg-secondary-900 "></th>
         <th className="bg-secondary-900"></th>
         {
          criterios.map( (criterio, index) => (
-          <th key={index} className="py-1 border-2" colSpan={entregas[index].length}> {criterio.ponderacion}%</th>
+          <th key={index} className="py-1 border-2" colSpan={entregas[index].length}> { ""+criterio.ponderacion.toString()+"%"}</th>
          ))
         }
         <th className="bg-secondary-900"></th>
@@ -366,9 +400,9 @@ const RegistroCalificaciones = ({controlModal, entregasExistentes}) => {
          )
         )
         }
-        <td className="p-2" style={{border:"1px solid white"}}> {alumno.calificacion}</td>
-        <td className="p-2 text-center" style={{border:"1px solid white"}}> {Math.round(alumno.calificacion)}</td>
-        <td className="p-2 text-center" style={{border:"1px solid white"}}> {Math.round(alumno.calificacion)>=6?Math.round(alumno.calificacion):"5"}</td>
+        <td className="p-2" style={{border:"1px solid white"}}> {alumno.calificacion.toFixed(2)}</td>
+        <td className="p-2 text-center" style={{border:"1px solid white"}}> {Math.round(Number(alumno.calificacion.toFixed(2)))}</td>
+        <td className="p-2 text-center" style={{border:"1px solid white"}}> {Math.round(Number(alumno.calificacion.toFixed(2)))>=6?Math.round(alumno.calificacion):"5"}</td>
 
        </tr>
        )

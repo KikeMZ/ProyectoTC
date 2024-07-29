@@ -1,15 +1,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { extraerDatosMaterias } from '../services/importacion.js';
-import MateriaCard from "../components/card"
-import { Button } from "@nextui-org/react";
+import PeriodoCard from "../components/cardPeriodo";
+import ModalPeriodo from "../components/modalPeriodo";
+import { useForm } from "react-hook-form";
+import { Button, useDisclosure } from "@nextui-org/react";
 import {toast} from 'react-hot-toast';
-import { getAllProfesores, createProfesor } from '../services/profesor.api.js';
+import { getAllPeriodos, createPeriodo } from '../services/periodo.api.js';
 import { getAllClases, crearClase } from '../services/clases.api.js';
 import axios from "axios";
 
 
 export default function Home() {
+
+  const controlModal = useDisclosure();
   const [archivoPDF, setArchivoPDF] = useState(null); 
   const [clases, setClases] = useState([]);
   const [resultadoExtraccion, setResultadoExtraccion] = useState(-1);
@@ -17,166 +21,82 @@ export default function Home() {
   const [lista, setLista] = useState([]);
 
 
-
-  const mensajesImportacion = [
-    "¡Se han importado los datos del PDF exitosamente!", // 0 sin problemas
-    "¡El archivo PDF esta vacio!", // 1
-    "¡La estructura del documento no es valida!", //2
-    "¡El tipo de archivo no es valido!",//3 Solo PDF
-    "¡Seleccione un archivo primero!"//4 Sin archivo
-  ];
-
   useEffect(()=>{
-    async function cargarclases(){
-      const res =  await getAllClases();
+    async function cargarPeriodos(){
+      const res =  await getAllPeriodos();
       console.log(res);
-      setLista(res.data)
+      if(res.data.length>0)
+      {
+       setLista(res.data)
+       setMostrarTarjetas(true);
+      }
     }
-    cargarclases();
+    cargarPeriodos();
   },[]);
 
-
-  const registrarProfesores = async (listaClases) => {
-   //console.log("Profesores:")
-   let respuesta = await getAllProfesores();
-   let nombreProfesoresBD = respuesta.data.map( (profesor) => profesor.nombre )
-   let nombreProfesores = listaClases.map( (clase) => clase.nombreProfesor); 
-   //console.log(nombreProfesores);
-   let auxProfesores = new Set(nombreProfesores);
-   let listaProfesoresEncontrados = [...auxProfesores];
-   //console.log(listaProfesoresEncontrados);
-   let profesoresNoEncontrados = listaProfesoresEncontrados.filter( (profesor) => !nombreProfesoresBD.includes(profesor) );
-   console.log(profesoresNoEncontrados)
-   //let profesoresCreados = []
-   let promesas = profesoresNoEncontrados.map( profesor => createProfesor({"nombre":profesor}));
-   await Promise.all(promesas).then( res => {console.log("Profesores creados")});
-
-   //console.log(profesoresUnicos);
-   
+  const transformarFechaFormatoDjango = (fecha) => {
+   return fecha.year +"-"+ fecha.month +"-"+ fecha.day;
   }
 
-  const obtenerDatosProfesores = async (listaClases) => {
-   let respuesta = await getAllProfesores();
-   let profesoresBD = respuesta.data;
-   let profesoresExtraccion = [...new Set(listaClases.map( (clase) => clase.nombreProfesor))]; 
-   let listaProfesores = profesoresBD.filter( (profesor) => profesoresExtraccion.includes(profesor.nombre) );
-   return listaProfesores;
-   
-
-  }
   
-  const registrarClases = async (listaClases) => {
-   let profesores = await obtenerDatosProfesores(listaClases);
-   let JSONClase = {
-    "nrc":"",
-    "clave":"",
-    "seccion":"",
-    "nombreMateria":"",
-    "id_profesor":""
-   }
-   for(let clase of listaClases)
-   {
-    let profesor = profesores.find( (profesor) => profesor.nombre==clase.nombreProfesor)
-    JSONClase = {
-     "nrc": clase.nrc,
-     "clave": clase.clave,
-     "seccion": clase.seccion,
-     "nombreMateria": clase.nombreMateria,
-     "id_profesor": profesor.id
-    }
-    console.log( await crearClase(JSONClase) );
-   }
+  const registrarPeriodo = (periodo) => {
+    let toastRegistro = toast.loading("Registrando periodo...")
+    periodo.fecha_inicio = transformarFechaFormatoDjango(periodo.fecha_inicio);
+    periodo.fecha_finalizacion = transformarFechaFormatoDjango(periodo.fecha_finalizacion);
+    periodo.estado="ACTIVO";
+    console.log(periodo);
+    createPeriodo(periodo).then((res) => {
+     console.log("Periodo")
+     setLista([...lista,res.data])
+     toast.dismiss(toastRegistro);
+     toast.success("¡Se ha registrado el periodo exitosamente!");
+     controlModal.onClose();
+    }).catch( e => toast.error("¡Ha ocurrido un problema al intentar registrar el periodo!, vuelva a pulsar el boton para volver a intentarlo."));
+  
   }
 
-  const manejarArchivo = (e) => {
-    let archivoSeleccionado = e.target.files[0];
-    if (archivoSeleccionado) {
-      let tipoArchivo = archivoSeleccionado.type;
-      if (tipoArchivo === "application/pdf") { // Validar que sea un archivo PDF
-        let leerArchivo = new FileReader();
-        leerArchivo.readAsArrayBuffer(archivoSeleccionado);
-        leerArchivo.onload = (e) => {
-        setArchivoPDF(e.target.result);
-        };
-      } else { 
-      toast.error("Por favor seleccione un archivo PDF");
-      }
-    }
-  };
-
-  const leerPDF = async (e) => {
-    e.preventDefault();
-    const response = await extraerDatosMaterias(archivoPDF);
-    if (response) {
-      const { resultado, clases: listaClases } = response;
-      let nuevaLista = [];
-      let bandera = 0;
-      for (let i = 0; i < listaClases.length; i++) {
-        bandera=0;
-        lista.map((clase, index)=>{
-          if (clase.nrc == listaClases[i].nrc) {
-            bandera = 1; 
-          }
-        })
-        if (bandera == 0) {
-          nuevaLista.push(listaClases[i])
-        }
-      }
-      setClases(nuevaLista);
-      await registrarProfesores(nuevaLista);
-      console.log("Profesores registrados");
-      await registrarClases(nuevaLista);
-
-    /*  for (let i = 0; i < nuevaLista.length; i++) {
-        axios.post(import.meta.env.VITE_BACKEND_URL + "Clase2/", nuevaLista[i]).then( res => {
-        console.log(res);
-       });
-      } */
-      setResultadoExtraccion(resultado);
-      setMostrarTarjetas(resultado === 0);
-      
-
-
-      if (resultado != 0) {
-      toast.error(mensajesImportacion[resultado]);
-        
-      }else{
-      toast.success(mensajesImportacion[resultado]);
-      }
-    } else {
-      toast.error('Selecciona un archivo primero');
-    }
-    
-  };
 
 
   return (
     <div className="flex flex-col items-center justify-center min-h-full">
       {!mostrarTarjetas && (
         <div className="flex flex-col items-center justify-center">
-          <h1 className="text-center text-3xl font-bold mb-8">
-            Parece que aún no tienes registrada ninguna clase
+          <h1 className="text-center text-3xl font-bold mb-4">
+            Parece que aún no se tiene registrado algun periodo.
           </h1>
-          <form className="mb-4">
-            <input type="file" accept=".pdf" id="cargar" name="archivo" onChange={manejarArchivo} />
-          </form>
           <Button
           radius="large"
-          className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white mt-20"
-          onClick={leerPDF}
+          className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-5 font-bold text-base"
+          onClick={controlModal.onOpen}
         >
-          Extraer datos
+          <i className="pi pi-plus font-semibold text-base"/> Crear periodo
         </Button>
         </div>
       )}
 
       {mostrarTarjetas && (
-        <div className="grid grid-cols-3 gap-4 p-4 ">
-          {clases.map((clase, index) => (
-            <MateriaCard key={index} clase={clase} />
-          ))}
+        <div>
+         <h2 className="text-4xl font-semibold">Periodos</h2>
+         <hr className="border-1 mt-2"/>
+         <Button
+          radius="large"
+          className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-5 font-bold text-base"
+          onClick={controlModal.onOpen}
+        >
+          <i className="pi pi-plus font-semibold text-base"/> Crear periodo
+        </Button>
+
+
+         <div className="grid grid-cols-3 gap-4 p-4 ">
+           {lista.map((periodo, index) => (
+             <PeriodoCard key={index} periodo={periodo} />
+           ))}
+         </div>
         </div>
       )}
+
+     <ModalPeriodo controlModal={controlModal} modoEdicion={false} crearPeriodo={registrarPeriodo} periodo={null}/>
+     
     </div>
   );
 }

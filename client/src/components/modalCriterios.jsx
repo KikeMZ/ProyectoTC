@@ -35,12 +35,12 @@ export default function CriterioModal({ controlModal, setCriterios, setMaximo, m
        <ModalBody className="text-black">
         <div className="flex">
          <label htmlFor="nombreC" className="inline">Nombre:</label>
-         <input id="nombreC" className="ml-2 px-2 border-2 border-black " onChange={(e) => setNombreCriterio( e.target.value)}/>
+         <input id="nombreC" className="ml-2 px-2 border-2 border-black w-3/4" onChange={(e) => setNombreCriterio( e.target.value)}/>
         </div>
 
         <div className="flex">
          <label htmlFor="nombreP" className="inline">Ponderacion:</label>
-         <input id="nombreP" type="number" placeholder="0" max={100 - maximo} min="0" maxLength="2" value={ponderacion} onChange={(e) => setPonderacion(parseInt(e.target.value))} className="ml-2 px-2 border-2 border-black "/>
+         <input id="nombreP" type="number" placeholder="0" max={100 - maximo} min="0" maxLength="2" value={ponderacion} onChange={(e) => setPonderacion(parseInt(e.target.value))} className="ml-2 px-2 border-2 border-black w-1/4"/>
         &nbsp;%
         </div>
 

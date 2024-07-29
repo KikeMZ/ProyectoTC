@@ -45,7 +45,7 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
     }
 
     updateEntrega(entrega.id,entregaActualizada).then( (res) => {
-     console.log(res)
+    // console.log(res)
      setEntregas( (listaEntregas) => actualizarListaEntregas(listaEntregas, res.data) );
      onClose();
      toast.dismiss(toastActualizar);
@@ -72,7 +72,7 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
     let criterio = criterios.find( (c) => c.id==tipo);
     let listaAlumnos = await obtenerListaAlumnos(nrc);
 
-   console.log(listaAlumnos)
+   //console.log(listaAlumnos)
    let entrega = {
     "nombre": nombreEntrega,
     "tipo": tipo,
@@ -80,7 +80,6 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
     "estado": "PENDIENTE"
    }
    createEntrega(entrega).then( (res) => {
-    setEntregas( (listaEntregas) => [...listaEntregas, res.data]);
     setMostrarEntregas(true);
     //for(let alumno of listaAlumnos)
     //{
@@ -92,7 +91,7 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
       "id_entrega": res.data.id
      }
 
-     console.log(calificacion);
+    // console.log(calificacion);
      return createCalificacion(calificacion);
     }
     )
@@ -102,6 +101,7 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
       entregaActualizada.estado = "REGISTRADA";
       updateEntrega(res.data.id, entregaActualizada ).then( res3 => {
         onClose();
+        setEntregas( (listaEntregas) => [...listaEntregas, res.data]);
         toast.dismiss(toastCreacion)
         toast.success("¡Se ha creado la entrega exitosamente!")
        }
@@ -138,10 +138,10 @@ export default function ModalEntregas({ controlModal, modoEdicion, setEntregas, 
 
     if(modoEdicion)
     {
-     console.log("Edicion")
-     console.log(entrega);
+    // console.log("Edicion")
+    // console.log(entrega);
      setNombreEntrega(entrega.nombre);
-     console.log("Nombre:"+entrega.nombre)
+    // console.log("Nombre:"+entrega.nombre)
      setTipo(entrega.tipo)
      setFecha( parseDate(entrega.fecha));
     }  

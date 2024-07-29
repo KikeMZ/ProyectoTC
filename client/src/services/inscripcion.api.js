@@ -61,6 +61,11 @@ import axios from 'axios';
     return response.data;
 }
 
+  export const obtenerInscripcionesPorAlumno = async (matricula) => {
+   const respuesta = await axios.get(import.meta.env.VITE_BACKEND_URL+"Inscripcion/obtenerInscripcionesPorAlumno/");
+
+  }
+
   // ------------------
   // --- Update ---
   // ------------------

@@ -82,6 +82,16 @@ class Clase2ViewSet(viewsets.ModelViewSet):
         lista_clases = [ self.get_serializer(c).data for c in clases_filtradas ]
         print(lista_clases)
         return Response(lista_clases, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'], url_path=r'getClasesByPeriodo/(?P<periodo>[^/.]+)')
+    def getClasesByPeriodo(self, request, periodo, pk=None):
+        clases_filtradas = []
+        lista_clases = []
+        clases_filtradas = Clase2.objects.filter(id_periodo=periodo).order_by("nombreMateria")
+        lista_clases = [ self.get_serializer(c).data for c in clases_filtradas ]
+        print(lista_clases)
+        return Response(lista_clases, status=status.HTTP_200_OK)
+        
 
 class ProfesorViewSet(viewsets.ModelViewSet):
     queryset = Profesor.objects.all()
@@ -176,6 +186,16 @@ class InscripcionViewSet(viewsets.ModelViewSet):
             inscripcion.estado = "ACTIVA"
             inscripcion.save()
         return Response([],status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'], url_path=r'obtenerInscripcionesPorAlumno/(?P<matricula>[^/.]+)')
+    def obtenerInscripcionesPorAlumno(self, request, matricula):
+        #print(matricula)
+        inscripciones_filtradas = Inscripcion.objects.filter(alumno=matricula, estado="ACTIVA")
+        lista_inscripciones_alumno = [self.get_serializer(inscripcion).data for inscripcion in inscripciones_filtradas]
+        #print(lista_inscripciones)
+        return Response(lista_inscripciones_alumno, status=status.HTTP_200_OK)
+        
+    
     
 class CriterioViewSet(viewsets.ModelViewSet):
     queryset = Criterio.objects.all()

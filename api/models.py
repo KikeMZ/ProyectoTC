@@ -39,7 +39,7 @@ class Profesor(models.Model):
 class Periodo(models.Model):
     nombre=models.CharField(max_length=100)
     plan=models.CharField(max_length=50)
-    estado=models.CharField(max_length=50, choices={"ACTIVO":"ACTIVO","FINALIZADO":"FINALIZADO"})
+    estado=models.CharField(max_length=50, choices=[("ACTIVO","ACTIVO"),("FINALIZADO","FINALIZADO")])
     fecha_inicio=models.DateField()
     fecha_finalizacion=models.DateField()
 
@@ -50,6 +50,7 @@ class Clase2(models.Model):
     seccion=models.CharField(max_length=4)
     nombreMateria=models.CharField(max_length=250)
     id_profesor=models.ForeignKey(Profesor, on_delete=models.DO_NOTHING, default=0)
+    id_periodo=models.ForeignKey(Periodo, on_delete=models.DO_NOTHING, default=0)
 
 
     def __str__(self):
@@ -58,7 +59,7 @@ class Clase2(models.Model):
 class Inscripcion(models.Model):
     clase = models.ForeignKey(Clase2, on_delete=models.DO_NOTHING, null=True)
     alumno = models.ForeignKey(Alumno, on_delete=models.DO_NOTHING, null=True)
-    estado = models.CharField(max_length=50, choices=[("ACTIVA","ACTIVA"), ("PENDIENTE","PENDIENTE"), ("BAJA","BAJA")])
+    estado = models.CharField(max_length=50, choices=[("ACTIVA","ACTIVA"), ("PENDIENTE","PENDIENTE"), ("BAJA","BAJA"), ("ARCHIVADA","ARCHIVADA")])
 
 class Criterio(models.Model):
     id_criterio = models.AutoField(primary_key=True)

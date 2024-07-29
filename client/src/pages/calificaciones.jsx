@@ -162,9 +162,9 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
   const crearListaCalificaciones = async ( datosCalificaciones, posicionIdentificador, posicionNota, notaMaxima) => {
     let calificacionesEncontradas = [];
     let correo = "";
-    let inscripciones = await axios.get("http://127.0.0.1:8000/api/Inscripcion/?search="+nrc);
+    let inscripciones = await axios.get(import.meta.env.VITE_BACKEND_URL+"Inscripcion/?search="+nrc);
     let listaAlumnos = inscripciones.data.map( (inscripcion) => inscripcion.alumno_detail);
-    console.log(inscripciones)
+   // console.log(inscripciones)
     for(let d of datosCalificaciones)
     {
      let datosAlumno;
@@ -209,7 +209,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
      
 
     setCalificacionesExtraidas(calificacionesEncontradas.sort(ordenAlfabeticoB));
-    console.log(calificacionesEncontradas);
+   // console.log(calificacionesEncontradas);
 
    }
 
@@ -281,7 +281,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
     let existeNombre = contenidoArchivo.search(campoNombre) != -1?true:false;
     let existenApellidos = contenidoArchivo.search(campoApellidos) != -1?true:false;
     let existeNota = contenidoArchivo.search(campoNota) != -1?true:false;
-    console.log("Correo:"+existeCorreo+" Nota:"+existeNota); 
+    //console.log("Correo:"+existeCorreo+" Nota:"+existeNota); 
     let esValido = (existeCorreo || (existeNombre && existenApellidos)) && existeNota;
     return esValido;
  
@@ -294,7 +294,7 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
   //
   const leerArchivoCalificaciones = async (e) =>{
     //e.preventDefault();
-    console.log("l")
+  //  console.log("l")
     if(archivoCalificaciones!=null)
     { //Se verifica si el usuario ha seleccionado el archivo Excel.
       if(archivoCalificaciones.tipo == 1)
@@ -302,8 +302,8 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
        const workbook =  XLSX.read(archivoCalificaciones.datos, {type: 'buffer'});
        const worksheetName =  workbook.SheetNames[0];
        const worksheet =  workbook.Sheets[worksheetName];
-       console.log(worksheet);
-       console.log(XLSX.utils.sheet_to_csv(worksheet, {RS:"#"}))
+  //     console.log(worksheet);
+  //     console.log(XLSX.utils.sheet_to_csv(worksheet, {RS:"#"}))
        const excelValido = validarEstructuraCalificaciones(XLSX.utils.sheet_to_csv(worksheet));
        const existeNombreEntrega = validarNombreEntrega(XLSX.utils.sheet_to_txt(worksheet));
        if(!excelValido)
@@ -367,8 +367,8 @@ const Calificaciones = ({nrc, entrega, mostrarVistaEntregas}) => {
         let notaMaxima = archivoCalificaciones.datos.data[2][posicionNota];
         //let fecha = archivoCalificaciones.datos.data[1][posicionNota];
         let auxCalificaciones = Papa.unparse(archivoCalificaciones.datos, {newline:"#"}).replace("�","Ñ").split("#");
-        console.log("Papaparse")
-        console.log(auxCalificaciones)
+      //  console.log("Papaparse")
+      //  console.log(auxCalificaciones)
         crearListaCalificaciones(auxCalificaciones,posicionIdentificador, posicionNota,notaMaxima);
         setMostrarCalificacionesExtraidas(true);
         toast.success("¡Se han extraido los datos exitosamente!");

@@ -21,7 +21,7 @@ function NavLink({ to, icon: Icon, text, active, onClick }) {
 }
 
 export default function Sidebar() {
-  const [activeLink, setActiveLink] = useState("");
+  const [activeLink, setActiveLink] = useState("/admin");
   const handleLinkClick = (link) => {
     setActiveLink(link);
   };

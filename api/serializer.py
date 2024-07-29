@@ -25,7 +25,7 @@ class ProfesorSerializer(serializers.ModelSerializer):
 
 class PeriodoSerializer(serializers.ModelSerializer):
     class Meta:
-        model=Profesor
+        model=Periodo
         fields= '__all__'
 
 class Clase2Serializer(serializers.ModelSerializer):
@@ -33,8 +33,7 @@ class Clase2Serializer(serializers.ModelSerializer):
 
     class Meta:
         model=Clase2
-        fields = ('nrc', 'clave', 'seccion', 'nombreMateria', 'id_profesor', 'profesor_detail')
-
+        fields = ('nrc', 'clave', 'seccion', 'nombreMateria', 'id_profesor', 'profesor_detail', 'id_periodo')
 
 
 class InscripcionSerializer(serializers.ModelSerializer):

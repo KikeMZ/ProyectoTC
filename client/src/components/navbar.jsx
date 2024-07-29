@@ -32,7 +32,7 @@ export const Nav = ({clase}) => {
   const [ existenAlumnos, setExistenAlumnos ] = useAtom(alumnosAtom);
   const [ existenCriterios, setExistenCriterios ] = useAtom(criteriosAtom);
 
-  console.log(clase);
+  //console.log(clase);
 
   const handleLinkClick = (link) => {
     setActiveLink(link);
@@ -51,8 +51,8 @@ export const Nav = ({clase}) => {
    const existenCriterios2 = async () => {
     let auxExistenCriterios = false;
     let res = await getCriteriosByNRC(clase.nrc);
-    console.log("Criterios")
-    console.log(res.data);
+   // console.log("Criterios")
+   // console.log(res.data);
     if(res.data.length>0)
      auxExistenCriterios = true;
     return auxExistenCriterios;
@@ -110,7 +110,7 @@ export const Nav = ({clase}) => {
         }
 
         {
-         existenAlumnos && existenCriterios &&
+         existenAlumnos && existenCriterios && mostrarEntregas &&
 
          (
          <NavLink

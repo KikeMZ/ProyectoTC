@@ -55,7 +55,7 @@ export const manejarArchivo = (e, setArchivo) =>{
   const crearListaCalificaciones = async (archivoCalificaciones, setCalificacionesExtraidas, setCalificacionesCompletas, datosCalificaciones, posicionIdentificador, posicionNota, notaMaxima, nrc) => {
     let calificacionesEncontradas = [];
     let correo = "";
-    let inscripciones = await axios.get("http://127.0.0.1:8000/api/Inscripcion/?search="+nrc);
+    let inscripciones = await axios.get(import.meta.env.VITE_BACKEND_URL+"Inscripcion/?search="+nrc);
     let listaAlumnos = inscripciones.data.map( (inscripcion) => inscripcion.alumno_detail);
     console.log(inscripciones)
     for(let d of datosCalificaciones)

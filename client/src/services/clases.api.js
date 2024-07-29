@@ -8,6 +8,10 @@ export const getAllClases = () => {
     return api.get("/");
 };
 
+export const getClasesByPeriodo = (periodo) => {
+    return api.get(`getClasesByPeriodo/${periodo}/`); 
+}
+
 export const getClasesByProfesor = (profesor) => {
     return api.get("/getClasesByProfesor/?profesor="+profesor)
 }

@@ -60,7 +60,7 @@ const Criterios = () => {
    let criteriosBD = []; //Almacena los criterios existentes en la base de datos.
    let criteriosActualizados = [];
    let res = await getAllCriterios(); //Se obtienen todos los criterios de la tabla Criterio.
-   console.log("Inicio"+res.data);
+  // console.log("Inicio"+res.data);
    criteriosBD = res.data;
    nombresCriteriosBD = res.data.map( (c) => c.nombre);
    let nombresCriterios = criterios.map( (c) => c.nombre)
@@ -75,7 +75,7 @@ const Criterios = () => {
      criterioExistente = criterio;
     else
      criterioExistente = criteriosBD.find( (c) => c.nombre == (criterio.nombre));
-    console.log(criterioExistente)
+  //  console.log(criterioExistente)
     if(criterioExistente)
     {
       let auxCriterioAgregado = {
@@ -90,7 +90,7 @@ const Criterios = () => {
     }
    }
    criteriosActualizados = criteriosExistentes;
-   console.log(criteriosUnicos + ":" + criterios)
+  // console.log(criteriosUnicos + ":" + criterios)
 
    //Se crean aquellos criterios que no estan en la base de datos.
      if(criteriosUnicos.length>0)
@@ -119,7 +119,7 @@ const Criterios = () => {
 
      }
 //   }).finally( () => {
-    console.log("Salida:"+ criteriosActualizados);
+    //console.log("Salida:"+ criteriosActualizados);
    
    
    return await criteriosActualizados;
@@ -131,7 +131,7 @@ const Criterios = () => {
     let toastRegistro = toast.loading("Registrando los criterios...")
     try{
      let criteriosActualizados = await crearCriteriosGenerales();
-     console.log("DD:"+criteriosActualizados)
+     //console.log("DD:"+criteriosActualizados)
  //    crearCriteriosGenerales().then( (res) => console.log("R:"+ res));
  //    console.log("CA:"+ criteriosActualizados)
     // for( let criterio of criteriosActualizados)
@@ -157,7 +157,7 @@ const Criterios = () => {
     toast.dismiss(toastRegistro);
     toast.success("¡Se han guardado los criterios correctamente!")
     }catch(e){
-     toast.error("¡Ha ocurrido un problema al intentar crear los criterios!, vuelva a pulsar el boton para reintentarlo.")
+     toast.error("¡Ha ocurrido un problema al intentar crear los criterios!, vuelva a pulsar el boton para reintentarlo.", {id:toastRegistro})
     }
    }
    else
@@ -170,7 +170,7 @@ const Criterios = () => {
 
    let auxCriterios = [...criterios];
    let posicionCriterio = criterios.findIndex( (c) => c.nombre==nombreCriterio)
-   console.log(auxCriterios[posicionCriterio]);
+  // console.log(auxCriterios[posicionCriterio]);
    if(!isNaN(valor) && valor!="") 
    { 
     if((maximo + parseInt(valor) - parseInt(auxCriterios[posicionCriterio].ponderacion))<=100 && parseInt(valor)>=0)
@@ -185,7 +185,7 @@ const Criterios = () => {
    else if(valor!="")
    {
     auxCriterios[posicionCriterio].nombre = valor;
-    console.log(auxCriterios)
+  //  console.log(auxCriterios)
 //    setMaximo(maximo)
    }
    setCriterios(auxCriterios);
@@ -205,7 +205,7 @@ const Criterios = () => {
    {
     let criterio = criterios.find( (c) => c.nombre==nombre)
     setCriteriosEliminados([...criteriosEliminados,criterio]);
-    console.log(criterios.filter( (c) => c.nombre!=nombre));
+  //  console.log(criterios.filter( (c) => c.nombre!=nombre));
     setCriterios(criterios.filter( (c) => c.nombre!=nombre));
     setMaximo(maximo-criterio.ponderacion);
    }
@@ -216,7 +216,8 @@ const Criterios = () => {
   }
 
   const guardarModificaciones = async () => {
-   console.log(criteriosEliminados.length);
+   try{
+  // console.log(criteriosEliminados.length);
    if(maximo==100)
    {
     let toastGuardar = toast.loading("Guardando cambios...");
@@ -231,7 +232,7 @@ const Criterios = () => {
 
     let criteriosActualizados = await crearCriteriosGenerales();
 
-    console.log(criteriosActualizados)
+    //console.log(criteriosActualizados)
 
    // for(let criterio of criteriosActualizados)
    // {
@@ -272,6 +273,9 @@ const Criterios = () => {
     toast.error("¡Accion no valida!, para guardar los cambios todos los criterios deben sumar 100%.")
     
    }
+  }catch(e){
+   toast.error("¡Ha ocurrido un problema al intentar guardar los criterios!, vuelva a pulsar el boton para reintentarlo.")
+  }
 
   }
 
@@ -394,7 +398,7 @@ const Criterios = () => {
             (!mostrarCriterios) &&  (
             <div className="flex flex-col items-center justify-start min-h-full">
               <div className="flex flex-col items-center justify-center">
-                    <h1 className="text-center text-3xl font-bold mt-6 mb-4">Parece que aun no hay ningun criterios de evaluacion para esta clase.</h1>
+                    <h1 className="text-center text-3xl font-bold mt-6 mb-4">Parece que aún no hay ningun criterio de evaluacion para esta clase.</h1>
                     <h3 className="text-center text-xl mb-8" style={{color:"lightgrey"}}>Comience con alguna de las siguientes opciones:</h3>
 
                     <div>
