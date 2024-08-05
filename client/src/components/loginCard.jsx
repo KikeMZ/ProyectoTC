@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Input, Button } from "@nextui-org/react";
 import { Link, useNavigate } from "react-router-dom";
+import {jwtDecode} from "jwt-decode";
 
+import { autenticarAdministrador } from "../services/administrador.api";
 import { autenticarProfesor } from "../services/profesor.api";
 import toast from "react-hot-toast";
 
@@ -33,10 +35,18 @@ export default function LoginCard() {
   }
 
   const verificarDatosLogin = () => {
+   let JSONUsuario = {
+    "username": email ,
+    "password": contrasena
+   }
    let tipoUsuario = comprobarTipoUsuario();
    if(tipoUsuario==1)
    {
-    autenticarProfesor(email, contrasena).then( (res) =>{
+    autenticarAdministrador(JSONUsuario).then( res => {
+      console.log(res.data.access)
+      console.log(jwtDecode(res.data.access));
+     })
+   /*  autenticarProfesor(email, contrasena).then( (res) =>{
      console.log(res)
      if(res.data.estadoSesion==0)
      {
@@ -48,11 +58,14 @@ export default function LoginCard() {
       toast.error("¡Debe llenar todos los campos para iniciar sesion!");
       //console.log("g")
      }
-   })
+   })*/
    }
    else
    {
-    window.location.href = "/admin";
+    autenticarAdministrador(JSONUsuario).then( res => {
+      console.log(jwtDecode(res.data.access));
+    })
+    //window.location.href = "/admin";
    }
   }
 

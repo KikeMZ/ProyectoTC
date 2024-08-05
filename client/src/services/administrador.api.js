@@ -5,7 +5,7 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL
 });
 
-export const getToken = (administrador) => {
+export const autenticarAdministrador = (administrador) => {
   return api.post('/token/', administrador)
 }
 

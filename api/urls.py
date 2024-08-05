@@ -21,7 +21,7 @@ router.register(r'User', views.UserViewSet,'User')
 
 urlpatterns =[
     path('',include(router.urls)),
-    path('token/', TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path('token/', views.CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path('token/refresh/', TokenRefreshView.as_view(), name="token_refresh"),
     path('docs/',include_docs_urls(title="API"))
 ]

@@ -191,7 +191,7 @@ export default function ClasesAdministrador() {
 
       {mostrarTarjetas && (
         <div className="flex flex-col">
-        <h1 className="text-4xl font-semibold ">Clases </h1>
+        <h1 className="text-4xl font-semibold ">Clases registradas</h1>
         <Button
           radius="large"
           className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white mt-10 text-base font-semibold"

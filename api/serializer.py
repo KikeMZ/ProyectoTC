@@ -1,7 +1,25 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer 
 from django.contrib.auth.models import User
 from .models import Programmer, Alumno, Periodo, Clase2, Profesor, Inscripcion, Entrega, Criterio, ClaseCriterio, Calificacion
 
+# Serializadores auxiliares
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls,user):
+        token = super().get_token(user)
+        correoUsuario = user.username
+        dominioProfesor = "@correo.buap.mx"
+        if dominioProfesor in correoUsuario:
+            profesor = Profesor.objects.get(id_usuario=user)
+            token['nombre'] = profesor.nombre
+            token['correo'] = correoUsuario
+        return token
+            
+
+
+# Serializadores principales
 
 class ProgrammerSerializer(serializers.ModelSerializer):
     class Meta:

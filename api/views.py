@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
-from .serializer import ProgrammerSerializer,AlumnoSerializer, PeriodoSerializer,Clase2Serializer, ProfesorSerializer, InscripcionSerializer,EntregaSerializer,CriterioSerializer, ClaseCriterioSerializer, CalificacionSerializer, UserSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializer import ProgrammerSerializer,AlumnoSerializer, PeriodoSerializer,Clase2Serializer, ProfesorSerializer, InscripcionSerializer,EntregaSerializer,CriterioSerializer, ClaseCriterioSerializer, CalificacionSerializer, UserSerializer, CustomTokenObtainPairSerializer
 from .models import Programmer,Alumno, Periodo,Clase2, Profesor, Inscripcion,Entrega,Criterio, ClaseCriterio, Calificacion
 from rest_framework import filters, status
 from rest_framework.response import Response
@@ -46,6 +47,10 @@ def enviarCorreo(correoDestino:str):
     smtp.quit()
 
 
+# Auxiliar views
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
 
 # Create your views here.
 
@@ -149,11 +154,11 @@ class ProfesorViewSet(viewsets.ModelViewSet):
             nombreProfesores = [ profesor.nombre for profesor in profesores]
             for p in datosProfesores:
                 posicionProfesor = nombreProfesores.index(p["nombre"])
-                contrasena = generarContrasena()
-                profesores[posicionProfesor].contrasena = contrasena
                 correoInicial = profesores[posicionProfesor].correo
                 profesores[posicionProfesor].correo = p["correo"]
                 if correoInicial=="":
+                    contrasena = generarContrasena()
+                    profesores[posicionProfesor].contrasena = contrasena
                     usuarioProfesor = User.objects.create_user(username=p["correo"], email=p["correo"], password=contrasena)
                     profesores[posicionProfesor].id_usuario = usuarioProfesor
                 profesores[posicionProfesor].save()
