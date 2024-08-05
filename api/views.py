@@ -1,6 +1,7 @@
 from django.shortcuts import render
+from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
-from .serializer import ProgrammerSerializer,AlumnoSerializer, PeriodoSerializer,Clase2Serializer, ProfesorSerializer, InscripcionSerializer,EntregaSerializer,CriterioSerializer, ClaseCriterioSerializer, CalificacionSerializer
+from .serializer import ProgrammerSerializer,AlumnoSerializer, PeriodoSerializer,Clase2Serializer, ProfesorSerializer, InscripcionSerializer,EntregaSerializer,CriterioSerializer, ClaseCriterioSerializer, CalificacionSerializer, UserSerializer
 from .models import Programmer,Alumno, Periodo,Clase2, Profesor, Inscripcion,Entrega,Criterio, ClaseCriterio, Calificacion
 from rest_framework import filters, status
 from rest_framework.response import Response
@@ -52,6 +53,17 @@ class ProgrammerViewSet(viewsets.ModelViewSet):       #esta clase se encarga de 
     queryset = Programmer.objects.all()
     serializer_class = ProgrammerSerializer
 
+class UserViewSet(viewsets.ModelViewSet):       #esta clase se encarga de crear todo el crud#
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    @action(detail=True, methods=['get'])
+    def grupos(self, request, pk=None):
+        user = self.get_object()
+        serializer = UserSerializer(user)
+        print(serializer.data)
+        return Response([])
+
 class AlumnoViewSet(viewsets.ModelViewSet):
     queryset = Alumno.objects.all()
     serializer_class = AlumnoSerializer
@@ -70,6 +82,7 @@ class PeriodoViewSet(viewsets.ModelViewSet):
 class Clase2ViewSet(viewsets.ModelViewSet):
     queryset = Clase2.objects.all()
     serializer_class=Clase2Serializer
+
 
     @action(detail=False, methods=['get'])
     def getClasesByProfesor(self, request, pk=None):
@@ -91,6 +104,19 @@ class Clase2ViewSet(viewsets.ModelViewSet):
         lista_clases = [ self.get_serializer(c).data for c in clases_filtradas ]
         print(lista_clases)
         return Response(lista_clases, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=["get"], url_path=r'getClasesByProfesorCurrentPeriodo/(?P<profesor>[^/.]+)')
+    def getClasesByProfesorCurrentPeriodo(self, request, profesor, pk=None):
+        #clases_profesor = []
+        clases_filtradas = []
+        lista_clases_activas = []
+        #periodos_activos = Periodo.objects.filter(estado="ACTIVO")
+        #profesor = Profesor.objects.get(id=profesor)
+        #print(profesor.id)
+        clases_filtradas = Clase2.objects.filter(id_profesor=profesor)
+        lista_clases_activas = [ self.get_serializer(c).data for c in clases_filtradas if c.id_periodo.estado=="ACTIVO"]
+        #print(lista_clases)
+        return Response(lista_clases_activas, status=status.HTTP_200_OK)
         
 
 class ProfesorViewSet(viewsets.ModelViewSet):
@@ -101,20 +127,37 @@ class ProfesorViewSet(viewsets.ModelViewSet):
     
 
     @action(detail=False, methods=['post'])
+    def crearCuenta(self, request, pk=None):
+        profesor = request.data
+        usuarioProfesor = User.objects.create_user(username=profesor["correo"], email=profesor["correo"], password=profesor["correo"])
+        print(usuarioProfesor.password)
+        p = Profesor.objects.create(nombre=profesor["nombre"], contrasena=profesor["contrasena"], id_usuario=usuarioProfesor)
+        print("Profesor valido")
+        return Response([], status=status.HTTP_201_CREATED)
+#        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    @action(detail=False, methods=['post'])
     def actualizarDatosProfesores(self, request, pk=None):
         datosProfesores = request.data["profesores"]
         tipoActualizacion = request.data["tipoActualizacion"]
         posicionProfesor = -1
         print(datosProfesores)
         profesores = Profesor.objects.all()
+        #Se comprueba si el endpoint es llamado despues de extraer datos del PDF de la pagina de Secretaria Academica
         if tipoActualizacion=='1':
             nombreProfesores = [ profesor.nombre for profesor in profesores]
             for p in datosProfesores:
                 posicionProfesor = nombreProfesores.index(p["nombre"])
                 contrasena = generarContrasena()
                 profesores[posicionProfesor].contrasena = contrasena
+                correoInicial = profesores[posicionProfesor].correo
                 profesores[posicionProfesor].correo = p["correo"]
+                if correoInicial=="":
+                    usuarioProfesor = User.objects.create_user(username=p["correo"], email=p["correo"], password=contrasena)
+                    profesores[posicionProfesor].id_usuario = usuarioProfesor
                 profesores[posicionProfesor].save()
+                
         else:
             identificadorProfesores = [ profesor.id for profesor in profesores]
             for p in datosProfesores:

@@ -25,21 +25,35 @@ export default function LoginCard() {
     setContrasena(e.target.value); // Actualizar el estado del email cuando cambia el valor del campo de entrada
   };
 
-  const verificarDatosLogin = () => {
-   autenticarProfesor(email, contrasena).then( (res) =>{
-    console.log(res)
-    if(res.data.estadoSesion==0)
-    {
-     window.localStorage.setItem("sesionUsuarioApp", JSON.stringify(res.data));
-     window.location.href = "/profesor?nombre="+res.data.nombre+"&email="+res.data.correo;
-    }
-    else if(res.data.estadoSesion==1)
-    {
-     toast.error("¡Debe llenar todos los campos para iniciar sesion!");
-     //console.log("g")
-    }
+  const comprobarTipoUsuario = () => {
+   if(email.includes("@correo.buap.mx"))
+    return 1; //Profesor
+   else
+    return 0; //Administrador;
+  }
 
+  const verificarDatosLogin = () => {
+   let tipoUsuario = comprobarTipoUsuario();
+   if(tipoUsuario==1)
+   {
+    autenticarProfesor(email, contrasena).then( (res) =>{
+     console.log(res)
+     if(res.data.estadoSesion==0)
+     {
+      window.localStorage.setItem("sesionUsuarioApp", JSON.stringify(res.data));
+      window.location.href = "/profesor?nombre="+res.data.nombre+"&email="+res.data.correo;
+     }
+     else if(res.data.estadoSesion==1)
+     {
+      toast.error("¡Debe llenar todos los campos para iniciar sesion!");
+      //console.log("g")
+     }
    })
+   }
+   else
+   {
+    window.location.href = "/admin";
+   }
   }
 
   

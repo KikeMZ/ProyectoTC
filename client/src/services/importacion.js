@@ -129,6 +129,7 @@ export const manejarArchivo = (e, setArchivo) =>{
      let profesor = {
       "nombre": nombreProcesado,
       "correo": correo,
+      "id_usuario": null
      }
      listaProfesores.push(profesor);
     }

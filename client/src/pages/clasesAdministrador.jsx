@@ -60,7 +60,7 @@ export default function ClasesAdministrador() {
    let profesoresNoEncontrados = listaProfesoresEncontrados.filter( (profesor) => !nombreProfesoresBD.includes(profesor) );
    console.log(profesoresNoEncontrados)
    //let profesoresCreados = []
-   let promesas = profesoresNoEncontrados.map( profesor => createProfesor({"nombre":profesor}));
+   let promesas = profesoresNoEncontrados.map( profesor => createProfesor({"nombre":profesor, "id_usuario":null}));
    await Promise.all(promesas).then( res => {console.log("Profesores creados")});
 
    //console.log(profesoresUnicos);

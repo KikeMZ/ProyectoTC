@@ -1,10 +1,16 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
 from .models import Programmer, Alumno, Periodo, Clase2, Profesor, Inscripcion, Entrega, Criterio, ClaseCriterio, Calificacion
 
 
 class ProgrammerSerializer(serializers.ModelSerializer):
     class Meta:
         model=Programmer
+        fields='__all__'
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=User
         fields='__all__'
 
 

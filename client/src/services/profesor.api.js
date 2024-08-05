@@ -14,6 +14,10 @@ export const createProfesor = (profesor) => {
   return api.post('/', profesor);
 }
 
+export const crearCuenta = (profesor) => {
+  return api.post('/crearCuenta/', profesor);
+}
+
 export const deleteProfesor = (id) => {
   return api.delete(`/${id}/`);
 }

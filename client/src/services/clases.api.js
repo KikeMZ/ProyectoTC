@@ -13,7 +13,11 @@ export const getClasesByPeriodo = (periodo) => {
 }
 
 export const getClasesByProfesor = (profesor) => {
-    return api.get("/getClasesByProfesor/?profesor="+profesor)
+    return api.get("/getClasesByProfesor/?profesor="+profesor);
+}
+
+export const getClasesByProfesorCurrentPeriodo = (profesor) => {
+    return api.get(`/getClasesByProfesorCurrentPeriodo/${profesor}/`);
 }
 
 export const crearClase = (Clase) => {
