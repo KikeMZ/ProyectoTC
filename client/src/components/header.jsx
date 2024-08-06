@@ -52,7 +52,7 @@ export default function Header() {
                         <DropdownMenu aria-label="User Actions" variant="flat">
                             <DropdownItem key="logout" color="danger">
                             <Link >
-                             <button onClick={ () => { window.localStorage.removeItem("sesionUsuarioApp");window.location.href="/"}}>
+                             <button onClick={ () => { window.localStorage.removeItem("access_token"); window.localStorage.removeItem("refresh_token"); window.location.href="/"}}>
                                 Cerrar sesión
                              </button>
                             </Link>

@@ -6,10 +6,22 @@ import Layout from "./layouts/layout"
 import LayoutProfesor from "./layouts/layoutProfesor";
 import LayoutAlumno from "./layouts/layoutAlumno";
 
-//importpages
+//Import auxiliares
+
+import {ProtectedRouteAdmin} from "./ProtectedRouteAdmin";
+import {ProtectedRouteProfesor} from "./ProtectedRouteProfesor";
+import {ProtectedRouteAlumno} from "./ProtectedRouteAlumno";
+
+// --------------------
+// --- Import pages ---
+// --------------------
+
+//Administrador
 import Home from "./pages/homepage";
 import ClasesAdministrador from "./pages/clasesAdministrador";
 import Profesores from "./pages/profesores";
+
+//Profesor
 import Error404 from "./pages/error404";
 import Historico from "./pages/historico"
 import Alumnos from "./pages/alumnos";
@@ -20,18 +32,25 @@ import Entregas from "./pages/entregas";
 import RegistroCalificaciones from "./pages/registroCalificaciones";
 import Asistencias from "./pages/asistencias";
 
+//Alumno
+
 
 export default function App() {
   return (
    <BrowserRouter>
     <Routes>
       <Route path="/" element={<Login/>}/>
-      <Route path="/admin" element={<Layout/>}>
+      
+      <Route element={<ProtectedRouteAdmin/>}>
+       <Route path="/admin" element={<Layout/>}>
         <Route index element ={<Home/>}/>
         <Route path="clases" element={<ClasesAdministrador/>}/>
         <Route path="profesores" element={<Profesores/>}/>
+       </Route>
       </Route>
-      <Route path="/profesor" element={<LayoutProfesor/>}>
+
+      <Route element={<ProtectedRouteProfesor/>}>
+       <Route path="/profesor" element={<LayoutProfesor/>}>
         <Route index element ={<HomeProfesor email=""/>}/>
         <Route path="historico" element ={<Historico/>}/>
         <Route path="alumnos" element={<Alumnos/>}/>
@@ -40,7 +59,9 @@ export default function App() {
          <Route path="reporte" element={<RegistroCalificaciones/>}/> 
         </Route>
         <Route path="criterios" element={<Criterios/>}/>
+       </Route>
       </Route>
+
       <Route path="/alumno" element={<LayoutAlumno/>}>
        <Route index element={<Home/>}/>
       </Route>

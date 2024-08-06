@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { Button } from "@nextui-org/react";
 import { FaChalkboardTeacher } from "react-icons/fa";
 import { IoIosSchool } from "react-icons/io";
 import { IoTimeOutline } from "react-icons/io5";
@@ -29,6 +30,7 @@ export default function Sidebar() {
   return (
     <div className="bg-secondary-900 h-[100vh] overflow-y-scroll scrollbar-hide p-4">
       <h1 className="text-center text-2xl font-bold mb-10">BUAP</h1>
+      <div className="flex flex-col justify-end gap-4 ">
       <nav>
         <NavLink
           to="/admin"
@@ -44,8 +46,11 @@ export default function Sidebar() {
           text="Profesores"
           active={activeLink === "/admin/profesores"}
           onClick={() => handleLinkClick("/admin/profesores")}
-        />       
+        />
+
       </nav>
-    </div>
+      <Button onPress={ () => { window.localStorage.removeItem("access_token"); window.localStorage.removeItem("refresh_token");  window.location.href="/"}} className="text-black font-semibold">Cerrar Sesion</Button>
+      </div>       
+      </div>
   );
 }

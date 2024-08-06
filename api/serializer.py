@@ -9,12 +9,15 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls,user):
         token = super().get_token(user)
+        tipo_usuario = 0 #Administrador
         correoUsuario = user.username
         dominioProfesor = "@correo.buap.mx"
         if dominioProfesor in correoUsuario:
             profesor = Profesor.objects.get(id_usuario=user)
             token['nombre'] = profesor.nombre
             token['correo'] = correoUsuario
+            tipo_usuario = 1 #Profesor
+        token['tipo_usuario'] = tipo_usuario
         return token
             
 

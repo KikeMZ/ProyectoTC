@@ -3,6 +3,8 @@ import MateriaCard from "../components/card"
 import { getProfesorByCorreo } from "../services/profesor.api";
 import { getClasesByProfesor } from '../services/clases.api.js';
 import { useLocation } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode'; 
+
 import { NavContext } from "../layouts/layoutProfesor";
 import { claseContext } from "../layouts/layoutProfesor";
 import { profesorContext } from '../layouts/layoutProfesor';
@@ -26,10 +28,11 @@ export default function HomeProfesor() {
   useEffect(() => {
     async function cargarclases() {
       try {
-        const res = await getProfesorByCorreo(profesor);
-        console.log("Respuesta Sesions:")
-        console.log(res)
-        const resClases = await getClasesByProfesor(await res.data[0]?.nombre); // Obtener la respuesta de getClasesByProfesor
+        //const res = await getProfesorByCorreo(profesor);
+        //console.log("Respuesta Sesions:")
+        //console.log(res)
+        let datosProfesor = jwtDecode(window.localStorage.getItem("access_token"));
+        const resClases = await getClasesByProfesor(await datosProfesor.nombre); // Obtener la respuesta de getClasesByProfesor
         const profesorMatches = resClases.data //res.data.filter(item => item.nombreProfesor === profesor); // Filtrar la lista directamente
         console.log(profesorMatches);
         setExistenAlumnos(false);

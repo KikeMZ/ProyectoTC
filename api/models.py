@@ -16,6 +16,7 @@ class Alumno(models.Model):
     apellidos=models.CharField(max_length=100)
     correo=models.CharField(max_length=100)
     contrasena=models.CharField(max_length=100, blank=True)
+    id_usuario=models.ForeignKey(User, on_delete=models.DO_NOTHING, default=0, blank=True, null=True)
 
     def __str__(self):
         return str(self.matricula )

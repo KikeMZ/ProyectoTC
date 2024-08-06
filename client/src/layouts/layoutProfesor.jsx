@@ -6,7 +6,7 @@ import Toast from "../components/toast"
 import { Nav } from "../components/navbar"
 import { useState, createContext } from "react"
 import { revisarEstadoSesion } from "../services/profesor.api"
-
+import {jwtDecode} from 'jwt-decode';
 
 export const NavContext = createContext();
 export const claseContext = createContext();
@@ -44,16 +44,16 @@ export default function LayoutProfesor() {
 
     useEffect(() => {
      async function autenticacion () {
-      let sesionUsuarioApp = window.localStorage.getItem("sesionUsuarioApp");
+      let sesionUsuarioApp = window.localStorage.getItem("access_token");
       if(sesionUsuarioApp)
       {
-       let profesor = JSON.parse(sesionUsuarioApp);
-       let res = await revisarEstadoSesion(profesor.id,profesor.token);
+       let profesor = jwtDecode(sesionUsuarioApp);
+       //let res = await revisarEstadoSesion(profesor.id,profesor.token);
        console.log("Layout")
-       console.log(res)
-       if(res.data.estadoSesion!=0)
-        navigate("/");
-       // setDataProfesor(res.data.nombre)
+      // console.log(res)
+      // if(res.data.estadoSesion!=0)
+      //  navigate("/");
+        setDataProfesor(profesor.nombre)
       }
       else
        navigate("/");

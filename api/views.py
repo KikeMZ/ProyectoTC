@@ -73,6 +73,16 @@ class AlumnoViewSet(viewsets.ModelViewSet):
     queryset = Alumno.objects.all()
     serializer_class = AlumnoSerializer
 
+    @action(detail=False, methods=['post'])
+    def registrarAlumnos(self, request, pk=None):
+        alumnos = request.data["alumnos"]
+        for alumno in alumnos:
+            contrasena = generarContrasena()
+            usuario = User.objects.create_user(username=alumno["correo"], email=alumno["correo"], password=contrasena)
+            Alumno.objects.create(matricula=alumno["matricula"], nombre=alumno["nombre"], apellidos=alumno["apellidos"], id_usuario=usuario)
+        return Response([], status=status.HTTP_201_CREATED)
+
+
     @action(detail=False, methods=['get'])
     def borrarAlumnos(self, request, pk=None):
         alumnos = Alumno.objects.all()

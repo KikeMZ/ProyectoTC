@@ -1,6 +1,32 @@
 import LoginCard from "../components/loginCard"
+import {Navigate} from "react-router-dom";
+
+import {jwtDecode} from "jwt-decode";
 
 export default function Login(){
+
+    let token = window.localStorage.getItem("access_token") ?? null;
+
+    const cargarVista = () =>{
+     let usuario = jwtDecode(token);
+     let direccionVista = "";
+     switch(usuario.tipo_usuario)
+     {
+        case 0: direccionVista = "/admin"
+                break;
+        case 1: direccionVista = `/profesor?nombre=${usuario.nombre}&email=${usuario.correo}`;
+                break;
+        case 2: direccionVista = `/alumno`
+                break;
+     }
+     return <Navigate to={direccionVista}/>
+
+    }
+
+    const sesionActiva = () => token!=null?true:false;
+
+    if(sesionActiva()) return(cargarVista())
+
 
     return(
         <div className="flex w-full h-screen">

@@ -3,6 +3,8 @@ import { Input, Button } from "@nextui-org/react";
 import { Link, useNavigate } from "react-router-dom";
 import {jwtDecode} from "jwt-decode";
 
+
+import {api} from "../services/axios.api";
 import { autenticarAdministrador } from "../services/administrador.api";
 import { autenticarProfesor } from "../services/profesor.api";
 import toast from "react-hot-toast";
@@ -35,38 +37,30 @@ export default function LoginCard() {
   }
 
   const verificarDatosLogin = () => {
+   //toast.error("¡Debe llenar todos los campos para iniciar sesion!");
    let JSONUsuario = {
     "username": email ,
     "password": contrasena
    }
-   let tipoUsuario = comprobarTipoUsuario();
-   if(tipoUsuario==1)
-   {
-    autenticarAdministrador(JSONUsuario).then( res => {
-      console.log(res.data.access)
-      console.log(jwtDecode(res.data.access));
-     })
-   /*  autenticarProfesor(email, contrasena).then( (res) =>{
-     console.log(res)
-     if(res.data.estadoSesion==0)
-     {
-      window.localStorage.setItem("sesionUsuarioApp", JSON.stringify(res.data));
-      window.location.href = "/profesor?nombre="+res.data.nombre+"&email="+res.data.correo;
-     }
-     else if(res.data.estadoSesion==1)
-     {
-      toast.error("¡Debe llenar todos los campos para iniciar sesion!");
-      //console.log("g")
-     }
-   })*/
-   }
+   autenticarAdministrador(JSONUsuario).then( res => {
+    let tipoUsuario = comprobarTipoUsuario();
+    window.localStorage.setItem("access_token", res.data.access);
+    window.localStorage.setItem("refresh_token", res.data.refresh)
+    api.defaults.headers['Authorization'] = 'JWT '+ window.localStorage.getItem('access_token');
+    if(tipoUsuario==1)
+    {
+     let datosProfesor = jwtDecode(res.data.access);
+     window.location.href = "/profesor?nombre="+datosProfesor.nombre+"&email="+datosProfesor.correo;
+
+
+    }
    else
    {
-    autenticarAdministrador(JSONUsuario).then( res => {
-      console.log(jwtDecode(res.data.access));
-    })
-    //window.location.href = "/admin";
+    window.location.href = "/admin";
    }
+  });
+
+
   }
 
   
