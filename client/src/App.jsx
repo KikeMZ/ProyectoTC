@@ -33,7 +33,9 @@ import RegistroCalificaciones from "./pages/registroCalificaciones";
 import Asistencias from "./pages/asistencias";
 
 //Alumno
-
+import HomeAlumno from "./pages/homepageAlumno";
+import CalificacionesAlumno from "./pages/calificacionesAlumno";
+import AsistenciasAlumno from "./pages/asistenciasAlumno";
 
 export default function App() {
   return (
@@ -62,9 +64,14 @@ export default function App() {
        </Route>
       </Route>
 
-      <Route path="/alumno" element={<LayoutAlumno/>}>
-       <Route index element={<Home/>}/>
+      <Route element={<ProtectedRouteAlumno/>}>
+       <Route path="/alumno" element={<LayoutAlumno/>}>
+        <Route index element={<HomeAlumno/>}/>
+        <Route path="calificaciones" element={<CalificacionesAlumno/>} />
+        <Route path="asistencias" element={<AsistenciasAlumno/>}/>
+       </Route>
       </Route>
+
       <Route path="*" element={<Error404/>} />
       <Route path="/login" element={<Login/>}/>
     </Routes>

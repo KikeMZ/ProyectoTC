@@ -79,9 +79,8 @@ class AlumnoViewSet(viewsets.ModelViewSet):
         for alumno in alumnos:
             contrasena = generarContrasena()
             usuario = User.objects.create_user(username=alumno["correo"], email=alumno["correo"], password=contrasena)
-            Alumno.objects.create(matricula=alumno["matricula"], nombre=alumno["nombre"], apellidos=alumno["apellidos"], id_usuario=usuario)
+            Alumno.objects.create(matricula=alumno["matricula"], nombre=alumno["nombre"], apellidos=alumno["apellidos"], correo=alumno["correo"],id_usuario=usuario)
         return Response([], status=status.HTTP_201_CREATED)
-
 
     @action(detail=False, methods=['get'])
     def borrarAlumnos(self, request, pk=None):
@@ -111,6 +110,20 @@ class Clase2ViewSet(viewsets.ModelViewSet):
         print(lista_clases)
         return Response(lista_clases, status=status.HTTP_200_OK)
     
+    @action(detail=False, methods=['get'], url_path=r'getClasesByAlumno/(?P<alumno>[^/.]+)')
+    def getClasesByAlumno(self, request, alumno, pk=None):
+        print("In")
+        inscripciones_alumno = []
+        clases_filtradas = []
+        lista_clases = []
+        #instancia_alumno = Alumno.objects.get(matricula=alumno)
+        inscripciones_alumno = Inscripcion.objects.filter(alumno=alumno)
+        clases_filtradas = [ inscripcion.clase for inscripcion in inscripciones_alumno]
+        lista_clases = [ self.get_serializer(c).data for c in clases_filtradas if c.id_periodo.estado=="ACTIVO"]
+        #print(clases_filtradas[0].nombreMateria)
+        return Response(lista_clases, status=status.HTTP_200_OK)
+        
+
     @action(detail=False, methods=['get'], url_path=r'getClasesByPeriodo/(?P<periodo>[^/.]+)')
     def getClasesByPeriodo(self, request, periodo, pk=None):
         clases_filtradas = []

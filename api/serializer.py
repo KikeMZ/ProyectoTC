@@ -12,11 +12,18 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         tipo_usuario = 0 #Administrador
         correoUsuario = user.username
         dominioProfesor = "@correo.buap.mx"
+        dominioAlumno = "@alumno.buap.mx" 
         if dominioProfesor in correoUsuario:
             profesor = Profesor.objects.get(id_usuario=user)
             token['nombre'] = profesor.nombre
             token['correo'] = correoUsuario
             tipo_usuario = 1 #Profesor
+        elif dominioAlumno in correoUsuario:
+            alumno = Alumno.objects.get(id_usuario=user)
+            token['matricula'] = alumno.matricula
+            token['nombre'] = alumno.apellidos + " " + alumno.nombre
+            token['correo'] = alumno.correo
+            tipo_usuario = 2
         token['tipo_usuario'] = tipo_usuario
         return token
             

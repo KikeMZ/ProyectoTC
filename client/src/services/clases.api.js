@@ -20,6 +20,10 @@ export const getClasesByProfesorCurrentPeriodo = (profesor) => {
     return api.get(`/getClasesByProfesorCurrentPeriodo/${profesor}/`);
 }
 
+export const getClasesByAlumno = (alumno) => {
+    return api.get(`/getClasesByAlumno/${alumno}/`);
+}
+
 export const crearClase = (Clase) => {
     return api.post("/", Clase);
 };

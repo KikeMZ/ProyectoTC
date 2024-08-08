@@ -1,25 +1,24 @@
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, AvatarIcon, User, Button } from "@nextui-org/react";
-import { claseContext } from "../layouts/layoutProfesor";
+import { claseContext } from "../layouts/layoutAlumno";
 import { useContext } from "react";
 import { Link } from 'react-router-dom';
-import { getProfesorByCorreo } from '../services/profesor.api'
+//import { getProfesorByCorreo } from '../services/profesor.api'
 import { jwtDecode } from "jwt-decode";
 
-const obtenerNombreProfesor = async (correoProfesor) => {
- let res = await getProfesorByCorreo(correoProfesor);
- let nombre = res.data[0].nombre;
- console.log(nombre)
- return nombre;
-} 
+let nombreAlumno = "";
+let correo =""
 
-const nombreProfesor = new URLSearchParams(location.search).get('nombre') //?? jwtDecode(window.localStorage.getItem("access_token")??null)?.nombre ?? null;
-const correo = new URLSearchParams(location.search).get('email') //?? jwtDecode(window.localStorage.getItem("access_token")??null)?.correo ?? null;
+if(window.localStorage.getItem("access_token"))
+{
+ nombreAlumno =  jwtDecode(window.localStorage.getItem("access_token")).nombre;
+ correo = jwtDecode(window.localStorage.getItem("access_token")).correo;
+}
 //if(correo)
 // nombreProfesor = correo;
 //console.log(nombreProfesor)
 
-export default function Header() {
+export default function HeaderAlumno() {
   const {dataClase} = useContext(claseContext)
 
     return (
@@ -47,7 +46,7 @@ export default function Header() {
                                 }}
                                 className="transition-transform"
                                 description={correo}
-                                name={nombreProfesor}
+                                name={nombreAlumno}
                             />
                         </DropdownTrigger>
                         <DropdownMenu aria-label="User Actions" variant="flat">

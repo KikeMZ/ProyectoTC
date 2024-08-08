@@ -7,7 +7,7 @@ import ErrorCarga from "../components/errorCarga";
 import { Button } from "@nextui-org/react";
 import toast from "react-hot-toast";
 import { obtenerListaAlumnos, crearListaInscripcion, activarInscripciones } from "../services/inscripcion.api"
-import { getAllAlumnos, createAlumno } from "../services/alumnos.api";
+import { getAllAlumnos, createAlumno, crearAlumnos } from "../services/alumnos.api";
 import { claseContext } from "../layouts/layoutProfesor";
 
 
@@ -165,7 +165,8 @@ export default function Alumnos() {
                 "nombre": nombre,
                 "apellidos": apellidos,
                 "correo": alumno.Correo,
-                "contrasena":""
+                "contrasena":"",
+                "id_usuario":null
             };
             return registroAlumno; //Se agrega el objeto generado al arreglo llamado "listaAlumnos";
         });
@@ -250,15 +251,16 @@ export default function Alumnos() {
         let alumnosBD = await getAllAlumnos();
         let matriculasBD = alumnosBD.data.map( (alumno) => alumno.matricula);
         let alumnosNoEncontrados = alumnos.filter( (alumno) => !matriculasBD.includes(alumno.matricula) ) 
-        let promesas = alumnosNoEncontrados.map(alumno => {
+       /* let promesas = alumnosNoEncontrados.map(alumno => {
             return createAlumno(alumno);
-        });
-        return await Promise.all(promesas);
+        });*/
+        return await crearAlumnos({"alumnos":alumnosNoEncontrados});
     }
 
     const registrarInscripcion = async () => {
         let toastRegistro = toast.loading("Registrando a los alumnos...");
         try {
+             console.log("Comienza el registro");
              let respuestaAlumno = await registrarAlumnos()
              //throw new Error("Prueba");
             // console.log(respuestaAlumno)
@@ -268,7 +270,7 @@ export default function Alumnos() {
             setMatriculas(listaMatriculas);
             //console.log(listaMatriculas);
             //console.log("Creacion de las inscripciones");
-
+            console.log("Comienza las inscripciones");
             let responses = await crearListaInscripcion(listaMatriculas, nrc);
             responses.forEach(response => {
                 //console.log('Inscripción registrada:', response.data);

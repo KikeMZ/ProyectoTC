@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { Button, useDisclosure } from "@nextui-org/react";
 import {toast} from 'react-hot-toast';
 import { getAllPeriodos, createPeriodo } from '../services/periodo.api.js';
-import { getAllClases, crearClase } from '../services/clases.api.js';
+import { getAllClases, getClasesByAlumno, crearClase } from '../services/clases.api.js';
 import axios from "axios";
 
 
@@ -24,6 +24,8 @@ export default function Home() {
   useEffect(()=>{
     async function cargarPeriodos(){
       const res =  await getAllPeriodos();
+      //const matricula = 201637439
+      //const pruebaClases = await getClasesByAlumno(matricula)
       console.log(res);
       if(res.data.length>0)
       {
