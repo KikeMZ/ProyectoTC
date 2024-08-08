@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import {useNavigate} from 'react-router-dom';
 import { extraerDatosMaterias } from '../services/importacion.js';
 
 import ModalExtraerClases from "../components/modalExtraerClases";
@@ -14,6 +15,7 @@ import axios from "axios";
 export default function ClasesAdministrador() {
 
   const controlModal = useDisclosure();
+  const navigate = useNavigate();
 
   const [archivoPDF, setArchivoPDF] = useState(null); 
   const [clases, setClases] = useState([]);
@@ -22,6 +24,7 @@ export default function ClasesAdministrador() {
   const [lista, setLista] = useState([]);
 
   const id_periodo = new URLSearchParams(location.search).get('periodo');
+  const nombre_periodo = new URLSearchParams(location.search).get('nombre');
 
 
 
@@ -139,7 +142,7 @@ export default function ClasesAdministrador() {
       if(nuevaLista.length>0)
       {
        console.log(nuevaLista)
-       setLista([...lista, nuevaLista]);
+       setLista([...lista, ...nuevaLista]);
        await registrarProfesores(nuevaLista);
        console.log("Profesores registrados");
        await registrarClases(nuevaLista, id_periodo);
@@ -170,7 +173,11 @@ export default function ClasesAdministrador() {
 
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-full">
+    <>
+      <div className="flex flex-col items-center justify-center min-h-full">
+      <div className="flex justify-start items-start w-full">
+       <Button onClick={() =>{ navigate("/")}} startContent={<i className="pi pi-chevron-left"/>} className="font-semibold mb-4 ml-16" variant="faded">Regresar a periodos</Button>
+      </div>
       {!mostrarTarjetas && (
         <div className="flex flex-col items-center justify-center">
           <h1 className="text-center text-3xl font-bold mb-8">
@@ -191,7 +198,7 @@ export default function ClasesAdministrador() {
 
       {mostrarTarjetas && (
         <div className="flex flex-col">
-        <h1 className="text-4xl font-semibold ">Clases registradas</h1>
+        <h1 className="text-4xl font-semibold ">Clases - {nombre_periodo}</h1>
         <Button
           radius="large"
           className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white mt-10 text-base font-semibold"
@@ -212,6 +219,7 @@ export default function ClasesAdministrador() {
 
       <ModalExtraerClases controlModal={controlModal} onManejarArchivo={manejarArchivo} extraerClases={leerPDF}/>
     </div>
+    </>
   );
 }
 

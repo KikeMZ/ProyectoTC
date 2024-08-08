@@ -80,6 +80,7 @@ class AlumnoViewSet(viewsets.ModelViewSet):
             contrasena = generarContrasena()
             usuario = User.objects.create_user(username=alumno["correo"], email=alumno["correo"], password=contrasena)
             Alumno.objects.create(matricula=alumno["matricula"], nombre=alumno["nombre"], apellidos=alumno["apellidos"], correo=alumno["correo"],id_usuario=usuario)
+            print("Se ha creado la cuenta para un alumno")
         return Response([], status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['get'])
@@ -183,7 +184,12 @@ class ProfesorViewSet(viewsets.ModelViewSet):
                     contrasena = generarContrasena()
                     profesores[posicionProfesor].contrasena = contrasena
                     usuarioProfesor = User.objects.create_user(username=p["correo"], email=p["correo"], password=contrasena)
+                    print("Se ha creado la cuenta para un profesor")
                     profesores[posicionProfesor].id_usuario = usuarioProfesor
+                if profesores[posicionProfesor].correo!="" and profesores[posicionProfesor]!=p["correo"]:
+                    profesores[posicionProfesor].correo = p["correo"]
+                    profesores[posicionProfesor].id_usuario.username = p["correo"] 
+                    profesores[posicionProfesor].id_usuario.save()
                 profesores[posicionProfesor].save()
                 
         else:
@@ -191,11 +197,19 @@ class ProfesorViewSet(viewsets.ModelViewSet):
             for p in datosProfesores:
                 posicionProfesor = identificadorProfesores.index(p["id"])
                 profesores[posicionProfesor].nombre = p["nombre"]
-                if profesores[posicionProfesor].correo=="":
+                if profesores[posicionProfesor].correo=="" and p["correo"]!="":
                     contrasena = generarContrasena()
                     profesores[posicionProfesor].contrasena = contrasena
                     profesores[posicionProfesor].correo = p["correo"]
-                    profesores[posicionProfesor].save()
+                    usuarioProfesor = User.objects.create_user(username=p["correo"], email=p["correo"], password=contrasena)
+                    print("Se ha creado la cuenta para un profesor")
+                    profesores[posicionProfesor].id_usuario = usuarioProfesor
+                if profesores[posicionProfesor].correo!="" and profesores[posicionProfesor]!=p["correo"]:
+                    profesores[posicionProfesor].correo = p["correo"]
+                    profesores[posicionProfesor].id_usuario.username = p["correo"] 
+                    profesores[posicionProfesor].id_usuario.save()
+                profesores[posicionProfesor].save()
+                
         
         return Response([], status=status.HTTP_200_OK)
     
@@ -203,8 +217,12 @@ class ProfesorViewSet(viewsets.ModelViewSet):
     def reiniciarContrasena(self, request, pk=None):
         profesor = self.get_object()
         contrasenaActualizada = generarContrasena()
+        #print(profesor.contrasena)
         profesor.contrasena = contrasenaActualizada
+        #print(profesor.id_usuario.password)
+        profesor.id_usuario.set_password(contrasenaActualizada)
         profesor.save()
+        profesor.id_usuario.save()
         #enviarCorreo("")
         return Response({"mensaje":"¡Correo enviado exitosamente!"})
     

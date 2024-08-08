@@ -49,7 +49,10 @@ export default function Home() {
     console.log(periodo);
     createPeriodo(periodo).then((res) => {
      console.log("Periodo")
-     setLista([...lista,res.data])
+     if(lista.length==0)
+      setLista([res.data])
+     else
+      setLista([...lista,res.data])
      toast.dismiss(toastRegistro);
      toast.success("¡Se ha registrado el periodo exitosamente!");
      controlModal.onClose();

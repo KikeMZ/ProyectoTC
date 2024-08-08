@@ -258,7 +258,7 @@ export default function Alumnos() {
     }
 
     const registrarInscripcion = async () => {
-        let toastRegistro = toast.loading("Registrando a los alumnos...");
+        let toastRegistro = toast.loading("Registrando a los alumnos...", {"duration":30000});
         try {
              console.log("Comienza el registro");
              let respuestaAlumno = await registrarAlumnos()

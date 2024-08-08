@@ -14,7 +14,7 @@ export default function PeriodoCard({ periodo }) {
 
   return (  
       <Card className="max-w-[400px] bg-gray-100">
-        <Link to={`clases?periodo=${id}`} onClick={handleSelectPeriodo}>
+        <Link to={`clases?periodo=${id}&nombre=${nombre}`} onClick={handleSelectPeriodo}>
         <CardHeader className="flex gap-3">
           <div className="flex flex-col">
             <p className="text-xl font-semibold">{nombre}</p>
