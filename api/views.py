@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializer import ProgrammerSerializer,AlumnoSerializer, PeriodoSerializer,Clase2Serializer, ProfesorSerializer, InscripcionSerializer,EntregaSerializer,CriterioSerializer, ClaseCriterioSerializer, CalificacionSerializer, UserSerializer, CustomTokenObtainPairSerializer
-from .models import Programmer,Alumno, Periodo,Clase2, Profesor, Inscripcion,Entrega,Criterio, ClaseCriterio, Calificacion
+from .serializer import ProgrammerSerializer,AlumnoSerializer, PeriodoSerializer,Clase2Serializer, ProfesorSerializer, InscripcionSerializer,EntregaSerializer,CriterioSerializer, ClaseCriterioSerializer, CalificacionSerializer, UserSerializer, CustomTokenObtainPairSerializer, AsistenciaSerializer
+from .models import Programmer,Alumno, Periodo,Clase2, Profesor, Inscripcion,Entrega,Criterio, ClaseCriterio, Calificacion, Asistencia
 from rest_framework import filters, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -11,6 +11,7 @@ import smtplib
 from email.message import EmailMessage
 import random
 import string
+from django.utils import timezone
 
 def generarCodigo(tamano:int):
     Characters=string.ascii_letters + "1234567890."
@@ -374,3 +375,31 @@ class CalificacionViewSet(viewsets.ModelViewSet):
         print("e")
         print(lista_calificaciones)
         return Response(lista_calificaciones, status=status.HTTP_200_OK)
+    
+## Esto lo hize yo
+class AsistenciaViewSet(viewsets.ModelViewSet):
+    queryset = Asistencia.objects.all()
+    serializer_class = AsistenciaSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Validar la inscripción
+        materia_nrc = serializer.validated_data['materia_nrc']
+        matricula = serializer.validated_data['matricula']
+
+        inscripcion = Inscripcion.objects.filter(alumno=matricula, clase=materia_nrc).first()
+
+        if not inscripcion or inscripcion.estado != 'ACTIVA':
+            return Response(
+                {"detail": f"El alumno con matrícula {matricula} no está inscrito en la clase con NRC {materia_nrc} o no tiene una inscripción activa."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Guardar la asistencia si todo está bien
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
