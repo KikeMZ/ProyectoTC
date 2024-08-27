@@ -110,7 +110,7 @@ export const Nav = ({clase}) => {
         }
 
         {
-         existenAlumnos && existenCriterios && mostrarEntregas &&
+         existenAlumnos && existenCriterios && 
 
          (
          <NavLink
