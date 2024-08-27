@@ -17,6 +17,8 @@ router.register(r'ClaseCriterio',views.ClaseCriterioViewSet,'ClaseCriterio')
 router.register(r'Entrega',views.EntregaViewSet,'Entrega')
 router.register(r'Calificacion', views.CalificacionViewSet,'Calificacion')
 router.register(r'User', views.UserViewSet,'User')
+router.register(r'Asistencia', views.AsistenciaViewSet, 'AsistenciaViewSet')
+
 
 
 urlpatterns =[
