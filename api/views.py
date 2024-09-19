@@ -402,4 +402,11 @@ class AsistenciaViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-
+    def get_queryset(self):
+        queryset = Asistencia.objects.all()
+        nrc = self.request.query_params.get('materia_nrc', None)
+        if nrc is not None:
+        # Filtramos por el campo 'nrc' en el modelo relacionado 'Clase2'
+            queryset = queryset.filter(materia_nrc__nrc=nrc)
+        return queryset
+    
