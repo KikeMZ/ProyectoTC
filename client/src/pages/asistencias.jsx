@@ -8,19 +8,25 @@ const Asistencias = () => {
   const [matricula, setMatricula] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [asistencias, setAsistencias] = useState([]);
+  const [isSuccess, setIsSuccess] = useState(false); // Nuevo estado para manejar éxito o error
+  const [nextPage, setNextPage] = useState(null);  // Página siguiente
+  const [prevPage, setPrevPage] = useState(null);  // Página anterior
+  const [currentPage, setCurrentPage] = useState(1);  // Página actual
 
   useEffect(() => {
     showNav();
-    fetchAsistencias();
-  }, [showNav, dataClase]);
+    fetchAsistencias(currentPage);
+  }, [showNav, dataClase, currentPage]);
 
-  const fetchAsistencias = async () => {
+  const fetchAsistencias = async (page = 1) => {
     const nrc_clase = dataClase.nrc;
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/Asistencia/?materia_nrc=${nrc_clase}`);
+      const response = await fetch(`http://127.0.0.1:8000/api/Asistencia/?materia_nrc=${nrc_clase}&page=${page}`);
       if (response.ok) {
         const result = await response.json();
-        setAsistencias(result);
+        setAsistencias(result.results);  // Aquí se guardan solo los resultados
+        setNextPage(result.next);  // Establecemos la URL de la página siguiente
+        setPrevPage(result.previous);  // Establecemos la URL de la página anterior
       } else {
         console.error('Error al obtener las asistencias:', response.statusText);
       }
@@ -48,11 +54,13 @@ const Asistencias = () => {
       if (response.ok) {
         const result = await response.json();
         setMensaje('Asistencia registrada correctamente.');
+        setIsSuccess(true); // Indicamos que fue exitoso
         console.log('Asistencia registrada:', result);
         fetchAsistencias(); // Actualiza la lista de asistencias
       } else {
         const errorData = await response.json();
         const detail = errorData.detail || '';
+        setIsSuccess(false); // Indicamos que ocurrió un error
 
         if (detail.includes('Invalid pk')) {
           setMensaje('La matrícula no está registrada en el sistema.');
@@ -65,12 +73,17 @@ const Asistencias = () => {
       }
     } catch (error) {
       setMensaje('Error al conectar con el servidor.');
+      setIsSuccess(false); // Indicamos que ocurrió un error
       console.error('Error al conectar con el servidor:', error);
     }
   };
 
   const handleScan = (scannedMatricula) => {
     setMatricula(scannedMatricula); // Actualiza el campo de matrícula con el valor escaneado
+  };
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
@@ -96,13 +109,14 @@ const Asistencias = () => {
           onClick={handleGuardar}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 mr-2"
         >
-          Guardar
+          Registrar Alumno
         </button>
       </div>
 
       {/* Mostrar el mensaje debajo del botón */}
       {mensaje && (
-        <div className="mt-4 p-2 border border-white rounded text-red-500 w-11/12 sm:w-7/12 md:w-7/12 lg:w-7/12 xl:w-7/12 mx-auto">
+        <div className={`mt-4 p-2 border border-white rounded w-11/12 sm:w-7/12 md:w-7/12 lg:w-7/12 xl:w-7/12 mx-auto 
+          ${isSuccess ? 'text-green-500' : 'text-red-500'}`}>
           {mensaje}
         </div>
       )}
@@ -130,6 +144,25 @@ const Asistencias = () => {
             ))}
           </tbody>
         </table>
+        {/* Paginación */}
+        <div className="mt-4">
+          {prevPage && (
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 mr-2"
+            >
+              Página Anterior
+            </button>
+          )}
+          {nextPage && (
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+            >
+              Página Siguiente
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

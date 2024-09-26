@@ -12,6 +12,11 @@ from email.message import EmailMessage
 import random
 import string
 from django.utils import timezone
+from rest_framework.pagination import PageNumberPagination
+from django.http import JsonResponse
+from django.utils.timezone import now
+from datetime import date
+from django.db.models import Count
 
 def generarCodigo(tamano:int):
     Characters=string.ascii_letters + "1234567890."
@@ -377,9 +382,17 @@ class CalificacionViewSet(viewsets.ModelViewSet):
         return Response(lista_calificaciones, status=status.HTTP_200_OK)
     
 ## Esto lo hize yo
+
+
+class AsistenciaPagination(PageNumberPagination):
+    page_size = 10  # Número de elementos por página
+    page_size_query_param = 'page_size'
+    max_page_size = 100  # Límite máximo de elementos por página
+    
 class AsistenciaViewSet(viewsets.ModelViewSet):
     queryset = Asistencia.objects.all()
     serializer_class = AsistenciaSerializer
+    pagination_class = AsistenciaPagination  # Añadir la paginación aquí
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -406,7 +419,8 @@ class AsistenciaViewSet(viewsets.ModelViewSet):
         queryset = Asistencia.objects.all()
         nrc = self.request.query_params.get('materia_nrc', None)
         if nrc is not None:
-        # Filtramos por el campo 'nrc' en el modelo relacionado 'Clase2'
-            queryset = queryset.filter(materia_nrc__nrc=nrc)
+            queryset = queryset.filter(materia_nrc__nrc=nrc).order_by('-fecha')  
         return queryset
     
+    
+
