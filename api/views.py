@@ -17,6 +17,7 @@ from django.http import JsonResponse
 from django.utils.timezone import now
 from datetime import date
 from django.db.models import Count
+from rest_framework.views import APIView
 
 def generarCodigo(tamano:int):
     Characters=string.ascii_letters + "1234567890."
@@ -424,3 +425,26 @@ class AsistenciaViewSet(viewsets.ModelViewSet):
     
     
 
+class EntregasPorTipoView(APIView):
+    def get(self, request, nrc):
+        # Filtrar las entregas por el nrc específico (a través de la relación ClaseCriterio -> Clase2)
+        entregas = Entrega.objects.filter(tipo__id_clase__nrc=nrc)
+        
+        # Contar el total de entregas por cada tipo
+        entregas_por_tipo = entregas.values('tipo__nombre').annotate(total=Count('id'))
+        
+        # Obtener la fecha de hoy
+        today = timezone.now().date()
+        
+        # Contar las asistencias del día de hoy por el nrc específico
+        asistencias_hoy = Asistencia.objects.filter(materia_nrc__nrc=nrc, fecha=today).count()
+        
+        # Crear la respuesta con los totales por tipo y el conteo de asistencias de hoy
+        resultado = {
+            'entregas_por_tipo': {
+                tipo['tipo__nombre']: tipo['total'] for tipo in entregas_por_tipo
+            },
+            'asistencias_hoy': asistencias_hoy
+        }
+        
+        return Response(resultado)
