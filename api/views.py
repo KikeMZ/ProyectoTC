@@ -18,6 +18,8 @@ from django.utils.timezone import now
 from datetime import date
 from django.db.models import Count
 from rest_framework.views import APIView
+from datetime import timedelta
+import calendar
 
 def generarCodigo(tamano:int):
     Characters=string.ascii_letters + "1234567890."
@@ -438,13 +440,64 @@ class EntregasPorTipoView(APIView):
         
         # Contar las asistencias del día de hoy por el nrc específico
         asistencias_hoy = Asistencia.objects.filter(materia_nrc__nrc=nrc, fecha=today).count()
+
+        # Obtener el inicio de la semana (lunes)
+        start_of_week = today - timedelta(days=today.weekday())
         
-        # Crear la respuesta con los totales por tipo y el conteo de asistencias de hoy
+        # Contar las asistencias de la semana
+        asistencias_semana = Asistencia.objects.filter(materia_nrc__nrc=nrc, fecha__gte=start_of_week).count()
+
+        # Obtener el inicio del mes actual, anterior y anteanterior
+        start_of_month = today.replace(day=1)  # Primer día del mes actual
+        start_of_previous_month = (start_of_month - timedelta(days=1)).replace(day=1)  # Primer día del mes anterior
+        start_of_two_months_ago = (start_of_previous_month - timedelta(days=1)).replace(day=1)  # Primer día del anteanterior mes
+        
+        # Contar las asistencias del mes actual
+        asistencias_mes_actual = Asistencia.objects.filter(materia_nrc__nrc=nrc, fecha__gte=start_of_month).count()
+
+        # Contar las asistencias del mes anterior
+        asistencias_mes_anterior = Asistencia.objects.filter(
+            materia_nrc__nrc=nrc,
+            fecha__gte=start_of_previous_month,
+            fecha__lt=start_of_month  # Antes del inicio del mes actual
+        ).count()
+
+        # Contar las asistencias del anteanterior mes
+        asistencias_mes_ante_anterior = Asistencia.objects.filter(
+            materia_nrc__nrc=nrc,
+            fecha__gte=start_of_two_months_ago,
+            fecha__lt=start_of_previous_month  # Antes del inicio del mes anterior
+        ).count()
+
+        # Obtener los nombres de los meses
+        nombre_mes_actual = calendar.month_name[today.month]
+        nombre_mes_anterior = calendar.month_name[start_of_previous_month.month]
+        nombre_mes_ante_anterior = calendar.month_name[start_of_two_months_ago.month]
+
+        # Crear un array con las asistencias de los últimos tres meses
+        asistencias_mensuales = [
+            {nombre_mes_actual: asistencias_mes_actual},
+            {nombre_mes_anterior: asistencias_mes_anterior},
+            {nombre_mes_ante_anterior: asistencias_mes_ante_anterior}
+        ]
+        
+        # Obtener los criterios relacionados con la clase (ClaseCriterio)
+        criterios = ClaseCriterio.objects.filter(id_clase__nrc=nrc).values('nombre', 'ponderacion')
+
+        # Crear un listado de criterios con nombre y ponderación
+        criterios_listado = [
+            {'nombre': criterio['nombre'], 'ponderacion': criterio['ponderacion']} for criterio in criterios
+        ]
+        
+        # Crear la respuesta con los totales por tipo, asistencias diarias, semanales, mensuales y criterios
         resultado = {
             'entregas_por_tipo': {
                 tipo['tipo__nombre']: tipo['total'] for tipo in entregas_por_tipo
             },
-            'asistencias_hoy': asistencias_hoy
+            'asistencias_hoy': asistencias_hoy,
+            'asistencias_semana': asistencias_semana,
+            'asistencias_mensuales': asistencias_mensuales,
+            'criterios': criterios_listado  # Listado de criterios con nombre y ponderación
         }
         
         return Response(resultado)
