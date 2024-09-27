@@ -120,6 +120,18 @@ export const Nav = ({clase}) => {
           onClick={() => handleLinkClick("/profesor/asistencias")}
          />
          )
+        }
+        {
+         existenAlumnos && existenCriterios && 
+
+         (
+         <NavLink
+          to="/profesor/analisis"
+          text="Analisis"
+          active={activeLink === "/profesor/analisis"}
+          onClick={() => handleLinkClick("/profesor/analisis")}
+         />
+         )
         }     
       </nav>
     </div>
