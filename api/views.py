@@ -20,6 +20,8 @@ from django.db.models import Count
 from rest_framework.views import APIView
 from datetime import timedelta
 import calendar
+import locale
+from django.db.models import Avg  # Esto es lo que falta
 
 def generarCodigo(tamano:int):
     Characters=string.ascii_letters + "1234567890."
@@ -397,6 +399,11 @@ class AsistenciaViewSet(viewsets.ModelViewSet):
     serializer_class = AsistenciaSerializer
     pagination_class = AsistenciaPagination  # Añadir la paginación aquí
 
+class AsistenciaViewSet(viewsets.ModelViewSet):
+    queryset = Asistencia.objects.all()
+    serializer_class = AsistenciaSerializer
+    pagination_class = AsistenciaPagination  # Añadir la paginación aquí
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -413,6 +420,20 @@ class AsistenciaViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Verificar si ya se ha registrado asistencia el mismo día
+        today = timezone.now().date()  # Obtener la fecha actual
+        asistencia_existente = Asistencia.objects.filter(
+            matricula=matricula,
+            materia_nrc=materia_nrc,
+            fecha=today  # Comparamos solo la fecha
+        ).exists()
+
+        if asistencia_existente:
+            return Response(
+                {"detail": f"El alumno con matrícula {matricula} ya ha registrado asistencia hoy."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         # Guardar la asistencia si todo está bien
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -425,7 +446,11 @@ class AsistenciaViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(materia_nrc__nrc=nrc).order_by('-fecha')  
         return queryset
     
-    
+
+
+
+# Configurar el locale en español para obtener los nombres de los meses en español
+locale.setlocale(locale.LC_TIME, 'es_ES.utf8')
 
 class EntregasPorTipoView(APIView):
     def get(self, request, nrc):
@@ -469,10 +494,10 @@ class EntregasPorTipoView(APIView):
             fecha__lt=start_of_previous_month  # Antes del inicio del mes anterior
         ).count()
 
-        # Obtener los nombres de los meses
-        nombre_mes_actual = calendar.month_name[today.month]
-        nombre_mes_anterior = calendar.month_name[start_of_previous_month.month]
-        nombre_mes_ante_anterior = calendar.month_name[start_of_two_months_ago.month]
+        # Obtener los nombres de los meses en español
+        nombre_mes_actual = today.strftime("%B")  # Mes actual en español
+        nombre_mes_anterior = start_of_previous_month.strftime("%B")  # Mes anterior en español
+        nombre_mes_ante_anterior = start_of_two_months_ago.strftime("%B")  # Anteanterior mes en español
 
         # Crear un array con las asistencias de los últimos tres meses
         asistencias_mensuales = [
@@ -501,3 +526,54 @@ class EntregasPorTipoView(APIView):
         }
         
         return Response(resultado)
+
+
+
+
+## Esto lo hize con chatgpt
+class AsistenciaPorClaseView(APIView):
+    def get(self, request, nrc):
+        total_alumnos = Inscripcion.objects.filter(clase__nrc=nrc, estado="ACTIVA").count()
+        total_asistencias = Asistencia.objects.filter(materia_nrc=nrc).values('matricula').annotate(total=Count('id_asistencia'))
+        
+        resultados = []
+        for asistencia in total_asistencias:
+            porcentaje = (asistencia['total'] / total_alumnos) * 100
+            resultados.append({
+                'matricula': asistencia['matricula'],
+                'total_asistencias': asistencia['total'],
+                #'porcentaje_asistencia': porcentaje
+            })
+        
+        return Response(resultados)
+
+class AsistenciaDiariaView(APIView):
+    def get(self, request, nrc):
+        asistencia_diaria = Asistencia.objects.filter(materia_nrc=nrc).values('fecha').annotate(total_asistencias=Count('id_asistencia'))
+        return Response(asistencia_diaria)
+
+class DistribucionCalificacionesView(APIView):
+    def get(self, request, nrc):
+        calificaciones = Calificacion.objects.filter(id_entrega__tipo__id_clase__nrc=nrc).values('nota').annotate(cantidad=Count('nota'))
+        return Response(calificaciones)
+    
+class PromedioCalificacionesView(APIView):
+    def get(self, request, nrc):
+        promedio = Calificacion.objects.filter(id_entrega__tipo__id_clase__nrc=nrc).aggregate(promedio_nota=Avg('nota'))
+        return Response(promedio)
+    
+class EstadoInscripcionesView(APIView):
+    def get(self, request, nrc):
+        estados = Inscripcion.objects.filter(clase__nrc=nrc).values('estado').annotate(total=Count('estado'))
+        return Response(estados)
+    
+class ProgresoEntregasView(APIView):
+    def get(self, request, nrc):
+        entregas = Entrega.objects.filter(tipo__id_clase__nrc=nrc).values('estado').annotate(total=Count('estado'))
+        return Response(entregas)
+    
+class ClasesPorProfesorView(APIView):
+    def get(self, request):
+        clases_por_profesor = Clase2.objects.values('id_profesor__nombre').annotate(total_clases=Count('nrc'))
+        return Response(clases_por_profesor)
+    
