@@ -70,7 +70,9 @@ function Analisis() {
           borderWidth: 1
         }
       ]
-});
+  });
+
+  const [cardStatsData, setCardStatsData] = useState([]);
 
   useEffect(() => {
     showNav();
@@ -92,9 +94,19 @@ function Analisis() {
 
         const meses = asistenciasMensuales.map((item) => Object.keys(item)[0]);
         const valores = asistenciasMensuales.map((item) => Object.values(item)[0]);
+        const entregas_tipo = result.entregas_por_tipo;
+
+        setCardStatsData(Object.entries(entregas_tipo).map(([tipo, cantidad]) => ({
+          title: tipo,
+          number: cantidad,
+          // icon: iconMapping[tipo]?.icon || "pi pi-chart-bar", // Valor por defecto
+          color: "bg-pink-200", // Valor por defecto
+        })));
+        
 
         console.log("mesesAistencias: ", meses);
         console.log("valoresAistencias: ", valores);
+        console.log("valoresCardStats: ", cardStatsData);
 
         setChartData({
           labels: meses, // Labels son los meses
@@ -151,71 +163,27 @@ function Analisis() {
             </Button>
         </div>
 
-    <div className="flex justify-between gap-4 p-4">
+    <div className="flex justify-between gap-4 p-4 overflow-x-scroll">
+      
+      {cardStatsData.length > 0 ? (
+          cardStatsData.map((data, index) => (
+            <CardStats
+              key={index}
+              titleCard={data.title}
+              numberCard={data.number}
+              iconCard={"pi pi-list-check"}
+              iconColor={data.color}
+            />
+          ))
+        ) : (
+          <p>No hay datos disponibles</p>
+        )}
       {/* Card 1: Traffic */}
-      <CardStats titleCard={"Test"} numberCard={250} iconCard={"pi pi-chart-bar"} iconColor={"bg-red-200"}/>
-      {/* <div className="bg-white p-6 rounded-lg shadow-md w-1/4 flex flex-col items-start">
-        <div className="flex justify-between w-full">
-          <div>
-            <h3 className="text-gray-600">TRAFFIC</h3>
-            <h2 className="text-2xl font-medium text-black">350,897</h2>
-          </div>
-          <div className="bg-red-200 text-red-600 rounded-full p-2">
-            <i className="pi pi-chart-bar"></i>
-          </div>
-        </div>
-        <p className="text-green-500 mt-2 text-sm">
-          <i className="pi pi-arrow-up"></i> 3.48% Since last month
-        </p>
-      </div> */}
-
-      {/* Card 2: New Users */}
-      <div className="bg-white p-6 rounded-lg shadow-md w-1/4 flex flex-col items-start">
-        <div className="flex justify-between w-full">
-          <div>
-            <h3 className="text-gray-600">NEW USERS</h3>
-            <h2 className="text-2xl font-bold text-black">2,356</h2>
-          </div>
-          <div className="bg-orange-200 text-orange-600 rounded-full p-2">
-            <i className="pi pi-chart-pie"></i>
-          </div>
-        </div>
-        <p className="text-red-500 mt-2 text-sm">
-          <i className="pi pi-arrow-down"></i> 3.48% Since last week
-        </p>
-      </div>
-
-      {/* Card 3: Sales */}
-      <div className="bg-white p-6 rounded-lg shadow-md w-1/4 flex flex-col items-start">
-        <div className="flex justify-between w-full">
-          <div>
-            <h3 className="text-gray-600">SALES</h3>
-            <h2 className="text-2xl font-bold text-black">924</h2>
-          </div>
-          <div className="bg-pink-200 text-pink-600 rounded-full p-2">
-            <i className="pi pi-users"></i>
-          </div>
-        </div>
-        <p className="text-red-500 mt-2 text-sm">
-          <i className="pi pi-arrow-down"></i> 1.10% Since yesterday
-        </p>
-      </div>
-
-      {/* Card 4: Performance */}
-      <div className="bg-white p-6 rounded-lg shadow-md w-1/4 flex flex-col items-start">
-        <div className="flex justify-between w-full">
-          <div>
-            <h3 className="text-gray-600">PERFORMANCE</h3>
-            <h2 className="text-2xl font-bold text-black">49.65%</h2>
-          </div>
-          <div className="bg-blue-200 text-blue-600 rounded-full p-2">
-            <i className="pi pi-percent"></i>
-          </div>
-        </div>
-        <p className="text-green-500 mt-2 text-sm">
-          <i className="pi pi-arrow-up"></i> 12% Since last month
-        </p>
-      </div>
+      {/* <CardStats titleCard={"Test"} numberCard={250} iconCard={"pi pi-chart-bar"} iconColor={"bg-red-200"}/> */}
+      {/* Colores de ionos bg-red-200,  bg-orange-200, bg-pink-200 bg-blue-200*/}
+      {/* <CardStats titleCard={"Test"} numberCard={250} iconCard={"pi pi-chart-pie"} iconColor={"bg-orange-200"} />      
+      <CardStats titleCard={"Test3"} numberCard={250} iconCard={"pi pi-users"} iconColor={"bg-pink-200"} />      
+      <CardStats titleCard={"Test3"} numberCard={250} iconCard={"pi pi-percent"} iconColor={"bg-blue-200"} />       */}
     </div>
 
         <div className="grid grid-cols-3 gap-3">
