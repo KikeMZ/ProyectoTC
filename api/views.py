@@ -521,9 +521,11 @@ class EntregasPorTipoView(APIView):
 
         # Crear un array con las asistencias de los últimos tres meses
         asistencias_mensuales = [
-            {nombre_mes_actual: asistencias_mes_actual},
+            {nombre_mes_ante_anterior: asistencias_mes_ante_anterior},
             {nombre_mes_anterior: asistencias_mes_anterior},
-            {nombre_mes_ante_anterior: asistencias_mes_ante_anterior}
+            {nombre_mes_actual: asistencias_mes_actual}
+            
+            
         ]
         
         # Obtener los criterios relacionados con la clase (ClaseCriterio)
@@ -572,26 +574,8 @@ class AsistenciaDiariaView(APIView):
 
 class DistribucionCalificacionesView(APIView):
     def get(self, request, nrc):
-        # Filtrar las calificaciones según el NRC
-        calificaciones = Calificacion.objects.filter(id_entrega__tipo__id_clase__nrc=nrc)\
-            .values('id_entrega_id', 'id_entrega__nombre', 'nota')\
-            .annotate(cantidad=Count('nota'))\
-            .order_by('id_entrega_id', 'nota')  # Ordenar por ID de entrega y nota
-
-        # Preparar la distribución de calificaciones
-        distribucion = {}
-        for calificacion in calificaciones:
-            entrega_id = calificacion['id_entrega_id']
-            entrega_nombre = calificacion['id_entrega__nombre']
-            nota = calificacion['nota']
-            cantidad = calificacion['cantidad']
-
-            # Usar el ID de la entrega como clave para asegurar que cada entrega se maneje correctamente
-            if entrega_id not in distribucion:
-                distribucion[entrega_id] = {'nombre': entrega_nombre, 'calificaciones': []}
-            distribucion[entrega_id]['calificaciones'].append({'nota': nota, 'cantidad': cantidad})
-
-        return Response(distribucion)
+        calificaciones = Calificacion.objects.filter(id_entrega__tipo__id_clase__nrc=nrc).values('nota').annotate(cantidad=Count('nota'))
+        return Response(calificaciones)
     
     
 class PromedioCalificacionesView(APIView):
