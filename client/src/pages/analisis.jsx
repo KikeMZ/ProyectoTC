@@ -73,14 +73,11 @@ function Analisis() {
   }
 
   const [chartData, setChartData] = useState(defaultDataChart);
-
   const [pieCriterios, setPieCriterios] = useState(defaultDataChart);
-
   const [asistencia_Por_Alumnos, setAsistencia_Por_Alumnos] = useState(defaultDataChart);
-
   const [distribucion_Calificaciones, setdistribucion_Calificaciones] = useState(defaultDataChart);
   const [cardStatsData, setCardStatsData] = useState([]);
-
+  const [promedioDeClase, setPromedioDeClase] = useState();
   useEffect(() => {
     showNav();
     fetchAnalisis();
@@ -101,9 +98,11 @@ function Analisis() {
         const {
           criterios,
           entregas_por_tipo, 
-          asistencias_mensuales
+          asistencias_mensuales,
+          promedioDeClase
         } = result;
 
+        setPromedioDeClase(promedioDeClase); 
         const meses = asistencias_mensuales.map((item) => Object.keys(item)[0]);
         const valores = asistencias_mensuales.map((item) => Object.values(item)[0]);
 
@@ -218,7 +217,7 @@ function Analisis() {
         <>
         <div className="flex justify-between">
             <h2 className="text-3xl font-semibold ml-6 mt-1 mb-4">Analisis De La Materia</h2>
-            <h3>Promedio de la Materia: 8</h3>
+            <h3>Promedio de la Materia: {promedioDeClase}</h3>
         </div>
 
     <div className="flex gap-4 p-4 overflow-x-auto">
