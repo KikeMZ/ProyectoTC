@@ -51,88 +51,34 @@ function Analisis() {
 
   const { dataClase } = useContext(claseContext);
   const { showNav } = useContext(NavContext);
+  const backgroundColor = [
+    "rgba(75,192,192,1)",
+    "#ecf0f1",
+    "#50AF95",
+    "#f3ba2f",
+    "#2a71d0"
+  ];
 
-  const [chartData, setChartData] = useState({
+  const defaultDataChart = {
     labels: Data.map((data) => data.year),
-    // labels: ("2020", "2021", "2022", "2023"),
     datasets: [
         {
           label: "Users Gained ",
           data: Data.map((data) => data.userGain),
-          backgroundColor: [
-            "rgba(75,192,192,1)",
-            "&quot;#ecf0f1",
-            "#50AF95",
-            "#f3ba2f",
-            "#2a71d0"
-          ],
+          backgroundColor,
           borderColor: "white",
           borderWidth: 1
         }
       ]
-  });
+  }
 
-  const [pieCriterios, setPieCriterios] = useState({
-    labels: [],
-    // labels: ("2020", "2021", "2022", "2023"),
-    datasets: [
-        {
-          label: "Users Gained ",
-          data: [],
-          backgroundColor: [
-            "rgba(75,192,192,1)",
-            "&quot;#ecf0f1",
-            "#50AF95",
-            "#f3ba2f",
-            "#2a71d0"
-          ],
-          borderColor: "white",
-          borderWidth: 1
-        }
-      ]
-  });
+  const [chartData, setChartData] = useState(defaultDataChart);
 
-  const [asistencia_Por_Alumnos, setAsistencia_Por_Alumnos] = useState({
-    labels: [
-      'Red',
-      'Green',
-      'Yellow',
-      'Grey',
-      'Blue'
-    ],
-    datasets: [{
-      label: 'My First Dataset',
-      data: [11, 16, 7, 3, 14],
-      backgroundColor: [
-        'rgb(255, 99, 132)',
-        'rgb(75, 192, 192)',
-        'rgb(255, 205, 86)',
-        'rgb(201, 203, 207)',
-        'rgb(54, 162, 235)'
-      ]
-    }]
-  });
+  const [pieCriterios, setPieCriterios] = useState(defaultDataChart);
 
-  const [distribucion_Calificaciones, setdistribucion_Calificaciones] = useState({
-    labels: [
-      'Red',
-      'Green',
-      'Yellow',
-      'Grey',
-      'Blue'
-    ],
-    datasets: [{
-      label: 'My First Dataset',
-      data: [11, 16, 7, 3, 14],
-      backgroundColor: [
-        'rgb(255, 99, 132)',
-        'rgb(75, 192, 192)',
-        'rgb(255, 205, 86)',
-        'rgb(201, 203, 207)',
-        'rgb(54, 162, 235)'
-      ]
-    }]
-  });
+  const [asistencia_Por_Alumnos, setAsistencia_Por_Alumnos] = useState(defaultDataChart);
+
+  const [distribucion_Calificaciones, setdistribucion_Calificaciones] = useState(defaultDataChart);
   const [cardStatsData, setCardStatsData] = useState([]);
 
   useEffect(() => {
@@ -157,25 +103,18 @@ function Analisis() {
           entregas_por_tipo, 
           asistencias_mensuales
         } = result;
-        // console.log("Criterios: ", criterios);
 
         const meses = asistencias_mensuales.map((item) => Object.keys(item)[0]);
         const valores = asistencias_mensuales.map((item) => Object.values(item)[0]);
 
-          // Actualizar pieCriterios con datos de criterios
+        // Actualizar pieCriterios con datos de criterios
         setPieCriterios({
           labels: criterios.map((data)=> data.nombre),
           datasets: [
             {
               label: "Ponderación de Criterios",
-              data: criterios.map((data)=> data.ponderacion), // Los valores de ponderación de cada criterio
-              backgroundColor: [
-                "rgba(75,192,192,1)",
-                "#ecf0f1",
-                "#50AF95",
-                "#f3ba2f",
-                "#2a71d0"
-              ],
+              data: criterios.map((data)=> data.ponderacion),
+              backgroundColor,
               borderColor: "white",
               borderWidth: 1
             }
@@ -230,13 +169,7 @@ function Analisis() {
             {
               label: "Asistencias",
               data: result.map((data)=> data.total_asistencias), // Los valores de ponderación de cada criterio
-              backgroundColor: [
-                "rgba(75,192,192,1)",
-                "#ecf0f1",
-                "#50AF95",
-                "#f3ba2f",
-                "#2a71d0"
-              ],
+              backgroundColor,
               borderColor: "white",
               borderWidth: 1
             }
@@ -265,13 +198,7 @@ function Analisis() {
             {
               label: "Alumnos",
               data: result.map((data)=> data.cantidad), // Los valores de ponderación de cada criterio
-              backgroundColor: [
-                "rgba(75,192,192,1)",
-                "#ecf0f1",
-                "#50AF95",
-                "#f3ba2f",
-                "#2a71d0"
-              ],
+              backgroundColor,
               borderColor: "white",
               borderWidth: 1
             }
@@ -302,7 +229,7 @@ function Analisis() {
               key={index}
               titleCard={data.title}
               numberCard={data.number}
-              iconCard={"pi pi-list-check"}
+              iconCard={"pi pi-chart-bar"}
               iconColor={data.color}
             />
           ))
