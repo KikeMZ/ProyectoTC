@@ -8,9 +8,9 @@ function CardStats( { titleCard, numberCard, iconCard, iconColor} ) {
                 <div className="flex justify-between w-full">
                 <div>
                     <h3 className="text-gray-600">{titleCard}</h3>
-                    <h2 className="text-2xl font-medium text-black">{numberCard} Usuarios</h2>
+                    <h2 className="text-2xl font-medium text-black">{numberCard} {(numberCard <= 1) ? "Entrega" : "Entregas" }</h2>
                 </div>
-                <div className={"text-red-600 rounded-full p-2 " + iconColor}>
+                <div className={"text-red-600 rounded-full p-2 " + iconColor} style={{height: "min-content"}}>
                     <i className={iconCard}></i>
                 </div>
                 </div>

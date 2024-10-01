@@ -4,11 +4,11 @@ import Chart from "chart.js/auto";
 import { CategoryScale } from "chart.js";
 import { useContext, useEffect, useState } from "react";
 import PieChart from "../components/pieChart";
-import { Button } from "@nextui-org/react";
 import { BarChart } from "../components/barChart";
 import LineChart from "../components/lineChart";
 import { claseContext, NavContext } from "../layouts/layoutProfesor";
 import CardStats from "../components/cardStats";
+import Asistencia_Por_Alumnos from "../components/asistenciasPorAlumnos";
 
 
 export const Data = [
@@ -72,42 +72,123 @@ function Analisis() {
       ]
   });
 
+  const [pieCriterios, setPieCriterios] = useState({
+    labels: [],
+    // labels: ("2020", "2021", "2022", "2023"),
+    datasets: [
+        {
+          label: "Users Gained ",
+          data: [],
+          backgroundColor: [
+            "rgba(75,192,192,1)",
+            "&quot;#ecf0f1",
+            "#50AF95",
+            "#f3ba2f",
+            "#2a71d0"
+          ],
+          borderColor: "white",
+          borderWidth: 1
+        }
+      ]
+  });
+
+  const [asistencia_Por_Alumnos, setAsistencia_Por_Alumnos] = useState({
+    labels: [
+      'Red',
+      'Green',
+      'Yellow',
+      'Grey',
+      'Blue'
+    ],
+    datasets: [{
+      label: 'My First Dataset',
+      data: [11, 16, 7, 3, 14],
+      backgroundColor: [
+        'rgb(255, 99, 132)',
+        'rgb(75, 192, 192)',
+        'rgb(255, 205, 86)',
+        'rgb(201, 203, 207)',
+        'rgb(54, 162, 235)'
+      ]
+    }]
+  });
+
+  const [distribucion_Calificaciones, setdistribucion_Calificaciones] = useState({
+    labels: [
+      'Red',
+      'Green',
+      'Yellow',
+      'Grey',
+      'Blue'
+    ],
+    datasets: [{
+      label: 'My First Dataset',
+      data: [11, 16, 7, 3, 14],
+      backgroundColor: [
+        'rgb(255, 99, 132)',
+        'rgb(75, 192, 192)',
+        'rgb(255, 205, 86)',
+        'rgb(201, 203, 207)',
+        'rgb(54, 162, 235)'
+      ]
+    }]
+  });
   const [cardStatsData, setCardStatsData] = useState([]);
 
   useEffect(() => {
     showNav();
     fetchAnalisis();
+    fetchAsistencias();
+    fetchDistAsist();
   }, [showNav, dataClase]);
 
+  const nrc_clase = dataClase.nrc;
   const fetchAnalisis = async () => {
-    console.log("dataClase: ", dataClase);
     
-    const nrc_clase = dataClase.nrc;
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/entregas/tipos/${nrc_clase}/`);
       if (response.ok) {
         const result = await response.json();
         console.log(result);
         
-        // Actualizamos el estado con las asistencias mensuales
-        const asistenciasMensuales = result.asistencias_mensuales;
+        // Actualizamos el estado de los datos con la api
+        const {
+          criterios,
+          entregas_por_tipo, 
+          asistencias_mensuales
+        } = result;
+        // console.log("Criterios: ", criterios);
 
-        const meses = asistenciasMensuales.map((item) => Object.keys(item)[0]);
-        const valores = asistenciasMensuales.map((item) => Object.values(item)[0]);
-        const entregas_tipo = result.entregas_por_tipo;
+        const meses = asistencias_mensuales.map((item) => Object.keys(item)[0]);
+        const valores = asistencias_mensuales.map((item) => Object.values(item)[0]);
 
-        setCardStatsData(Object.entries(entregas_tipo).map(([tipo, cantidad]) => ({
+          // Actualizar pieCriterios con datos de criterios
+        setPieCriterios({
+          labels: criterios.map((data)=> data.nombre),
+          datasets: [
+            {
+              label: "Ponderación de Criterios",
+              data: criterios.map((data)=> data.ponderacion), // Los valores de ponderación de cada criterio
+              backgroundColor: [
+                "rgba(75,192,192,1)",
+                "#ecf0f1",
+                "#50AF95",
+                "#f3ba2f",
+                "#2a71d0"
+              ],
+              borderColor: "white",
+              borderWidth: 1
+            }
+          ]
+        });
+
+        setCardStatsData(Object.entries(entregas_por_tipo).map(([tipo, cantidad]) => ({
           title: tipo,
           number: cantidad,
           // icon: iconMapping[tipo]?.icon || "pi pi-chart-bar", // Valor por defecto
           color: "bg-pink-200", // Valor por defecto
         })));
         
-
-        console.log("mesesAistencias: ", meses);
-        console.log("valoresAistencias: ", valores);
-        console.log("valoresCardStats: ", cardStatsData);
-
         setChartData({
           labels: meses, // Labels son los meses
           datasets: [
@@ -125,7 +206,7 @@ function Analisis() {
               borderWidth: 1
             }
           ]
-        });
+        });       
         
       } else {
         console.error('Error al obtener la data:', response.statusText);
@@ -135,35 +216,85 @@ function Analisis() {
     }
   };
 
-  const data = {
-      labels: ['Red', 'Orange', 'Blue'],
-      // datasets is an array of objects where each object represents a set of data to display corresponding to the labels above. for brevity, we'll keep it at one object
-      datasets: [
-          {
-            label: 'Popularity of colours',
-            data: [55, 23, 96],
-            // you can set indiviual colors for each bar
-            backgroundColor: [
-              'rgba(255, 255, 255, 0.6)',
-              'rgba(255, 255, 255, 0.6)',
-              'rgba(255, 255, 255, 0.6)'
-            ],
-            borderWidth: 1,
-          }
-      ]
-  }    
+  const fetchAsistencias = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/api/asistencia_por_clase/${nrc_clase}/`);
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Asistencias Rsult: ", result);        
+        console.log("Asistencias I map: ", result.map((data)=> data.matricula));
+
+        setAsistencia_Por_Alumnos({
+          labels: result.map((data)=> data.matricula),
+          datasets: [
+            {
+              label: "Asistencias",
+              data: result.map((data)=> data.total_asistencias), // Los valores de ponderación de cada criterio
+              backgroundColor: [
+                "rgba(75,192,192,1)",
+                "#ecf0f1",
+                "#50AF95",
+                "#f3ba2f",
+                "#2a71d0"
+              ],
+              borderColor: "white",
+              borderWidth: 1
+            }
+          ]
+        });
+        
+      } else{ 
+        console.error('Error al obtener la data:', response.statusText);
+      }
+    } catch (error) {
+      console.log(error);
+      
+    }    
+  }
+
+  const fetchDistAsist = async () => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/api/distribucion_calificaciones/${nrc_clase}/`);
+      if (response.ok) {
+        const result = await response.json();
+        console.log("distribucion_calificaciones: ", result);        
+
+        setdistribucion_Calificaciones({
+          labels: result.map((data)=> data.nota),
+          datasets: [
+            {
+              label: "Alumnos",
+              data: result.map((data)=> data.cantidad), // Los valores de ponderación de cada criterio
+              backgroundColor: [
+                "rgba(75,192,192,1)",
+                "#ecf0f1",
+                "#50AF95",
+                "#f3ba2f",
+                "#2a71d0"
+              ],
+              borderColor: "white",
+              borderWidth: 1
+            }
+          ]
+        });
+        
+      } else{ 
+        console.error('Error al obtener la data:', response.statusText);
+      }
+    } catch (error) {
+      console.log(error);
+      
+    }    
+  }
 
     return (
         <>
         <div className="flex justify-between">
             <h2 className="text-3xl font-semibold ml-6 mt-1 mb-4">Analisis De La Materia</h2>
-            <Button onPress={()=> console.log("hi")} className=" text-base">
-                <i className="pi pi-pencil"></i>
-                Editar
-            </Button>
+            <h3>Promedio de la Materia: 8</h3>
         </div>
 
-    <div className="flex justify-between gap-4 p-4 overflow-x-scroll">
+    <div className="flex gap-4 p-4 overflow-x-auto">
       
       {cardStatsData.length > 0 ? (
           cardStatsData.map((data, index) => (
@@ -178,18 +309,20 @@ function Analisis() {
         ) : (
           <p>No hay datos disponibles</p>
         )}
-      {/* Card 1: Traffic */}
-      {/* <CardStats titleCard={"Test"} numberCard={250} iconCard={"pi pi-chart-bar"} iconColor={"bg-red-200"}/> */}
       {/* Colores de ionos bg-red-200,  bg-orange-200, bg-pink-200 bg-blue-200*/}
-      {/* <CardStats titleCard={"Test"} numberCard={250} iconCard={"pi pi-chart-pie"} iconColor={"bg-orange-200"} />      
-      <CardStats titleCard={"Test3"} numberCard={250} iconCard={"pi pi-users"} iconColor={"bg-pink-200"} />      
-      <CardStats titleCard={"Test3"} numberCard={250} iconCard={"pi pi-percent"} iconColor={"bg-blue-200"} />       */}
     </div>
 
         <div className="grid grid-cols-3 gap-3">
-            <PieChart chartDataChild={chartData} titleChart={"Asistencias Mensuales"} />
-            <BarChart chartDataChild={chartData} />
-            <LineChart chartDataChild={chartData} />
+            <PieChart chartDataChild={pieCriterios} titleChart={"Criterios"} />
+            <BarChart chartDataChild={distribucion_Calificaciones} titleChart={"Distribucion de Calificaciones"} />
+            <LineChart chartDataChild={chartData} titleChart={"Asistencias Mensuales"} />
+        </div>
+        {/* <div>
+         <Asistencia_Por_Alumnos />
+        </div> */}
+
+        <div>
+          <BarChart chartDataChild={asistencia_Por_Alumnos} titleChart={"Asistencias Por Alumno"} />
         </div>
 
         </>
