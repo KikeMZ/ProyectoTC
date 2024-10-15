@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: mi-api-django
+    env: python
+    plan: free  # O el plan que prefieras
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn mi_proyecto.wsgi --log-file -"
+    disk:
+      mountPath: /var/lib/db
+      sizeGB: 1  # Especifica el tamaño del almacenamiento necesario para la base de datos
