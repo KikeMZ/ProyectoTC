@@ -1,3 +1,5 @@
+// @ts-check
+
 import React, { useContext, useEffect, useState } from "react";
 import { NavContext } from "../layouts/layoutProfesor";
 import { atom, useAtom } from "jotai";

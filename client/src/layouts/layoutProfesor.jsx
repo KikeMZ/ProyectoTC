@@ -1,3 +1,4 @@
+// @ts-check
 import { useEffect } from 'react'
 import { Outlet, useLocation, useNavigate } from "react-router-dom"
 import Sidebar from "../components/sidebar"
