@@ -4,6 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 # like npm install but get all the specific versions what you have
 RUN npm ci
+ENV NODE_OPTIONS=--max-old-space-size=4096
 # Copy all the code of the project
 COPY . .
 RUN npm run build
