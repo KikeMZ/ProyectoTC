@@ -9,6 +9,9 @@ import {toast} from 'react-hot-toast';
 import { getAllPeriodos, createPeriodo } from '../services/periodo.api.js';
 import { getAllClases, getClasesByAlumno, crearClase } from '../services/clases.api.js';
 import axios from "axios";
+import { FiEdit2 } from 'react-icons/fi';
+import { GrNext } from 'react-icons/gr';
+import { IoIosArrowBack } from 'react-icons/io';
 
 
 export default function Home() {
@@ -17,6 +20,8 @@ export default function Home() {
   const [archivoPDF, setArchivoPDF] = useState(null); 
   const [clases, setClases] = useState([]);
   const [resultadoExtraccion, setResultadoExtraccion] = useState(-1);
+  const [periodoSeleccionado, setPeriodoSeleccionado] = useState(null);
+  const [modoEdicion, setModoEdicion] = useState(false);
   const [mostrarTarjetas, setMostrarTarjetas] = useState(false);
   const [lista, setLista] = useState([]);
 
@@ -41,6 +46,11 @@ export default function Home() {
   }
 
   
+  const mostrarModalEditarPeriodo = (periodo) => {
+   setPeriodoSeleccionado(periodo);
+   controlModal.onOpen();
+  }
+
   const registrarPeriodo = (periodo) => {
     let toastRegistro = toast.loading("Registrando periodo...")
     periodo.fecha_inicio = transformarFechaFormatoDjango(periodo.fecha_inicio);
@@ -63,7 +73,7 @@ export default function Home() {
 
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-full">
+    <div className="flex flex-col items-start justify-start min-h-full w-full">
       {!mostrarTarjetas && (
         <div className="flex flex-col items-center justify-center">
           <h1 className="text-center text-3xl font-bold mb-4">
@@ -80,27 +90,51 @@ export default function Home() {
       )}
 
       {mostrarTarjetas && (
-        <div>
-         <h2 className="text-4xl font-semibold">Periodos</h2>
+        <div className="w-full px-3 pt-4">
+         <h2 className="text-4xl font-semibold py-2">{modoEdicion?(<> <FiEdit2 className="inline mr-3"/><span>Editar</span></>):'Periodos'}</h2>
          <hr className="border-1 mt-2"/>
+
+         <div className="flex justify-end items-center mt-5 gap-6">
          <Button
-          radius="large"
-          className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 mt-5 font-bold text-base"
+          radius="large "
+          className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 font-bold text-base"
           onClick={controlModal.onOpen}
         >
           <i className="pi pi-plus font-semibold text-base"/> Crear periodo
         </Button>
+        <Button onPress={()=> {setModoEdicion(!modoEdicion);}} className=" text-base py-6 font-medium">
+        
+        {
+         modoEdicion?
+         (
+          <>
+          <IoIosArrowBack size="25px" className="text-xl"/>
+          Regresar
+
+          </>
+         )
+         :
+         (
+          <>
+           <i className="pi pi-pencil"></i>
+            Editar
+          </>
+         )
+        }
+       </Button>
+       </div>
+
 
 
          <div className="grid grid-cols-3 gap-4 p-4 ">
            {lista.map((periodo, index) => (
-             <PeriodoCard key={index} periodo={periodo} />
+             <PeriodoCard key={index} periodo={periodo} modoEdicion={modoEdicion} editarPeriodo={mostrarModalEditarPeriodo}/>
            ))}
          </div>
         </div>
       )}
 
-     <ModalPeriodo controlModal={controlModal} modoEdicion={false} crearPeriodo={registrarPeriodo} periodo={null}/>
+     <ModalPeriodo controlModal={controlModal} modoEdicion={modoEdicion} crearPeriodo={registrarPeriodo} periodo={periodoSeleccionado}/>
      
     </div>
   );

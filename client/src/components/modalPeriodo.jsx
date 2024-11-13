@@ -19,11 +19,68 @@ export default function ModalPeriodo({ controlModal, modoEdicion, crearPeriodo, 
   const [ fechaInicio, setFechaInicio ] = useState(null);
   const [ fechaFinalizacion, setFechaFinalizacion ] = useState(null);
 
-  const { register, handleSubmit, control } = useForm()
+  const { register, handleSubmit, reset, control } = useForm();
   const listaPlanes = ["SEMESTRAL","CUATRIMESTRAL"];
 
+  useEffect(()=>{
+   reset(periodo);
+  },[periodo]);
 
-  return (  
+
+  if(modoEdicion) return(
+    <Modal isDismissable={false} classNames={{closeButton:"text-foreground-white text-2xl hover:bg-black active:text-black"}} isOpen={controlModal.isOpen} onOpenChange={controlModal.onOpenChange} >
+    <ModalContent>
+     {
+      (onClose) => (
+       <>
+        <ModalHeader className="bg-gradient-to-tr from-primary-100 to-primary-200 text-xl text-white font-bold">
+        <TbEdit size="30px" className="mr-2"></TbEdit>
+         Editar periodo
+
+
+
+        </ModalHeader>
+
+        <form onSubmit={handleSubmit( (periodo) => crearPeriodo(periodo))}>
+       <ModalBody className="gap-1 text-black">
+         <label htmlFor="nombrePeriodo" className=" font-semibold mt-3">Nombre</label>
+         <input id="nombrePeriodo" className="px-2 border-2 border-black rounded" {...register("nombre")} required/>
+        
+         <label htmlFor="nombreP" className="font-semibold mt-2">Plan de estudios</label>
+
+         <Controller
+          name="plan"
+          control={control}
+          render={ ({field:{onChange}}) => (
+           <Select onChange={onChange} isRequired radius="sm" classNames={{ label:"text-black"}} variant="bordered" labelPlacement={"outside"} placeholder={modoEdicion?periodo.plan:"Seleccione el tipo de plan"} aria-label="Tipo">
+            {
+             listaPlanes.map( (p, index) => (
+              <SelectItem key={p} value={p} className="text-black text-2xl">
+               {p}
+              </SelectItem>
+             ))
+            }
+           </Select>
+           )
+          }
+         />
+
+       </ModalBody>
+
+    </form>
+
+      </>
+      )
+     }
+    </ModalContent>
+
+
+    </Modal>
+    
+  ); 
+  
+
+  return(  
     <Modal isDismissable={false} classNames={{closeButton:"text-foreground-white text-2xl hover:bg-black active:text-black"}} isOpen={controlModal.isOpen} onOpenChange={controlModal.onOpenChange} >
     <ModalContent>
      {
@@ -36,7 +93,7 @@ export default function ModalPeriodo({ controlModal, modoEdicion, crearPeriodo, 
         (
         <>
          <TbEdit size="30px" className="mr-2"></TbEdit>
-         Editar criterio
+         Editar periodo
         </>
         )
         :

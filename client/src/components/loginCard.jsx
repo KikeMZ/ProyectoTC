@@ -50,13 +50,14 @@ export default function LoginCard() {
     if(tipoUsuario==1)
     {
      let datosProfesor = jwtDecode(res.data.access);
-     window.location.href = "/profesor?nombre="+datosProfesor.nombre+"&email="+datosProfesor.correo;
+     window.location.href = "/";
+     //window.location.href = "/profesor?nombre="+datosProfesor.nombre+"&email="+datosProfesor.correo;
 
 
     }
    else
    {
-    window.location.href = "/admin";
+    window.location.href = "/";
    }
   });
 
