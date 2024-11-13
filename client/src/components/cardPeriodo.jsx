@@ -14,7 +14,7 @@ export default function PeriodoCard({ periodo, modoEdicion, editarPeriodo }) {
 
   if(modoEdicion) return(
 
-    <Card className="max-w-[400px] bg-gray-100 hover:animate-pulse" onClick={() =>{ editarPeriodo(periodo)}}>
+    <Card className="max-w-[400px] bg-gray-100 hover:animate-pulse cursor-pointer" onClick={() =>{ editarPeriodo(periodo)}}>
     <CardHeader className="flex gap-3" onClick={ () => {editarPeriodo(periodo)}}>
       <div className="flex flex-col w-full">
         <div className="flex justify-between items-center">
@@ -32,7 +32,7 @@ export default function PeriodoCard({ periodo, modoEdicion, editarPeriodo }) {
       </div>
     </CardHeader>
     <Divider />
-        <CardBody>
+        <CardBody onClick={ () => {editarPeriodo(periodo)}}>
           <div className="flex justify-between items-center gap-5">
             <p className="text-small"> <span className=" font-medium">Inicio:</span> {fecha_inicio}</p>
             <p className="text-small"> <span className=" font-medium"> Cierre: </span> {fecha_finalizacion}</p>

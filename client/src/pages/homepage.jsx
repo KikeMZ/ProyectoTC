@@ -6,8 +6,10 @@ import ModalPeriodo from "../components/modalPeriodo";
 import { useForm } from "react-hook-form";
 import { Button, useDisclosure } from "@nextui-org/react";
 import {toast} from 'react-hot-toast';
-import { getAllPeriodos, createPeriodo } from '../services/periodo.api.js';
+import { getAllPeriodos, createPeriodo, updatePeriodo } from '../services/periodo.api.js';
 import { getAllClases, getClasesByAlumno, crearClase } from '../services/clases.api.js';
+
+import { parseDate } from "@internationalized/date";
 import axios from "axios";
 import { FiEdit2 } from 'react-icons/fi';
 import { GrNext } from 'react-icons/gr';
@@ -34,7 +36,7 @@ export default function Home() {
       console.log(res);
       if(res.data.length>0)
       {
-       setLista(res.data)
+       setLista(res.data);
        setMostrarTarjetas(true);
       }
     }
@@ -51,6 +53,28 @@ export default function Home() {
    controlModal.onOpen();
   }
 
+  const actualizarPeriodo = (periodo) => {
+    let listaActualizada = lista.filter((p) => p.id != periodo.id);
+    let toastRegistro = toast.loading("Actualizando periodo...")
+    console.log(periodo);
+    periodo.fecha_inicio = transformarFechaFormatoDjango(periodo.fecha_inicio);
+    periodo.fecha_finalizacion = transformarFechaFormatoDjango(periodo.fecha_finalizacion);
+    //periodo.estado="ACTIVO";
+    updatePeriodo(periodo.id,periodo).then((res) => {
+  //   console.log("Periodo")
+     if(lista.length==0)
+      setLista([res.data])
+     else
+     {
+      listaActualizada.push(res.data);
+      setLista(listaActualizada);
+     }
+     toast.dismiss(toastRegistro);
+     toast.success("¡Se ha actualizado el periodo exitosamente!");
+     controlModal.onClose();
+    }).catch( e => toast.error("¡Ha ocurrido un problema al intentar actualizar el periodo!, vuelva a pulsar el boton para volver a intentarlo."));
+
+  }
   const registrarPeriodo = (periodo) => {
     let toastRegistro = toast.loading("Registrando periodo...")
     periodo.fecha_inicio = transformarFechaFormatoDjango(periodo.fecha_inicio);
@@ -95,13 +119,18 @@ export default function Home() {
          <hr className="border-1 mt-2"/>
 
          <div className="flex justify-end items-center mt-5 gap-6">
-         <Button
-          radius="large "
-          className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 font-bold text-base"
-          onClick={controlModal.onOpen}
-        >
-          <i className="pi pi-plus font-semibold text-base"/> Crear periodo
-        </Button>
+
+        {
+         !modoEdicion && (
+          <Button
+           radius="large "
+           className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white px-6 py-6 font-bold text-base"
+           onClick={controlModal.onOpen}
+          >
+           <i className="pi pi-plus font-semibold text-base"/> Crear periodo
+          </Button>
+         )
+        }
         <Button onPress={()=> {setModoEdicion(!modoEdicion);}} className=" text-base py-6 font-medium">
         
         {
@@ -134,7 +163,7 @@ export default function Home() {
         </div>
       )}
 
-     <ModalPeriodo controlModal={controlModal} modoEdicion={modoEdicion} crearPeriodo={registrarPeriodo} periodo={periodoSeleccionado}/>
+     <ModalPeriodo controlModal={controlModal} modoEdicion={modoEdicion} crearPeriodo={registrarPeriodo} actualizarPeriodo={actualizarPeriodo} periodoSeleccionado={periodoSeleccionado}/>
      
     </div>
   );
