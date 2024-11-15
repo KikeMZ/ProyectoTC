@@ -49,6 +49,7 @@ const Profesores = () => {
   }
 
   const actualizarProfesores = (tipoActualizacion) => {
+   const toastLoading = toast.loading("Actualizando los datos de los profesores...");
    console.log("TIpo: "+tipoActualizacion)
    console.log("Extraccion:"+mostrarDatosExtraidos+" | Edicion: "+editarProfesores)
    let JSONActualizacion = {}
@@ -65,12 +66,16 @@ const Profesores = () => {
    }
    actualizarDatosProfesores(JSONActualizacion).then((res) => 
    {
-    console.log("Actualizacion")
+    toast.dismiss(toastLoading);
+    //console.log("Actualizacion")
     setEditarProfesores(false);
     setMostrarDatosExtraidos(false);
     toast.success("¡Se han guardado los cambios exitosamente!");
    }
-   );
+   ).catch(e =>{
+    toast.dismiss(toastLoading)
+    toast.error("¡Parece que ha ocurrido un problema al intentar actualizar los datos de los profesores!, pulsa el boton para reintentarlo.");
+   });
 
   }
 

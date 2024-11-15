@@ -29,7 +29,8 @@ export default function PeriodoCard({ periodo, modoEdicion, editarPeriodo }) {
          
         </div>
         <p className="text-small font-medium text-default-500">{plan}</p>
-      </div>
+        <p className="text-sm pt-1 text-default-500"><span className="font-medium">Estado:</span> {estado}</p>
+        </div>
     </CardHeader>
     <Divider />
         <CardBody onClick={ () => {editarPeriodo(periodo)}}>
@@ -52,9 +53,13 @@ export default function PeriodoCard({ periodo, modoEdicion, editarPeriodo }) {
              <p className="text-xl font-semibold">{nombre}</p>
 
              {
-              modoEdicion &&
+              modoEdicion?
               (
               <p className="text-sm text-default-500">Editar</p>
+              )
+              :
+              (                
+                <p className="text-sm text-default-500"><span className="font-medium"></span> {estado}</p>
               )
              }
              

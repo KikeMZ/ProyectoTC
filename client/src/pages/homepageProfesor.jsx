@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import MateriaCard from "../components/card"
 import { getProfesorByCorreo } from "../services/profesor.api";
-import { getClasesByProfesor } from '../services/clases.api.js';
+import { getClasesByProfesor, getClasesByProfesorCurrentPeriodo } from '../services/clases.api.js';
 import { useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode'; 
 
@@ -32,9 +32,9 @@ export default function HomeProfesor() {
         //console.log("Respuesta Sesions:")
         //console.log(res)
         let datosProfesor = jwtDecode(window.localStorage.getItem("access_token"));
-        const resClases = await getClasesByProfesor(await datosProfesor.nombre); // Obtener la respuesta de getClasesByProfesor
+        const resClases = await getClasesByProfesorCurrentPeriodo(await datosProfesor.nombre); // Obtener la respuesta de getClasesByProfesor
         const profesorMatches = resClases.data //res.data.filter(item => item.nombreProfesor === profesor); // Filtrar la lista directamente
-        console.log(profesorMatches);
+        console.log(datosProfesor);
         setExistenAlumnos(false);
         setExistenCriterios(false); 
         setLista(profesorMatches); // Establecer la lista filtrada en el estado
