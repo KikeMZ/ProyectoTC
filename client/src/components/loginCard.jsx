@@ -37,7 +37,11 @@ export default function LoginCard() {
   }
 
   const verificarDatosLogin = () => {
-   //toast.error("¡Debe llenar todos los campos para iniciar sesion!");
+
+   let toastLoading = toast.loading("Verificando credenciales de acceso...");
+   if(email!="" && contrasena!="")
+   {
+   
    let JSONUsuario = {
     "username": email ,
     "password": contrasena
@@ -59,8 +63,22 @@ export default function LoginCard() {
    {
     window.location.href = "/";
    }
-  });
+  }).catch(e => {
 
+    console.log(e.response.status);
+    toast.dismiss(toastLoading);
+    if(e.response.status === 401)
+     toast.error("¡Credenciales incorrectas!, parece que de los datos ingresados son incorrectos.");    
+    else
+    
+    toast.error("¡Ha ocurrido un problema al intentar iniciar sesion!, vuelva a pulsar el boton para reintentarlo.");
+  });
+  }
+  else
+  {
+    toast.dismiss(toastLoading);
+    toast.error("¡Debe llenar todos los campos para iniciar sesion!");
+  }
 
   }
 

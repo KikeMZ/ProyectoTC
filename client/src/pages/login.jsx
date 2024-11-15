@@ -2,6 +2,7 @@ import LoginCard from "../components/loginCard"
 import {Navigate} from "react-router-dom";
 
 import {jwtDecode} from "jwt-decode";
+import Toast from "../components/toast";
 
 export default function Login(){
 
@@ -30,6 +31,7 @@ export default function Login(){
 
     return(
         <div className="flex w-full h-screen">
+            <Toast></Toast>
             <div className="w-full flex items-center justify-center lg:w-1/2 ">
                 <LoginCard></LoginCard>
             </div>
