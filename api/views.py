@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializer import ProgrammerSerializer,AlumnoSerializer, PeriodoSerializer,Clase2Serializer, ProfesorSerializer, InscripcionSerializer,EntregaSerializer,CriterioSerializer, ClaseCriterioSerializer, CalificacionSerializer, UserSerializer, CustomTokenObtainPairSerializer
-from .models import Programmer,Alumno, Periodo,Clase2, Profesor, Inscripcion,Entrega,Criterio, ClaseCriterio, Calificacion
+from .serializer import ProgrammerSerializer,AlumnoSerializer, PeriodoSerializer,Clase2Serializer, ProfesorSerializer, InscripcionSerializer,EntregaSerializer,CriterioSerializer, ClaseCriterioSerializer, CalificacionSerializer, UserSerializer, CustomTokenObtainPairSerializer, AsistenciaSerializer
+from .models import Programmer,Alumno, Periodo,Clase2, Profesor, Inscripcion,Entrega,Criterio, ClaseCriterio, Calificacion, Asistencia
 from rest_framework import filters, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -11,6 +11,17 @@ import smtplib
 from email.message import EmailMessage
 import random
 import string
+from django.utils import timezone
+from rest_framework.pagination import PageNumberPagination
+from django.http import JsonResponse
+from django.utils.timezone import now
+from datetime import date
+from django.db.models import Count
+from rest_framework.views import APIView
+from datetime import timedelta
+import calendar
+import locale
+from django.db.models import Avg  # Esto es lo que falta
 
 def generarCodigo(tamano:int):
     Characters=string.ascii_letters + "1234567890."
@@ -374,3 +385,216 @@ class CalificacionViewSet(viewsets.ModelViewSet):
         print("e")
         print(lista_calificaciones)
         return Response(lista_calificaciones, status=status.HTTP_200_OK)
+    
+## Esto lo hize yo
+
+
+class AsistenciaPagination(PageNumberPagination):
+    page_size = 10  # Número de elementos por página
+    page_size_query_param = 'page_size'
+    max_page_size = 100  # Límite máximo de elementos por página
+    
+class AsistenciaViewSet(viewsets.ModelViewSet):
+    queryset = Asistencia.objects.all()
+    serializer_class = AsistenciaSerializer
+    pagination_class = AsistenciaPagination  # Añadir la paginación aquí
+
+class AsistenciaViewSet(viewsets.ModelViewSet):
+    queryset = Asistencia.objects.all()
+    serializer_class = AsistenciaSerializer
+    pagination_class = AsistenciaPagination  # Añadir la paginación aquí
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        
+        # Paso 1: Validar los datos recibidos
+        serializer.is_valid(raise_exception=True)
+
+        # Paso 2: Validar la inscripción
+        materia_nrc = serializer.validated_data['materia_nrc']
+        matricula = serializer.validated_data['matricula']
+        
+        inscripcion = Inscripcion.objects.filter(alumno=matricula, clase=materia_nrc).first()
+
+        if not inscripcion:
+            return Response(
+                {"detail": f"El alumno con matrícula {matricula} no está inscrito en la clase con NRC {materia_nrc}."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        now = timezone.now()
+        adjusted_time = now - timedelta(hours=6)  # Restar 6 horas
+        today = adjusted_time.date()  # Obtener solo la fecha ajustada
+
+        
+        if inscripcion.estado != 'ACTIVA':
+            print(f"El alumno con matrícula {matricula} no tiene una inscripción activa.")
+            return Response(
+                {"detail": f"El alumno con matrícula {matricula} no tiene una inscripción activa."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+        # Imprimir lo que se está comparando
+
+        asistencia_existente = Asistencia.objects.filter(
+            matricula=matricula,
+            materia_nrc=materia_nrc,
+            fecha=today  # Comparamos solo la fecha
+        ).exists()
+
+        if asistencia_existente:
+            return Response(
+                {"detail": f"El alumno con matrícula {matricula} ya ha registrado asistencia hoy."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Paso 4: Si todo está bien, guardar la asistencia
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def get_queryset(self):
+        queryset = Asistencia.objects.all()
+        nrc = self.request.query_params.get('materia_nrc', None)
+        if nrc is not None:
+            queryset = queryset.filter(materia_nrc__nrc=nrc).order_by('-fecha')
+        return queryset
+
+    
+
+
+
+# Configurar el locale en español para obtener los nombres de los meses en español
+locale.setlocale(locale.LC_TIME, 'es_ES.utf8')
+
+class EntregasPorTipoView(APIView):
+    def get(self, request, nrc):
+        # Filtrar las entregas por el nrc específico (a través de la relación ClaseCriterio -> Clase2)
+        entregas = Entrega.objects.filter(tipo__id_clase__nrc=nrc)
+        
+        # Contar el total de entregas por cada tipo
+        entregas_por_tipo = entregas.values('tipo__nombre').annotate(total=Count('id'))
+        
+        # Obtener la fecha de hoy
+        today = timezone.now().date()
+        
+        # Contar las asistencias del día de hoy por el nrc específico
+        asistencias_hoy = Asistencia.objects.filter(materia_nrc__nrc=nrc, fecha=today).count()
+
+        # Obtener el promedio de calificaciones para el nrc
+        promedio_calificacion = Calificacion.objects.filter(id_entrega__tipo__id_clase__nrc=nrc).aggregate(promedio_nota=Avg('nota'))['promedio_nota']
+
+        # Obtener el inicio de la semana (lunes)
+        start_of_week = today - timedelta(days=today.weekday())
+        
+        # Contar las asistencias de la semana
+        asistencias_semana = Asistencia.objects.filter(materia_nrc__nrc=nrc, fecha__gte=start_of_week).count()
+
+        # Obtener el inicio del mes actual, anterior y anteanterior
+        start_of_month = today.replace(day=1)  # Primer día del mes actual
+        start_of_previous_month = (start_of_month - timedelta(days=1)).replace(day=1)  # Primer día del mes anterior
+        start_of_two_months_ago = (start_of_previous_month - timedelta(days=1)).replace(day=1)  # Primer día del anteanterior mes
+        
+        # Contar las asistencias del mes actual
+        asistencias_mes_actual = Asistencia.objects.filter(materia_nrc__nrc=nrc, fecha__gte=start_of_month).count()
+
+        # Contar las asistencias del mes anterior
+        asistencias_mes_anterior = Asistencia.objects.filter(
+            materia_nrc__nrc=nrc,
+            fecha__gte=start_of_previous_month,
+            fecha__lt=start_of_month  # Antes del inicio del mes actual
+        ).count()
+
+        # Contar las asistencias del anteanterior mes
+        asistencias_mes_ante_anterior = Asistencia.objects.filter(
+            materia_nrc__nrc=nrc,
+            fecha__gte=start_of_two_months_ago,
+            fecha__lt=start_of_previous_month  # Antes del inicio del mes anterior
+        ).count()
+
+        # Obtener los nombres de los meses en español
+        nombre_mes_actual = today.strftime("%B")  # Mes actual en español
+        nombre_mes_anterior = start_of_previous_month.strftime("%B")  # Mes anterior en español
+        nombre_mes_ante_anterior = start_of_two_months_ago.strftime("%B")  # Anteanterior mes en español
+
+        # Crear un array con las asistencias de los últimos tres meses
+        asistencias_mensuales = [
+            {nombre_mes_ante_anterior: asistencias_mes_ante_anterior},
+            {nombre_mes_anterior: asistencias_mes_anterior},
+            {nombre_mes_actual: asistencias_mes_actual}
+            
+            
+        ]
+        
+        # Obtener los criterios relacionados con la clase (ClaseCriterio)
+        criterios = ClaseCriterio.objects.filter(id_clase__nrc=nrc).values('nombre', 'ponderacion')
+
+        # Crear un listado de criterios con nombre y ponderación
+        criterios_listado = [
+            {'nombre': criterio['nombre'], 'ponderacion': criterio['ponderacion']} for criterio in criterios
+        ]
+        
+        # Crear la respuesta con los totales por tipo, asistencias diarias, semanales, mensuales, criterios y promedio
+        resultado = {
+            'promedioDeClase': promedio_calificacion,  # Promedio de calificaciones como un solo valor
+            'entregas_por_tipo': {
+                tipo['tipo__nombre']: tipo['total'] for tipo in entregas_por_tipo
+            },
+            'asistencias_hoy': asistencias_hoy,
+            'asistencias_semana': asistencias_semana,
+            'asistencias_mensuales': asistencias_mensuales,
+            'criterios': criterios_listado,  # Listado de criterios con nombre y ponderación
+            
+        }
+        
+        return Response(resultado)
+
+class AsistenciaPorClaseView(APIView):
+    def get(self, request, nrc):
+        total_alumnos = Inscripcion.objects.filter(clase__nrc=nrc, estado="ACTIVA").count()
+        total_asistencias = Asistencia.objects.filter(materia_nrc=nrc).values('matricula').annotate(total=Count('id_asistencia'))
+        
+        resultados = []
+        for asistencia in total_asistencias:
+            porcentaje = (asistencia['total'] / total_alumnos) * 100
+            resultados.append({
+                'matricula': asistencia['matricula'],
+                'total_asistencias': asistencia['total'],
+                #'porcentaje_asistencia': porcentaje
+            })
+        
+        return Response(resultados)
+
+class AsistenciaDiariaView(APIView):
+    def get(self, request, nrc):
+        asistencia_diaria = Asistencia.objects.filter(materia_nrc=nrc).values('fecha').annotate(total_asistencias=Count('id_asistencia'))
+        return Response(asistencia_diaria)
+
+class DistribucionCalificacionesView(APIView):
+    def get(self, request, nrc):
+        calificaciones = Calificacion.objects.filter(id_entrega__tipo__id_clase__nrc=nrc).values('nota').annotate(cantidad=Count('nota'))
+        return Response(calificaciones)
+    
+    
+class PromedioCalificacionesView(APIView):
+    def get(self, request, nrc):
+        promedio = Calificacion.objects.filter(id_entrega__tipo__id_clase__nrc=nrc).aggregate(promedio_nota=Avg('nota'))
+        return Response(promedio)
+    
+class EstadoInscripcionesView(APIView):
+    def get(self, request, nrc):
+        estados = Inscripcion.objects.filter(clase__nrc=nrc).values('estado').annotate(total=Count('estado'))
+        return Response(estados)
+    
+class ProgresoEntregasView(APIView):
+    def get(self, request, nrc):
+        entregas = Entrega.objects.filter(tipo__id_clase__nrc=nrc).values('estado').annotate(total=Count('estado'))
+        return Response(entregas)
+    
+class ClasesPorProfesorView(APIView):
+    def get(self, request):
+        clases_por_profesor = Clase2.objects.values('id_profesor__nombre').annotate(total_clases=Count('nrc'))
+        return Response(clases_por_profesor)
+    

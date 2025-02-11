@@ -50,7 +50,7 @@ export default function LayoutProfesor() {
       {
        let profesor = jwtDecode(sesionUsuarioApp);
        //let res = await revisarEstadoSesion(profesor.id,profesor.token);
-       console.log("Layout")
+      //console.log("Layout")
       // console.log(res)
       // if(res.data.estadoSesion!=0)
       //  navigate("/");

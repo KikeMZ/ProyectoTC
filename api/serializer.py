@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer 
 from django.contrib.auth.models import User
-from .models import Programmer, Alumno, Periodo, Clase2, Profesor, Inscripcion, Entrega, Criterio, ClaseCriterio, Calificacion
+from .models import Programmer, Alumno, Periodo, Clase2, Profesor, Inscripcion, Entrega, Criterio, ClaseCriterio, Calificacion, Asistencia
 
 # Serializadores auxiliares
 
@@ -106,3 +106,19 @@ class CalificacionSerializer(serializers.ModelSerializer):
     class Meta:
         model=Calificacion
         fields= ('id', 'nota', 'matricula', 'id_entrega', 'alumno_detail', 'entrega_detail')
+
+#Esto lo hize yo
+class AsistenciaSerializer(serializers.ModelSerializer):
+    materia_nrc = serializers.SlugRelatedField(slug_field='nrc', queryset=Clase2.objects.all())
+    matricula = serializers.PrimaryKeyRelatedField(queryset=Alumno.objects.all())
+
+    class Meta:
+        model = Asistencia
+        fields = ['id_asistencia', 'matricula', 'materia_nrc', 'fecha']
+
+    class AsistenciaSerializer(serializers.ModelSerializer):
+        materia_nrc = serializers.PrimaryKeyRelatedField(queryset=Clase2.objects.all())  # Asegúrate de que use PrimaryKeyRelatedField o un campo similar
+
+        class Meta:
+            model = Asistencia
+            fields = ['id_asistencia', 'matricula', 'materia_nrc', 'fecha']

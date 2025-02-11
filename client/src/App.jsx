@@ -36,6 +36,7 @@ import Asistencias from "./pages/asistencias";
 import HomeAlumno from "./pages/homepageAlumno";
 import CalificacionesAlumno from "./pages/calificacionesAlumno";
 import AsistenciasAlumno from "./pages/asistenciasAlumno";
+import Analisis from "./pages/analisis";
 
 export default function App() {
   return (
@@ -57,6 +58,7 @@ export default function App() {
         <Route path="historico" element ={<Historico/>}/>
         <Route path="alumnos" element={<Alumnos/>}/>
         <Route path="asistencias" element={<Asistencias/>}/>
+        <Route path="analisis" element={<Analisis/>}/>
         <Route path="entregas" element={<Entregas/>}>
          <Route path="reporte" element={<RegistroCalificaciones/>}/> 
         </Route>

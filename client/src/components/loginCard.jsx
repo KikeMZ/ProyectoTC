@@ -37,7 +37,11 @@ export default function LoginCard() {
   }
 
   const verificarDatosLogin = () => {
-   //toast.error("¡Debe llenar todos los campos para iniciar sesion!");
+
+   let toastLoading = toast.loading("Verificando credenciales de acceso...");
+   if(email!="" && contrasena!="")
+   {
+   
    let JSONUsuario = {
     "username": email ,
     "password": contrasena
@@ -50,16 +54,31 @@ export default function LoginCard() {
     if(tipoUsuario==1)
     {
      let datosProfesor = jwtDecode(res.data.access);
-     window.location.href = "/profesor?nombre="+datosProfesor.nombre+"&email="+datosProfesor.correo;
+     window.location.href = "/";
+     //window.location.href = "/profesor?nombre="+datosProfesor.nombre+"&email="+datosProfesor.correo;
 
 
     }
    else
    {
-    window.location.href = "/admin";
+    window.location.href = "/";
    }
-  });
+  }).catch(e => {
 
+    console.log(e.response.status);
+    toast.dismiss(toastLoading);
+    if(e.response.status === 401)
+     toast.error("¡Credenciales incorrectas!, parece que de los datos ingresados son incorrectos.");    
+    else
+    
+    toast.error("¡Ha ocurrido un problema al intentar iniciar sesion!, vuelva a pulsar el boton para reintentarlo.");
+  });
+  }
+  else
+  {
+    toast.dismiss(toastLoading);
+    toast.error("¡Debe llenar todos los campos para iniciar sesion!");
+  }
 
   }
 
@@ -70,7 +89,7 @@ export default function LoginCard() {
       <p className="font-medium text-lg text-gray-300 my-8">Ingrese sus datos:</p>
       <div className="mt-4 ">
         <Input
-          type="email"
+          type="text"
           label="Usuario"
           variant="bordered"
           color="primary"

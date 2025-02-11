@@ -11,7 +11,7 @@ import { TbEdit } from "react-icons/tb";
 import toast from "react-hot-toast";
 
 
-export default function ModalPeriodo({ controlModal, modoEdicion, crearPeriodo, periodo}) {
+export default function ModalPeriodo({ controlModal, modoEdicion, crearPeriodo, actualizarPeriodo, periodoSeleccionado}) {
   //const { datosClase } = useContext(claseContext)
  // const [ plan, setPlan ] = useState([]);
   const [ nombrePeriodo, setNombrePeriodo ] = useState("");
@@ -19,11 +19,129 @@ export default function ModalPeriodo({ controlModal, modoEdicion, crearPeriodo, 
   const [ fechaInicio, setFechaInicio ] = useState(null);
   const [ fechaFinalizacion, setFechaFinalizacion ] = useState(null);
 
-  const { register, handleSubmit, control } = useForm()
+  const { register, handleSubmit, reset, control } = useForm();
   const listaPlanes = ["SEMESTRAL","CUATRIMESTRAL"];
+  const listaEstados = ["ACTIVO","FINALIZADO"];
+
+  useEffect(()=>{
+   if(periodoSeleccionado!=null)
+   {
+    const periodo = {...periodoSeleccionado, "fecha_inicio":parseDate(periodoSeleccionado.fecha_inicio), "fecha_finalizacion": parseDate(periodoSeleccionado.fecha_finalizacion)};
+    reset(periodo);
+    console.log(periodo);
+    
+   }
+  },[periodoSeleccionado]);
 
 
-  return (  
+  if(modoEdicion) return(
+    <Modal isDismissable={false} classNames={{closeButton:"text-foreground-white text-2xl hover:bg-black active:text-black"}} isOpen={controlModal.isOpen} onOpenChange={controlModal.onOpenChange} >
+    <ModalContent>
+     {
+      (onClose) => (
+       <>
+        <ModalHeader className="bg-gradient-to-tr from-primary-100 to-primary-200 text-xl text-white font-bold">
+        <TbEdit size="30px" className="mr-2"></TbEdit>
+         Editar periodo
+
+
+
+        </ModalHeader>
+
+        <form onSubmit={handleSubmit( (periodo) => actualizarPeriodo(periodo))}>
+       <ModalBody className="gap-1 text-black">
+         <label htmlFor="nombrePeriodo" className=" font-semibold mt-3">Nombre</label>
+         <input id="nombrePeriodo" className="px-2 border-2 border-black rounded" {...register("nombre")} required/>
+        
+         <label htmlFor="nombreP" className="font-semibold mt-2">Plan de estudios</label>
+
+         <Controller
+          name="plan"
+          control={control}
+          render={ ({field:{onChange}}) => (
+           <Select onChange={onChange} radius="sm" classNames={{ label:"text-black"}} variant="bordered" labelPlacement={"outside"} placeholder={modoEdicion?periodoSeleccionado.plan:"Seleccione el tipo de plan"} aria-label="Tipo">
+            {
+             listaPlanes.map( (p, index) => (
+              <SelectItem key={p} value={p} className="text-black text-2xl">
+               {p}
+              </SelectItem>
+             ))
+            }
+           </Select>
+           )
+          }
+         />
+
+
+         <label htmlFor="fechaInicio" className=" font-semibold mt-3">Fecha de inicio</label>
+
+         <Controller
+          name="fecha_inicio"
+          control={control}
+          render={ ({field: {onChange, value}}) => (
+           <DatePicker onChange={ onChange } variant="bordered" radius="sm" value={value} isRequired></DatePicker>
+           )
+          }
+         />
+
+         <label htmlFor="fechaFinalizacion" className=" font-semibold mt-3"> Fecha de termino</label>
+         <Controller
+          name="fecha_finalizacion"
+          control={control}
+          render={({field: {onChange, value}}) => (
+           <DatePicker onChange={onChange} variant="bordered" radius="sm" value={value} isRequired/>
+           )
+          }
+         />
+
+
+
+<label htmlFor="nombreP" className="font-semibold mt-2">Estado</label>
+         <Controller
+          name="estado"
+          control={control}
+          render={ ({field:{onChange}}) => (
+           <Select onChange={onChange} radius="sm" classNames={{ label:"text-black"}} variant="bordered" labelPlacement={"outside"} placeholder={modoEdicion?periodoSeleccionado.estado:"Seleccione el tipo de plan"} aria-label="Tipo">
+            {
+             listaEstados.map( (p, index) => (
+              <SelectItem key={p} value={p} className="text-black text-2xl">
+               {p}
+              </SelectItem>
+             ))
+            }
+           </Select>
+           )
+          }
+         />
+
+
+
+
+
+
+       </ModalBody>
+       <ModalFooter>
+        <Button color="danger" style={{fontWeight:"bold"}} onPress={onClose}>Cancelar</Button>
+        <Button type="submit" color="success" style={{background:"green",color:"white" ,fontWeight:"bold"}} onPress={() => { }}>Guardar cambios</Button>
+
+       </ModalFooter>
+
+
+
+    </form>
+
+      </>
+      )
+     }
+    </ModalContent>
+
+
+    </Modal>
+    
+  ); 
+  
+
+  return(  
     <Modal isDismissable={false} classNames={{closeButton:"text-foreground-white text-2xl hover:bg-black active:text-black"}} isOpen={controlModal.isOpen} onOpenChange={controlModal.onOpenChange} >
     <ModalContent>
      {
@@ -36,7 +154,7 @@ export default function ModalPeriodo({ controlModal, modoEdicion, crearPeriodo, 
         (
         <>
          <TbEdit size="30px" className="mr-2"></TbEdit>
-         Editar criterio
+         Editar periodo
         </>
         )
         :

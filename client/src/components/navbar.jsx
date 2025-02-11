@@ -110,7 +110,7 @@ export const Nav = ({clase}) => {
         }
 
         {
-         existenAlumnos && existenCriterios && mostrarEntregas &&
+         existenAlumnos && existenCriterios && 
 
          (
          <NavLink
@@ -118,6 +118,18 @@ export const Nav = ({clase}) => {
           text="Asistencias"
           active={activeLink === "/profesor/asistencias"}
           onClick={() => handleLinkClick("/profesor/asistencias")}
+         />
+         )
+        }
+        {
+         existenAlumnos && existenCriterios && 
+
+         (
+         <NavLink
+          to="/profesor/analisis"
+          text="Analisis"
+          active={activeLink === "/profesor/analisis"}
+          onClick={() => handleLinkClick("/profesor/analisis")}
          />
          )
         }     

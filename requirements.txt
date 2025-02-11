@@ -8,6 +8,7 @@ coreschema==0.0.4
 Django==5.0.2
 django-cors-headers==4.3.1
 djangorestframework==3.14.0
+djangorestframework_simplejwt==5.2.2
 gunicorn==21.2.0
 h11==0.14.0
 idna==3.6
