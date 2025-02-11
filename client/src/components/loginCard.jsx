@@ -89,7 +89,7 @@ export default function LoginCard() {
       <p className="font-medium text-lg text-gray-300 my-8">Ingrese sus datos:</p>
       <div className="mt-4 ">
         <Input
-          type="email"
+          type="text"
           label="Usuario"
           variant="bordered"
           color="primary"
