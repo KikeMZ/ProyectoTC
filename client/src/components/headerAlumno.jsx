@@ -30,35 +30,38 @@ export default function HeaderAlumno() {
             <p className="text-start text-sm">{dataClase.seccion}</p>
             </div>
             </div>
-            <nav className="flex gap-4" >
-                <Button className="bg-secondary-900" radius="full" isIconOnly>
-                    <IoMdNotificationsOutline className=" size-6 fill-white"/>
-                </Button>
-                <div className="flex items-center">
-                    <Dropdown placement="bottom-start" className="bg-secondary-900">
-                        <DropdownTrigger>
-                            <User
-                                as="button"
-                                avatarProps={{
-                                    isBordered: true,
-                                    color:"primary",
-                                    icon: <AvatarIcon/>
-                                }}
-                                className="transition-transform"
-                                description={correo}
-                                name={nombreAlumno}
-                            />
-                        </DropdownTrigger>
-                        <DropdownMenu aria-label="User Actions" variant="flat">
-                            <DropdownItem key="logout" color="danger">
-                            <Link >
-                             <button onClick={ () => { window.localStorage.removeItem("access_token"); window.localStorage.removeItem("refresh_token"); window.location.href="/"}}>
-                                Cerrar sesión
-                             </button>
-                            </Link>
-                            </DropdownItem>
-                        </DropdownMenu>
-                    </Dropdown>
+            <nav className="flex gap-4 w-full justify-between items-center">
+                <p className="italic">Alumno</p>
+                <div className="flex gap-4 items-center">
+                    <Button className="bg-secondary-900" radius="full" isIconOnly>
+                        <IoMdNotificationsOutline className=" size-6 fill-white"/>
+                    </Button>
+                    <div className="flex items-center">
+                        <Dropdown placement="bottom-start" className="bg-secondary-900">
+                            <DropdownTrigger>
+                                <User
+                                    as="button"
+                                    avatarProps={{
+                                        isBordered: true,
+                                        color:"primary",
+                                        icon: <AvatarIcon/>
+                                    }}
+                                    className="transition-transform"
+                                    description={correo}
+                                    name={nombreAlumno}
+                                />
+                            </DropdownTrigger>
+                            <DropdownMenu aria-label="User Actions" variant="flat">
+                                <DropdownItem key="logout" color="danger">
+                                <Link >
+                                <button onClick={ () => { window.localStorage.removeItem("access_token"); window.localStorage.removeItem("refresh_token"); window.location.href="/"}}>
+                                    Cerrar sesión
+                                </button>
+                                </Link>
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
+                    </div>
                 </div>
             </nav>
         </header>

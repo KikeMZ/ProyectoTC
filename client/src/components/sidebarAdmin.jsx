@@ -29,7 +29,8 @@ export default function Sidebar() {
 
   return (
     <div className="bg-secondary-900 h-[100vh] overflow-y-scroll scrollbar-hide p-4">
-      <h1 className="text-center text-2xl font-bold mb-10">BUAP</h1>
+      <h1 className="text-center text-2xl font-bold mb-2">BUAP</h1>
+      <h3 className="text-center text-md italic mb-10">Administrador</h3>
       <div className="flex flex-col justify-end gap-4 ">
       <nav>
         <NavLink
