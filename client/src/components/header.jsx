@@ -15,6 +15,7 @@ const obtenerNombreProfesor = async (correoProfesor) => {
 
 //const nombreProfesor = new URLSearchParams(location.search).get('nombre') //?? jwtDecode(window.localStorage.getItem("access_token")??null)?.nombre ?? null;
 //const correo = new URLSearchParams(location.search).get('email') //?? jwtDecode(window.localStorage.getItem("access_token")??null)?.correo ?? null;
+
 //if(correo)
 // nombreProfesor = correo;
 //console.log(nombreProfesor)
@@ -67,8 +68,10 @@ export default function Header() {
                             </DropdownMenu>
                         </Dropdown>
                     </div>
+
                 </div>
             </nav>
         </header>
     )
 }
+

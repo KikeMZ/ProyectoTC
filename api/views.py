@@ -38,7 +38,8 @@ def generarContrasena():
     return generarCodigo(10)
 
 def enviarCorreo(correoDestino:str):
-    remitente="sm.maldonado1799@gmail.com"
+    remitente="sc.fcc.buap@gmail.com"
+    feature-ClaseAdministrador
     destinatario="pokemondile24@gmail.com"
     mensaje="hola mundo"
     email=EmailMessage()
@@ -53,7 +54,9 @@ def enviarCorreo(correoDestino:str):
     #smtp.ehlo()
     smtp.starttls()
     ##smtp.login(remitente,"Drafthhh-1")
-    smtp.login(remitente,"jywedbrhzkbbwjvg")
+
+    smtp.login(remitente,"pfswbmfwwkqxeblw")
+    feature-ClaseAdministrador
     smtp.sendmail(remitente,destinatario,email.as_string())
     smtp.quit()
 
@@ -151,9 +154,11 @@ class Clase2ViewSet(viewsets.ModelViewSet):
         clases_filtradas = []
         lista_clases_activas = []
         #periodos_activos = Periodo.objects.filter(estado="ACTIVO")
-        #profesor = Profesor.objects.get(id=profesor)
+
+        profesorBD = Profesor.objects.get(nombre=profesor)
         #print(profesor.id)
-        clases_filtradas = Clase2.objects.filter(id_profesor=profesor)
+        clases_filtradas = Clase2.objects.filter(id_profesor=profesorBD.id)
+        feature-ClaseAdministrador
         lista_clases_activas = [ self.get_serializer(c).data for c in clases_filtradas if c.id_periodo.estado=="ACTIVO"]
         #print(lista_clases)
         return Response(lista_clases_activas, status=status.HTTP_200_OK)
