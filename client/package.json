@@ -26,7 +26,7 @@
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.4",
     "papaparse": "^5.4.1",
-    "pdfjs-dist": "^2.16.105",
+    "pdfjs-dist": "^5.0.375",
     "primeicons": "^7.0.0",
     "qrcode": "^1.5.4",
     "react": "^18.2.0",

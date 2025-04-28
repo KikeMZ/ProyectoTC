@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { extraerDatosMaterias } from '../services/importacion.js';
 import ModalExtraerClases from "../components/modalExtraerClases";
@@ -6,7 +6,6 @@ import ClaseCard from "../components/cardClase";
 import { Button, useDisclosure } from "@nextui-org/react";
 import { toast } from 'react-hot-toast';
 import { getClasesByPeriodo } from '../services/clases.api.js';
-import axios from "axios";
 
 const Spinner = () => (
   <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500"></div>
@@ -23,11 +22,17 @@ export default function ClasesAdministrador() {
   const navigate = useNavigate();
 
   const [archivoPDF, setArchivoPDF] = useState(null);
+  const [archivoSeleccionado, setArchivoSeleccionado] = useState(null);
   const [resultadoExtraccion, setResultadoExtraccion] = useState(-1);
   const [mostrarTarjetas, setMostrarTarjetas] = useState(false);
   const [lista, setLista] = useState([]);
   const [cargando, setCargando] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  const [mensajeArchivo, setMensajeArchivo] = useState("");
+  const [esArchivoValido, setEsArchivoValido] = useState(null);
+
+  const inputRef = useRef(null); // Referencia al input file
 
   const id_periodo = new URLSearchParams(location.search).get('periodo');
   const nombre_periodo = new URLSearchParams(location.search).get('nombre');
@@ -41,7 +46,6 @@ export default function ClasesAdministrador() {
   ];
 
   useEffect(() => {
-    // Intentamos cargar las clases del localStorage para el periodo actual
     const clasesGuardadas = localStorage.getItem(`clases_periodo_${id_periodo}`);
     if (clasesGuardadas) {
       setLista(JSON.parse(clasesGuardadas));
@@ -59,23 +63,45 @@ export default function ClasesAdministrador() {
   }, [id_periodo]);
 
   const manejarArchivo = (e) => {
-    let archivoSeleccionado = e.target.files[0];
-    if (archivoSeleccionado) {
-      let tipoArchivo = archivoSeleccionado.type;
+    const archivo = e.target.files[0];
 
-      if (tipoArchivo === "application/pdf") {
-        let leerArchivo = new FileReader();
-        leerArchivo.readAsArrayBuffer(archivoSeleccionado);
-        leerArchivo.onload = (e) => {
+    if (archivo) {
+      setArchivoSeleccionado(archivo);
+
+      if (archivo.type === "application/pdf") {
+        const reader = new FileReader();
+        reader.readAsArrayBuffer(archivo);
+        reader.onload = (e) => {
           setArchivoPDF(e.target.result);
         };
+        setMensajeArchivo("Archivo compatible");
+        setEsArchivoValido(true);
       } else {
-        toast.error("Por favor seleccione un archivo PDF");
+        setMensajeArchivo("Solo se permiten archivos PDF");
+        setEsArchivoValido(false);
+        setArchivoPDF(null);
       }
+    } else {
+      limpiarArchivo();
+    }
+  };
+
+  const limpiarArchivo = () => {
+    setArchivoSeleccionado(null);
+    setArchivoPDF(null);
+    setMensajeArchivo("");
+    setEsArchivoValido(null);
+    if (inputRef.current) {
+      inputRef.current.value = "";
     }
   };
 
   const leerPDF = async () => {
+    // Validación de seguridad
+    if (!archivoSeleccionado || !esArchivoValido) {
+      toast.error("Seleccione un archivo PDF válido antes de continuar.");
+      return;
+    }
 
     setCargando(true);
     setProgress(10);
@@ -86,17 +112,9 @@ export default function ClasesAdministrador() {
       if (response) {
         const { resultado, clases: listaClases } = response;
         let nuevaLista = [];
-        let bandera = 0;
         for (let i = 0; i < listaClases.length; i++) {
-          bandera = 0;
-          lista.forEach((clase) => {
-            if (clase.nrc === listaClases[i].nrc) {
-              bandera = 1;
-            }
-          });
-          if (bandera === 0) {
-            nuevaLista.push(listaClases[i]);
-          }
+          const existe = lista.some((clase) => clase.nrc === listaClases[i].nrc);
+          if (!existe) nuevaLista.push(listaClases[i]);
         }
         if (nuevaLista.length > 0) {
           setLista([...lista, ...nuevaLista]);
@@ -110,17 +128,15 @@ export default function ClasesAdministrador() {
         } else {
           toast.success(mensajesImportacion[resultado]);
           controlModal.onClose();
-          
-          // Guardamos las clases en el localStorage bajo una clave única para el periodo
           const listaActualizada = [...lista, ...nuevaLista];
           localStorage.setItem(`clases_periodo_${id_periodo}`, JSON.stringify(listaActualizada));
         }
       } else {
         toast.error('Selecciona un archivo primero');
       }
-      
       setCargando(false);
       setTimeout(() => setProgress(0), 500);
+      limpiarArchivo();
     }, 2000);
   };
 
@@ -139,11 +155,41 @@ export default function ClasesAdministrador() {
               Parece que aún no tienes registrada ninguna clase para este periodo.
             </h1>
             <form className="mb-4">
-              <input type="file" accept=".pdf" id="cargar" name="archivo" onChange={manejarArchivo} disabled={cargando} />
+              <input
+                type="file"
+                accept=".pdf"
+                id="cargar"
+                name="archivo"
+                ref={inputRef}
+                onChange={manejarArchivo}
+                disabled={cargando}
+              />
+              {mensajeArchivo && (
+                <p
+                  className="text-sm mt-2 font-semibold"
+                  style={{ color: esArchivoValido ? "green" : "red" }}
+                >
+                  {mensajeArchivo}
+                </p>
+              )}
             </form>
-            <Button radius="large" className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white mt-20" onClick={leerPDF} disabled={cargando}>
+
+            <Button
+              radius="large"
+              disabled={!(archivoSeleccionado && esArchivoValido) || cargando}
+              className={`mt-4 px-8 py-4 font-bold text-white transition-colors ${
+                archivoSeleccionado && esArchivoValido
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
+              onClick={leerPDF}
+            >
               {cargando ? <Spinner /> : "Importar clases"}
             </Button>
+            <p className="text-xs text-gray-500 mt-2 italic">
+              Nota: Solo se admiten archivos PDF.
+            </p>
+
             {cargando && <ProgressBar progress={progress} />}
           </div>
         )}
@@ -151,7 +197,11 @@ export default function ClasesAdministrador() {
         {mostrarTarjetas && (
           <div className="flex flex-col">
             <h1 className="text-4xl font-semibold">Clases - {nombre_periodo}</h1>
-            <Button radius="large" className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white mt-10 text-base font-semibold" onClick={controlModal.onOpen}>
+            <Button
+              radius="large"
+              className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white mt-10 text-base font-semibold"
+              onClick={controlModal.onOpen}
+            >
               Importar clases
             </Button>
             <h2 className="text-2xl font-semibold mt-3 ml-4">Total: {lista.length}</h2>
@@ -163,7 +213,11 @@ export default function ClasesAdministrador() {
           </div>
         )}
 
-        <ModalExtraerClases controlModal={controlModal} onManejarArchivo={manejarArchivo} extraerClases={leerPDF} />
+        <ModalExtraerClases
+          controlModal={controlModal}
+          onManejarArchivo={manejarArchivo}
+          extraerClases={leerPDF}
+        />
       </div>
     </>
   );

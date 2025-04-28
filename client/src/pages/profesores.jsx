@@ -18,6 +18,9 @@ import { MdLockReset, MdDelete} from 'react-icons/md';
 
 import toast from 'react-hot-toast';
 
+const normalizarNombre = (nombre) => nombre.toLowerCase().replace(/\s+/g, ' ').trim();
+
+
 const Profesores = () => {
 
   const controlModal = useDisclosure();
@@ -49,35 +52,37 @@ const Profesores = () => {
   }
 
   const actualizarProfesores = (tipoActualizacion) => {
-   const toastLoading = toast.loading("Actualizando los datos de los profesores...");
-   console.log("TIpo: "+tipoActualizacion)
-   console.log("Extraccion:"+mostrarDatosExtraidos+" | Edicion: "+editarProfesores)
-   let JSONActualizacion = {}
-   if(tipoActualizacion==1)
-   {
-    let nombresProfesoresBD = profesores.map((profesor) => profesor.nombre);
-    let profesoresFiltrados = datosExtraidos.filter( (p) => nombresProfesoresBD.includes(p.nombre));
-    JSONActualizacion = {"profesores": profesoresFiltrados,"tipoActualizacion":'1'}
-    console.log(profesoresFiltrados)
-   }
-   else
-   {
-    JSONActualizacion = {"profesores": profesoresModificados,"tipoActualizacion":'2'}    
-   }
-   actualizarDatosProfesores(JSONActualizacion).then((res) => 
-   {
-    toast.dismiss(toastLoading);
-    //console.log("Actualizacion")
-    setEditarProfesores(false);
-    setMostrarDatosExtraidos(false);
-    toast.success("¡Se han guardado los cambios exitosamente!");
-   }
-   ).catch(e =>{
-    toast.dismiss(toastLoading)
-    toast.error("¡Parece que ha ocurrido un problema al intentar actualizar los datos de los profesores!, pulsa el boton para reintentarlo.");
-   });
-
-  }
+    const toastLoading = toast.loading("Actualizando los datos de los profesores...");
+    let JSONActualizacion = {};
+  
+    if (tipoActualizacion == 1) {
+      let nombresProfesoresBD = profesores.map((profesor) => normalizarNombre(profesor.nombre));
+      let profesoresFiltrados = datosExtraidos.filter((p) =>
+        nombresProfesoresBD.includes(normalizarNombre(p.nombre))
+      );
+      JSONActualizacion = { profesores: profesoresFiltrados, tipoActualizacion: '1' };
+    } else {
+      JSONActualizacion = { profesores: profesoresModificados, tipoActualizacion: '2' };
+    }
+  
+    actualizarDatosProfesores(JSONActualizacion)
+      .then((res) => {
+        toast.dismiss(toastLoading);
+        setEditarProfesores(false);
+        setMostrarDatosExtraidos(false);
+        toast.success("¡Se han guardado los cambios exitosamente!");
+  
+        // 🔁 Volver a cargar lista actualizada de profesores
+        getAllProfesores().then((res) => {
+          setProfesores(res.data.sort(ordenAlfabetico));
+        });
+      })
+      .catch((e) => {
+        toast.dismiss(toastLoading);
+        toast.error("¡Ocurrió un problema al actualizar los profesores!");
+      });
+  };
+  
 
   const modificarEstadoArchivoProfesores = (archivoPDF) => setArchivoProfesores(archivoPDF);
 

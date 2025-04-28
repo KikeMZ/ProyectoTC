@@ -182,7 +182,7 @@ class ProfesorViewSet(viewsets.ModelViewSet):
 #        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-    @action(detail=False, methods=['post'])
+    """@action(detail=False, methods=['post'])
     def actualizarDatosProfesores(self, request, pk=None):
         datosProfesores = request.data["profesores"]
         tipoActualizacion = request.data["tipoActualizacion"]
@@ -227,7 +227,82 @@ class ProfesorViewSet(viewsets.ModelViewSet):
                 profesores[posicionProfesor].save()
                 
         
-        return Response([], status=status.HTTP_200_OK)
+        return Response([], status=status.HTTP_200_OK)"""
+    
+    @action(detail=False, methods=['post'])
+    def actualizarDatosProfesores(self, request, pk=None):
+        print("Petición recibida en actualizarDatosProfesores")
+    
+        datosProfesores = request.data.get("profesores", [])
+        tipoActualizacion = request.data.get("tipoActualizacion", "1")
+        profesores = Profesor.objects.all()
+
+        def normalizar(nombre):
+            return ' '.join(nombre.lower().split())
+
+        if tipoActualizacion == '1':
+            print("Tipo de actualización: desde archivo PDF")
+
+            nombreProfesores = [normalizar(p.nombre) for p in profesores]
+
+            for p in datosProfesores:
+                nombre_normalizado = normalizar(p["nombre"])
+                nuevoCorreo = p["correo"]
+
+                if nombre_normalizado in nombreProfesores:
+                    posicionProfesor = nombreProfesores.index(nombre_normalizado)
+                    profesor_obj = profesores[posicionProfesor]
+
+                    profesor_obj.correo = nuevoCorreo
+
+                    if profesor_obj.id_usuario is None:
+                        contrasena = generarContrasena()
+                        profesor_obj.contrasena = contrasena
+                        try:
+                            usuarioProfesor = User.objects.create_user(
+                                username=nuevoCorreo,
+                                email=nuevoCorreo,
+                                password=contrasena
+                            )
+                            profesor_obj.id_usuario = usuarioProfesor
+                        except Exception as e:
+                            print(f"Error al crear usuario: {str(e)}")
+                            continue
+
+                    elif profesor_obj.id_usuario.username != nuevoCorreo:
+                        profesor_obj.id_usuario.username = nuevoCorreo
+                        profesor_obj.id_usuario.email = nuevoCorreo
+                        profesor_obj.id_usuario.save()
+
+                    profesor_obj.save()
+                    print(f"Profesor actualizado: {profesor_obj.nombre}")
+                
+                else:
+                    # 🚨 Si el profesor no existe, lo creamos
+                    print(f"Profesor nuevo detectado: {p['nombre']}")
+                    contrasena = generarContrasena()
+                    try:
+                        usuarioProfesor = User.objects.create_user(
+                            username=nuevoCorreo,
+                            email=nuevoCorreo,
+                            password=contrasena
+                        )
+                        nuevo_profesor = Profesor.objects.create(
+                            nombre=p["nombre"],
+                            correo=nuevoCorreo,
+                            contrasena=contrasena,
+                            id_usuario=usuarioProfesor
+                        )
+                        print(f"Profesor creado: {nuevo_profesor.nombre}")
+                    except Exception as e:
+                        print(f"Error al crear nuevo profesor {p['nombre']}: {str(e)}")
+                        continue
+
+        else:
+            print("Actualización tipo 2 no revisada en este flujo")
+
+        return Response({"mensaje": "Proceso completado"}, status=status.HTTP_200_OK)
+
     
     @action(detail=True, methods=["post"])
     def reiniciarContrasena(self, request, pk=None):
