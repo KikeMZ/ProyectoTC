@@ -144,7 +144,7 @@ export default function ClasesAdministrador() {
     <>
       <div className="flex flex-col items-center justify-center min-h-full">
         <div className="flex justify-start items-start w-full">
-          <Button onClick={() => navigate("/")} startContent={<i className="pi pi-chevron-left" />} className="font-semibold mb-4 ml-16" variant="faded">
+          <Button onClick={() => navigate("/")} startContent={<i className="pi pi-chevron-left" />} className="font-semibold m-4 ml-1" variant="faded">
             Regresar a periodos
           </Button>
         </div>
@@ -205,7 +205,7 @@ export default function ClasesAdministrador() {
               Importar clases
             </Button>
             <h2 className="text-2xl font-semibold mt-3 ml-4">Total: {lista.length}</h2>
-            <div className="grid grid-cols-3 gap-4 p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 p-4">
               {lista.map((clase, index) => (
                 <ClaseCard key={index} clase={clase} />
               ))}

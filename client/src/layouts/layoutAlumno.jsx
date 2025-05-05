@@ -66,24 +66,28 @@ const LayoutAlumno = () => {
     
     return(
         <alumnoContext.Provider value={{dataAlumno, limpiarAlumno}}>
-         <claseContext.Provider value={{dataClase, limpiarDatos, asignarDatos}}>
-          <div className="flex h-screen overflow-hidden">
-            <Toast></Toast>
-            <SidebarAlumno/>
-            <div className="flex flex-col flex-1 ">
-                <HeaderAlumno/>
-                {shownav && <NavAlumno clase={{dataClase}}/>}
-                <div className="flex-1 overflow-y-auto px-4 pb-8">
-                 <NavContext.Provider value={{shownav, showNav, dontshowNav}}>
-                    <Outlet/>
-                 </NavContext.Provider>
+            <claseContext.Provider value={{dataClase, limpiarDatos, asignarDatos}}>
+                <div className="flex h-screen overflow-hidden">
+                    <Toast/>
+
+                    {/* Sidebar con un ancho fijo */}
+                    <div className="w-20 shrink-0">
+                        <SidebarAlumno />
+                    </div>
+
+                    <div className="flex flex-col flex-1 overflow-y-auto">
+                        <HeaderAlumno/>
+                        {shownav && <NavAlumno clase={{dataClase}}/>}
+                        <div className="flex-1 overflow-y-auto px-4 pb-8">
+                        <NavContext.Provider value={{shownav, showNav, dontshowNav}}>
+                            <Outlet/>
+                        </NavContext.Provider>
+                        </div>
+                    </div>
                 </div>
-            </div>
-          </div>
-         </claseContext.Provider>
+            </claseContext.Provider>
         </alumnoContext.Provider>
     )
-
 
 };
 

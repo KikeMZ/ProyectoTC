@@ -1,19 +1,17 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@nextui-org/react";
 import { FaChalkboardTeacher } from "react-icons/fa";
 import { IoIosSchool } from "react-icons/io";
 import { IoTimeOutline } from "react-icons/io5";
 
-
 // Componente de link para el sidebar
-function NavLink({ to, icon: Icon, text, active, onClick }) {
+function NavLink({ to, icon: Icon, text, active }) {
   return (
     <Link
       to={to}
       className={`flex items-center gap-4 px-4 py-2 rounded-lg hover:bg-secondary-100 ${active ? "bg-primary-100" : ""}`}
       style={{ marginBottom: "8px" }}
-      onClick={onClick}
     >
       <Icon />
       {text}
@@ -22,10 +20,8 @@ function NavLink({ to, icon: Icon, text, active, onClick }) {
 }
 
 export default function Sidebar() {
-  const [activeLink, setActiveLink] = useState("/admin");
-  const handleLinkClick = (link) => {
-    setActiveLink(link);
-  };
+  const location = useLocation();
+  const currentPath = location.pathname;
 
   return (
     <div className="bg-secondary-900 h-[100vh] overflow-y-scroll scrollbar-hide p-4">
@@ -37,16 +33,14 @@ export default function Sidebar() {
           to="/admin"
           icon={FaChalkboardTeacher}
           text="Clases"
-          active={activeLink === "/admin"}
-          onClick={() => handleLinkClick("/admin")}
+          active={currentPath === "/admin"}
         />
 
         <NavLink
           to="/admin/profesores"
           icon={IoIosSchool}
           text="Profesores"
-          active={activeLink === "/admin/profesores"}
-          onClick={() => handleLinkClick("/admin/profesores")}
+          active={currentPath === "/admin/profesores"}
         />
 
       </nav>

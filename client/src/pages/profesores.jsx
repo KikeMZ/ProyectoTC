@@ -196,196 +196,205 @@ const Profesores = () => {
   return (
     <>
 
-    <div className="flex">
+    <div className="flex flex-col xl:flex-row w-full gap-4">
 
     {
       !editarProfesores && !mostrarDatosExtraidos &&
       (
        <>
-       <div className="w-2/4">
-       
-       <h2 className="text-3xl font-semibold mt-8"> 
-       {
-        editarProfesores?
-        (<>
-         <FiEdit2/>
-         <span>Editar</span>
-         
-        </>)
-        :
-        "Lista de profesores"
-       }
-       </h2>
+       <div className="w-full xl:w-2/4">
+        <h2 className="text-2xl xl:text-3xl font-semibold mt-6 xl:mt-8">
+        {
+          editarProfesores?
+          (<>
+          <FiEdit2 className="inline mr-2"/>
+            Editar
+          </>)
+          :
+          "Lista de profesores"
+        }
+        </h2>
        </div>
-       <div className="flex w-2/4 justify-end">
 
-                    <Button
-                        radius="large"
+       <div className="flex flex-col xl:flex-row w-full xl:w-2/4 justify-end gap-4 my-4 xl:mt-0">
 
-                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mr-3 mb-10 font-bold text-base"
-                        onClick={ () => {setEditarProfesores(true)}}
-                    >
-                        <i className="pi pi-pencil" style={{fontSize:"18px",fontWeight:"bold"}}></i> Modificar profesores
-                    </Button>
+              <Button
+                  radius="large"
+                  className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white font-bold text-base"
+                  onClick={ () => {setEditarProfesores(true)}}
+              >
+                  <i className="pi pi-pencil mr-2" style={{fontSize:"18px",fontWeight:"bold"}}></i> Modificar profesores
+              </Button>
 
-                    <Button
-                        radius="large"
-
-                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-0 mb-10 font-bold text-base"
-                        onClick={controlModal.onOpen}
-                    >
-                        <i className="pi pi-folder-open" style={{fontSize:"18px",fontWeight:"bold"}}></i> { mostrarDatosExtraidos?"Cambiar archivo":"Importar datos"}
-                    </Button>
-
-       </div>
+              <Button
+                  radius="large"
+                  className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white font-bold text-base"
+                  onClick={controlModal.onOpen}
+              >
+                  <i className="pi pi-folder-open mr-2" style={{fontSize:"18px",fontWeight:"bold"}}></i> { mostrarDatosExtraidos?"Cambiar archivo":"Importar datos"}
+              </Button>
+        </div>
       </>
-      )
-                    
-    }
+    )
+  }
+  {
+    (editarProfesores || mostrarDatosExtraidos) && (
+      <div className="flex flex-col justify-between w-full">
+        <div>
+          <Button
+          onClick={() => {
+            setEditarProfesores(false);
+            setMostrarDatosExtraidos(false);
+          }}
+          variant="faded"
+          radius="large"
+          className="text-base mt-4"
+          >
+          <IoIosArrowBack size="24px" />
+          Regresar a lista de profesores
+          </Button>
+        </div>
 
-                    {
-                     (editarProfesores || mostrarDatosExtraidos) &&
-                     (
-                      <div className="flex flex-col justify-between w-full">
-                      <div>
-                      <Button onClick={() => {setEditarProfesores(false); setMostrarDatosExtraidos(false); }} variant="faded" radius="large" className="text-base"> 
-                       <IoIosArrowBack size="24px"/>
-                       Regresar a lista de profesores
-                      </Button>
-                      </div>
-                      <div className="flex justify-between">
-                      <div className="flex flex-row w-2/4 mt-8 ml-2">
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center w-full mt-6 gap-4">
+          {/* Título Editar */}
+          <div className="flex items-center gap-3 w-full xl:w-1/2">
+            <FiEdit2 size="28px" className="font-semibold" />
+            <p className="text-2xl xl:text-3xl font-semibold">Editar</p>
+          </div>
 
-                       <FiEdit2 size="28px" className="font-semibold mr-3"/>
-                       <p className="text-3xl font-semibold ">
-                        Editar
-                       </p>
+          {/* Botones de acción */}
+          <div className="flex flex-col sm:flex-row gap-3 w-full xl:w-1/2 mb-2 justify-end">
+            <Button
+            radius="large"
+            className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white font-bold text-base"
+            onClick={controlModal.onOpen}
+            >
+              <i
+              className="pi pi-folder-open mr-2"
+              style={{ fontSize: "18px", fontWeight: "bold" }}
+              ></i>
+              {mostrarDatosExtraidos ? "Cambiar archivo" : "Importar Datos"}
+            </Button>
 
-                      </div>
-
-                      <div>
-                      <Button
-                      radius="large"
-
-                      className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-0 mb-10 font-bold text-base"
-                      onClick={controlModal.onOpen}
-                      >
-                      <i className="pi pi-folder-open" style={{fontSize:"18px",fontWeight:"bold"}}></i> { mostrarDatosExtraidos?"Cambiar archivo":"Importar Datos"}
-                  </Button>
-                      
-                      <Button
-                        radius="large"
-
-                        className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white py-6 mt-5 ml-3 mb-10 font-bold text-base"
-                        onClick={() => editarProfesores?actualizarProfesores(2):actualizarProfesores(1)}
-                     >
-                        <i className="pi pi-save" style={{fontSize:"18px",fontWeight:"bold"}}></i> Guardar cambios
-                    </Button>
-                    </div>
-                    </div>
-                    </div>
-                     )
-                    }
-
+            <Button
+            radius="large"
+            className="bg-gradient-to-tr from-primary-100 to-primary-200 text-white font-bold text-base"
+            onClick={() =>
+              editarProfesores ? actualizarProfesores(2) : actualizarProfesores(1)
+            }
+            >
+              <i
+              className="pi pi-save mr-2"
+              style={{ fontSize: "18px", fontWeight: "bold" }}
+              ></i>
+              Guardar cambios
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
     </div>
-    {
-     mostrarDatosExtraidos
-     ? 
-     (
+  {
+    mostrarDatosExtraidos ? (
       <>
-      <h2 className="text-3xl font-semibold mb-2">Resumen de la extraccion</h2>
-      <hr></hr>
-      <h2 className="text-2xl my-3">Numero de profesores identificados: {datosExtraidos.length}</h2>
-      <hr></hr>
-      <br></br>
-      <table style={{width:"100%"}}>
-      <thead>
-        <tr>
-          <th className="text-2xl py-3 pl-3 text-left">Nombre</th>
-          <th className="text-2xl py-3 text-left">Correo</th>
-        </tr>
-      </thead>
-      <tbody>
-      {
+        <h2 className="text-3xl font-semibold mb-2">Resumen de la extracción</h2>
+        <hr className="my-2" />
+        <h3 className="text-2xl my-3">
+        Número de profesores identificados: {datosExtraidos.length}
+        </h3>
 
-      datosExtraidos.map( (profesor, index) => (
-      <tr key={index} style={{border:"2px solid"}}>
-       <td className="text-xl py-3 pl-3"> {profesor.nombre} </td>
-       <td className="text-xl py-3"> {profesor.correo}</td>      
-      </tr>
-      ))
-      
-      }
-      </tbody>
-      </table>
-      <br></br>
+        <hr className="my-2" />
 
-      </>
-     )
-     :
-
-     (
-      <>
-      <table style={{width:"100%", borderCollapse:"collapse", border:"3px solid white"}}>
-       <thead>
-        <tr style={{border:"3px solid white"}}>
-          <th className="text-2xl py-3 text-start pl-3">Nombre</th>
-          <th className="text-2xl py-3 text-start">Correo</th>
-          {
-           editarProfesores && (
-            <>
-             <th className="text-2xl py-3"> Acciones</th>
-            </>
-           )
-          }
-        </tr>
-       </thead>
-       <tbody>
-
-    {
-     profesores?.map( (profesor, index) => (
-      
-    <tr key={index} className="text-center" style={{border:"3px solid grey"}}>
-      
-     { editarProfesores?
-
-      (
-      <>
-        <td className="py-2 px-2">
-         <Input classNames={{input: ["text-base font-semibold text-start"]}}  type="text" onChange={ (e) => {modificarProfesor(profesor.id, e.target.value, 1)}} value={profesor.nombre} ></Input>
-        </td>
-        <td className="py-2 px-2">
-         <Input classNames={{input: ["text-base font-semibold text-start"]}}  type="text" onChange={ (e) => {modificarProfesor(profesor.id, e.target.value, 2)}} value={profesor.correo} ></Input>
-        </td>
-
-        <td>
-         <Tooltip className="text-black font-semibold" content="Reiniciar Contraseña">
-          <button onClick={ () => { setProfesorSeleccionado(profesor); controlModalContrasena.onOpen();}} >
-           <MdLockReset size="40px"/>
-          </button>
-         </Tooltip>
-        </td>
-      </>
-      )
-      :
-      (
-       <>
-     <td className="text-xl py-3 text-start px-2"> {profesor.nombre} </td>
-     <td className="text-xl py-3 text-start"> {profesor.correo!=""?profesor.correo:"Vacio"} </td>
-        
-       </>
-      )
-     }
-
-    </tr>
-    )
-    )
-    }
-     </tbody>
-    </table>
+        <div className="overflow-x-auto mt-4">
+          <table className="min-w-[400px] w-full border-collapse border border-gray-300 text-base">
+            <thead>
+              <tr className="bg-gray-100">
+              <th className="text-xl py-3 pl-3 text-left">Nombre</th>
+              <th className="text-xl py-3 text-left">Correo</th>
+              </tr>
+            </thead>
+          <tbody>
+          {datosExtraidos.map((profesor, index) => (
+            <tr key={index} className="border-b border-gray-300">
+              <td className="text-base py-3 pl-3">{profesor.nombre}</td>
+              <td className="text-base py-3">{profesor.correo}</td>
+            </tr>
+          ))}
+          </tbody>
+        </table>
+      </div>
     </>
-    )
-   }
+  ) : (
+    <div className="overflow-x-auto">
+      <table className="min-w-[400px] w-full border-collapse border border-white text-sm xl:text-base">
+        <thead>
+          <tr className="border-b-4 border-white">
+            <th className="text-2xl py-3 text-start pl-3">Nombre</th>
+            <th className="text-2xl py-3 text-start">Correo</th>
+            {editarProfesores && <th className="text-2xl py-3">Acciones</th>}
+          </tr>
+        </thead>
+      <tbody>
+        {profesores?.map((profesor, index) => (
+          <tr
+          key={index}
+          className="text-start border-b-2 border-gray-300"
+          >
+          {editarProfesores ? (
+            <>
+            <td className="py-2 px-2">
+            <Input
+            classNames={{ input: ["text-base font-semibold text-start"] }}
+            type="text"
+            onChange={(e) =>
+              modificarProfesor(profesor.id, e.target.value, 1)
+            }
+            value={profesor.nombre}
+            />
+            </td>
+            <td className="py-2 px-2">
+            <Input
+            classNames={{ input: ["text-base font-semibold text-start"] }}
+            type="text"
+            onChange={(e) =>
+              modificarProfesor(profesor.id, e.target.value, 2)
+            }
+            value={profesor.correo}
+            />
+            </td>
+            <td className="py-2 px-2">
+            <Tooltip
+            className="text-black font-semibold"
+            content="Reiniciar Contraseña"
+            >
+            <button
+            onClick={() => {
+              setProfesorSeleccionado(profesor);
+              controlModalContrasena.onOpen();
+            }}
+            >
+            <MdLockReset size="30px" />
+            </button>
+            </Tooltip>
+            </td>
+            </>
+          ) : (
+            <>
+            <td className="text-xl py-3 px-2">{profesor.nombre}</td>
+            <td className="text-xl py-3 px-2">
+            {profesor.correo !== "" ? profesor.correo : "Vacío"}
+            </td>
+            </>
+          )}
+          </tr>
+      ))}
+      </tbody>
+    </table>
+  </div>
+  )
+}
+
 
    <ModalExtraerCorreos controlModal={controlModal}  extraerDatosArchivoProfesores={extraerDatosArchivoProfesores} setArchivoProfesores={modificarEstadoArchivoProfesores}></ModalExtraerCorreos>
    <ModalReiniciarContrasena controlModal={controlModalContrasena} usuario={profesorSeleccionado} reiniciarContrasena={reiniciarContrasena} />

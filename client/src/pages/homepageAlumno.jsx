@@ -55,7 +55,7 @@ export default function HomeAlumno() {
          <FaChalkboardTeacher className="mt-3" size="45px"/>
           <h1 className="text-4xl font-semibold mt-3 mb-2 ml-5">Clases</h1>
          </div>
-        <div className="grid grid-cols-3 gap-4 p-4 ">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 p-4 ">
           
           {lista.map((clase, index) => (
             <ClaseAlumnoCard key={index} clase={clase} />
