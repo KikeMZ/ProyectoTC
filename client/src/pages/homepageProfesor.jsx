@@ -32,8 +32,9 @@ export default function HomeProfesor() {
         //console.log("Respuesta Sesions:")
         //console.log(res)
         let datosProfesor = jwtDecode(window.localStorage.getItem("access_token"));
-        const resClases = await getClasesByProfesorCurrentPeriodo(datosProfesor.user_id); // Obtener la respuesta de getClasesByProfesor
+        const resClases = await getClasesByProfesorCurrentPeriodo(await datosProfesor.nombre); // Obtener la respuesta de getClasesByProfesor
         const profesorMatches = resClases.data //res.data.filter(item => item.nombreProfesor === profesor); // Filtrar la lista directamente
+        console.log(datosProfesor);
         setExistenAlumnos(false);
         setExistenCriterios(false); 
         setLista(profesorMatches); // Establecer la lista filtrada en el estado
@@ -49,7 +50,7 @@ export default function HomeProfesor() {
   
   return (
 
-        <div className="grid grid-cols-3 gap-4 p-4 ">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 ">
           {lista.map((clase, index) => (
             <MateriaCard key={index} clase={clase} />
           ))}

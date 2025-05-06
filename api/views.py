@@ -158,7 +158,7 @@ class Clase2ViewSet(viewsets.ModelViewSet):
         profesorBD = Profesor.objects.get(nombre=profesor)
         #print(profesor.id)
         clases_filtradas = Clase2.objects.filter(id_profesor=profesorBD.id)
-        feature-ClaseAdministrador
+        #feature-ClaseAdministrador
         lista_clases_activas = [ self.get_serializer(c).data for c in clases_filtradas if c.id_periodo.estado=="ACTIVO"]
         #print(lista_clases)
         return Response(lista_clases_activas, status=status.HTTP_200_OK)

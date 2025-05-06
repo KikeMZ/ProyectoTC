@@ -210,42 +210,34 @@ export default function Alumnos() {
     //  Funcion que permite la extraccion de los datos del PDF
     // --------------------------------------------------------
     //
-    const leerExcel = async (e) => {
-        e.preventDefault();
-        if (archivoExcel != null) { //Se verifica si el usuario ha seleccionado el archivo Excel.
+    const leerExcel = async () => {
+        if (archivoExcel != null) {
             let toastExportacion = toast.loading("Extrayendo los datos del Excel..."); 
-            const workbook = await XLSX.read(archivoExcel, { type: 'buffer' }); //Se obtiene la referencia al archivo Excel
-            const worksheetName = await workbook.SheetNames[0]; //Se obtiene el nombre de la segunda hoja del Excel, la cual es aquella que contiene los datos de los alumnos.
-            const worksheet = await workbook.Sheets[worksheetName]; //Se obtiene la referencia a la segunda hoja de Excel mediante su nombre.
-            const excelValido = validarEstructuraExcel(XLSX.utils.sheet_to_txt(worksheet)); //Se verifica si la estructura del Excel es valida.
-            if (!excelValido) { //Si el Excel no tiene una estructura valida, entonces se asigna un valor igual 2 al estado llamado "resultadoExtraccion".
+            const workbook = await XLSX.read(archivoExcel, { type: 'buffer' });
+            const worksheetName = await workbook.SheetNames[0];
+            const worksheet = await workbook.Sheets[worksheetName];
+            const excelValido = validarEstructuraExcel(XLSX.utils.sheet_to_txt(worksheet));
+            if (!excelValido) {
                 setResultadoExtraccion(2);
                 toast.error(mensajesImportacionExcel[2])
-            }
-            else {//Si el Excel tiene una estructura valida, entonces comienza el proceso de extraccion.
-                let datosAlumnos = await XLSX.utils.sheet_to_json(worksheet); // Se obtiene un arreglo con cada una de las filas de la segundo hoja del archivo Excel
-                console.log("JSON")
-                console.log(datosAlumnos)
-               // datosAlumnos.shift(); //Se elimina el primer elemento del arreglo, debido a que contiene informacion de los encabezados de la tabla.
-               // let correosAlumnos = datosAlumnos.pop()["Número de"]; //Se extrae el ultimo elemento del arreglo, el cual contiene los correos de los estudiantes.
-               // const listaCorreos = obtenerCorreos(correosAlumnos).map((correo) => correo.trim()); //Se procesa el String con los correos, obteniendo una arreglo con los correos de los alumnos.
-                const listaAlumnos = crearJSON_Alumnos(datosAlumnos)// , listaCorreos); //Se procesa el arreglo con los datos de los alumnos, obteniendo otro arreglo con los datos mas relevantes de los alumnos
-               // console.log(correosAlumnos)
-                console.log("Lista final")
+            } else {
+                let datosAlumnos = await XLSX.utils.sheet_to_json(worksheet);
+                const listaAlumnos = crearJSON_Alumnos(datosAlumnos);
+                console.log("Lista final");
                 console.log(listaAlumnos);
-                setAlumnos(listaAlumnos); //Se guarda el arreglo obtenido en el estado "listaAlumnos";
-                setResultadoExtraccion(0); //Se indica que el proceso de extraccion se realizo correctamente.
-                toast.dismiss(toastExportacion)
-                toast.success("¡Se han extraido los datos del Excel exitosamente!")
-                setMostrarTablas(true)
+                setAlumnos(listaAlumnos);
+                setResultadoExtraccion(0);
+                toast.dismiss(toastExportacion);
+                toast.success("¡Se han extraído los datos del Excel exitosamente!");
+                setMostrarTablas(true);
             }
-        }
-        else { //Si el usuario aun no ha seleccionado algun archivo, se asignara un valor igual a 4 al estado "resultadoExtraccion".
+        } else {
             setResultadoExtraccion(4);
-            toast.error(mensajesImportacionExcel[4])
+            toast.error(mensajesImportacionExcel[4]);
         }
-
     }
+    
+
 
     const registrarAlumnos = async () => {
         let alumnosBD = await getAllAlumnos();
