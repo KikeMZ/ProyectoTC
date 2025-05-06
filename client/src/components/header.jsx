@@ -21,15 +21,16 @@ export default function Header() {
   const correo = datosProfesor.email;
 
     return (
-        <header className="h-14 border-b border-gray-600 p-4 bg-transparent flex items-center">
-            <div>
-            <h1 className="text-center font-bold">{dataClase.nombreMateria}</h1>
-            <div className="justify-between flex">
-            <p className="text-start text-sm">{dataClase.nrc}</p>
-            <p className="text-start text-sm">{dataClase.seccion}</p>
+        <header className="border-b border-gray-600 pb-4 py-2 bg-transparent flex flex-wrap items-start sm:items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start flex-grow">
+                <h1 className="font-bold text-sm sm:text-base truncate w-full sm:w-auto">{dataClase.nombreMateria}</h1>
+                <div className="flex gap-4 sm:ml-4 mt-1 sm:mt-0 w-full sm:w-auto">
+                    <p className="text-start text-sm">{dataClase.nrc}</p>
+                    <p className="text-start text-sm">{dataClase.seccion}</p>
+                </div>
             </div>
-            </div>
-            <nav className="flex gap-4 w-full justify-between items-center" >
+
+            <nav className="flex gap-4 items-center justify-between w-full sm:w-auto" >
                 <p className="italic">Profesor</p>
                 <div className="flex gap-4 items-center">
                     <Button className="bg-secondary-900" radius="full" isIconOnly>

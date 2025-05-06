@@ -12,10 +12,9 @@ export default function Sidebar() {
   ];
   const [open, setOpen] = useState(false);
   return (
-    <section className="flex gap-4">
+    <section className="relative">
       <div
-        className={`bg-secondary-100 min-h-screen ${open ? "w-48" : "w-16"
-          } duration-300 text-gray-100 px-4`}
+        className={`absolute top-0 left-0 bg-secondary-100 min-h-screen ${open ? "w-48" : "w-20"} duration-300 text-gray-100 px-4 z-20`}
       >
         <div className="py-3 flex justify-end">
           <HiMenuAlt3

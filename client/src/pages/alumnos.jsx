@@ -295,11 +295,11 @@ export default function Alumnos() {
 
 
     return (
-        <div className="flex flex-col items-center justify-start min-h-full">
+        <div className="flex flex-col items-center justify-start min-h-full px-4 sm:px-6 md:px-8">
 
             { cargando?
               (<>
-               <h2 className="text-3xl font-bold mt-10 pt-4">Cargando alumnos</h2>
+               <h2 className="text-center text-2xl sm:text-3xl font-bold mb-8">Cargando alumnos</h2>
                <i className="pi pi-sync pi-spin mt-6 text-3xl"></i>
               </>)
               :

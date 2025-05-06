@@ -69,9 +69,14 @@ export default function LayoutProfesor() {
         <profesorContext.Provider value={{dataProfesor, limpiarProfesor}}>
             <claseContext.Provider value={{ dataClase, limpiarDatos, asignarDatos }}>
                 <div className="flex h-screen overflow-hidden">
-                    <Toast></Toast>
-                    <Sidebar />
-                    <div className="flex flex-col flex-1">
+                    <Toast/>
+
+                    {/* Sidebar con un ancho fijo */}
+                    <div className="w-20 shrink-0">
+                        <Sidebar />
+                    </div>
+
+                    <div className="flex flex-col flex-1 overflow-y-auto">
                         <Header />
                         {shownav && <Nav clase={dataClase}/>}
                         <div className="flex-1 overflow-y-auto px-4 pb-8">
